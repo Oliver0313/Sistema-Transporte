@@ -1,0 +1,52 @@
+:root {
+
+  --color-sidebar-bg: #14161b;     
+  --color-sidebar-text: #ffffff;   
+  --color-sidebar-active: #ffffff; 
+
+
+  --bg-main: #f3f4f6;            
+  --bg-surface: #ffffff;   
+
+  --text-main: #111827;        
+  --text-muted: #6b7280;         
+  --border-color: #e5e7eb;    
+
+  
+  --color-accent: #1f2937;     
+  --color-accent-hover: #374151; 
+  
+
+  --status-success-bg: #f0fdf4;
+  --status-success-border: #bbf7d0;
+  --status-success-text: #166534;
+  
+  /* Estado: En Viaje / Monitoreo / Rutas (Azul) */
+  --status-info-bg: #eff6ff;
+  --status-info-border: #bfdbfe;
+  --status-info-text: #1e40af;
+  
+  /* Estado: Pendiente / Mantenimiento / Alerta (Amarillo) */
+  --status-warning-bg: #fffbeb;
+  --status-warning-border: #fef3c7;
+  --status-warning-text: #9a3412;
+  
+  /* Estado: Cancelado / Fuera de Servicio (Rosa/Rojo) */
+  --status-danger-bg: #fef2f2;
+  --status-danger-border: #fee2e2;
+  --status-danger-text: #991b1b;
+
+
+  --font-base: 'Inter', system-ui, -apple-system, sans-serif;
+  
+
+  --radius-sm: 4px;          
+  --radius-md: 6px;         
+  --radius-lg: 8px;            
+  
+  --shadow-card: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+
+
+  --sidebar-width: 240px;     
+  --navbar-height: 60px;   
+}
