@@ -23,8 +23,8 @@ namespace SistemaTransporte.Application.Services
                 Id = s.Id,
                 AreaSolicitante = s.AreaSolicitante,
                 CantidadColaboradores = s.CantidadColaboradores,
-                HoraSalida = s.FechaHoraSalida,
-                HoraRegreso = s.FechaHoraRegreso,
+                FechaHoraSalida = s.FechaHoraSalida,
+                FechaHoraRegreso = s.FechaHoraRegreso,
                 Destino = s.Destino,
                 Motivo = s.Motivo,
                 Estado = s.Estado,
@@ -44,8 +44,8 @@ namespace SistemaTransporte.Application.Services
                 Id = s.Id,
                 AreaSolicitante = s.AreaSolicitante,
                 CantidadColaboradores = s.CantidadColaboradores,
-                HoraSalida = s.FechaHoraSalida,
-                HoraRegreso = s.FechaHoraRegreso,
+                FechaHoraSalida = s.FechaHoraSalida,
+                FechaHoraRegreso = s.FechaHoraRegreso,
                 Destino = s.Destino,
                 Motivo = s.Motivo,
                 Estado = s.Estado,
@@ -58,15 +58,15 @@ namespace SistemaTransporte.Application.Services
             if (dto.CantidadColaboradores <= 0)
                 throw new Exception("La cantidad de colaboradores debe ser mayor que cero.");
 
-            if (dto.HoraRegreso <= dto.HoraSalida)
+            if (dto.FechaHoraRegreso <= dto.FechaHoraSalida)
                 throw new Exception("La hora de regreso debe ser mayor que la hora de salida.");
 
             var solicitud = new SolicitudTransporte
             {
                 AreaSolicitante = dto.AreaSolicitante,
                 CantidadColaboradores = dto.CantidadColaboradores,
-                FechaHoraSalida = dto.HoraSalida,
-                FechaHoraRegreso = dto.HoraRegreso,
+                FechaHoraSalida = dto.FechaHoraSalida,
+                FechaHoraRegreso = dto.FechaHoraRegreso,
                 Destino = dto.Destino,
                 Motivo = dto.Motivo,
                 UsuarioSolicitanteId = dto.UsuarioSolicitanteId,
@@ -81,8 +81,8 @@ namespace SistemaTransporte.Application.Services
                 Id = solicitud.Id,
                 AreaSolicitante = solicitud.AreaSolicitante,
                 CantidadColaboradores = solicitud.CantidadColaboradores,
-                HoraSalida = solicitud.FechaHoraSalida,
-                HoraRegreso = solicitud.FechaHoraRegreso,
+                FechaHoraSalida = solicitud.FechaHoraSalida,
+                FechaHoraRegreso = solicitud.FechaHoraRegreso,
                 Destino = solicitud.Destino,
                 Motivo = solicitud.Motivo,
                 Estado = solicitud.Estado,
@@ -100,13 +100,13 @@ namespace SistemaTransporte.Application.Services
             if (dto.CantidadColaboradores <= 0)
                 throw new Exception("La cantidad de colaboradores debe ser mayor que cero.");
 
-            if (dto.HoraRegreso <= dto.HoraSalida)
+            if (dto.FechaHoraRegreso <= dto.FechaHoraSalida)
                 throw new Exception("La hora de regreso debe ser mayor que la hora de salida.");
 
             solicitud.AreaSolicitante = dto.AreaSolicitante;
             solicitud.CantidadColaboradores = dto.CantidadColaboradores;
-            solicitud.FechaHoraSalida = dto.HoraSalida;
-            solicitud.FechaHoraRegreso = dto.HoraRegreso;
+            solicitud.FechaHoraSalida = dto.FechaHoraSalida;
+            solicitud.FechaHoraRegreso = dto.FechaHoraRegreso;
             solicitud.Destino = dto.Destino;
             solicitud.Motivo = dto.Motivo;
             solicitud.Estado = dto.Estado;

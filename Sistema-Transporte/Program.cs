@@ -21,6 +21,7 @@ builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IVehiculoService, VehiculoService>();
 builder.Services.AddScoped<IConductorService, ConductorService>();
 builder.Services.AddScoped<ISolicitudTransporteService, SolicitudTransporteService>();
+builder.Services.AddScoped<IAsignacionService, AsignacionService>();
 
 var app = builder.Build();
 

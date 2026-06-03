@@ -9,7 +9,7 @@ namespace SistemaTransporte.Domain.Enums
     public enum EstadoSolicitud
     {
         Pendiente = 1,
-        Aceptada = 2,
+        Aprobada = 2,
         Rechazada = 3,
         Cancelada = 4,
         Finalizada = 5

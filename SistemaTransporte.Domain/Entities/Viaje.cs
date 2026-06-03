@@ -17,7 +17,7 @@ namespace SistemaTransporte.Domain.Entities
         public string Observaciones { get; set; }
         public string Origen { get; set; }
         public string Destino { get; set; }
-        public string CantidadPasajeros { get; set; }
-        public string DistanciaRecorrida { get; set; }
+        public int CantidadPasajeros { get; set; }
+        public decimal DistanciaRecorrida { get; set; }
     }
 }

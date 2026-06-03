@@ -11,8 +11,8 @@ namespace SistemaTransporte.Application.DTOs.SolicitudTransporte
     {
         public string AreaSolicitante { get; set; }
         public int CantidadColaboradores { get; set; }
-        public DateTime HoraSalida { get; set; }
-        public DateTime HoraRegreso { get; set; }
+        public DateTime FechaHoraSalida { get; set; }
+        public DateTime FechaHoraRegreso { get; set; }
         public string Destino { get; set; }
         public string Motivo { get; set; }
         public int UsuarioSolicitanteId { get; set; }
