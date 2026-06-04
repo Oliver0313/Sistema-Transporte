@@ -22,6 +22,7 @@ builder.Services.AddScoped<IVehiculoService, VehiculoService>();
 builder.Services.AddScoped<IConductorService, ConductorService>();
 builder.Services.AddScoped<ISolicitudTransporteService, SolicitudTransporteService>();
 builder.Services.AddScoped<IAsignacionService, AsignacionService>();
+builder.Services.AddScoped<IViajeService, ViajeService>();
 
 var app = builder.Build();
 
