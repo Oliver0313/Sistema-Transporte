@@ -8,7 +8,8 @@ namespace SistemaTransporte.Domain.Enums
 {
     public enum EstadoCombustible
     {
-        Aprobado = 1,
-        Pendiente = 2
+        Pendiente = 1,
+        Aprobado = 2,
+        Rechazado = 3
     }
 }
