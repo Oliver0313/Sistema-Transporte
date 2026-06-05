@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SistemaTransporte.Application.DTOs.Viaje;
 using SistemaTransporte.Application.Interfaces;
 
 namespace Sistema_Transporte.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class ViajesController : ControllerBase

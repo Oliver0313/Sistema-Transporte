@@ -3,6 +3,9 @@ using SistemaTransporte.Application.Interfaces;
 using SistemaTransporte.Application.Services;
 using SistemaTransporte.Infrastructure.Data;
 using SistemaTransporte.Infrastructure.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +26,25 @@ builder.Services.AddScoped<IConductorService, ConductorService>();
 builder.Services.AddScoped<ISolicitudTransporteService, SolicitudTransporteService>();
 builder.Services.AddScoped<IAsignacionService, AsignacionService>();
 builder.Services.AddScoped<IViajeService, ViajeService>();
+builder.Services.AddScoped<IMantenimientoService, MantenimientoService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
+        };
+    });
 
 var app = builder.Build();
 
@@ -34,6 +56,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
