@@ -1,13 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../views/LoginView.vue'
-import RegisterView from '../views/RegisterView.vue' // 🌟 1. Importamos la vista
+import RegisterView from '../views/RegisterView.vue' 
+import OperatorDashboard from '../views/operador/OperatorDashboard.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      redirect: '/login' // Redirección limpia a la pantalla de entrada
+      redirect: '/login' 
     },
     {
       path: '/login',
@@ -15,10 +16,19 @@ const router = createRouter({
       component: LoginView
     },
     {
-      path: '/register', // 🌟 2. Agregamos la ruta de Registro
+      path: '/register', 
       name: 'register',
       component: RegisterView
-    }
+    },
+    {
+    path: '/dashboard/operador',
+    name: 'operator-dashboard',
+    component: OperatorDashboard
+  },
+  {
+    path: '/',
+    redirect: '/dashboard/operador'
+  }
   ]
 })
 

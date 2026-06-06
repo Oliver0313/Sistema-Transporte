@@ -1,7 +1,7 @@
 <template>
   <div class="login-layout">
     
-    <div class="login-hero-side" :style="{ backgroundImage: `url(${imagenAutobus})` }">
+    <div class="login-hero-side" :style="{ backgroundImage: `url(${imagenesCarrusel[indiceActivo]})` }">
       <div class="hero-overlay">
         <div class="hero-content">
           <p class="hero-tagline">SISTEMA INTELIGENTE DE GESTIÓN CON MONITOREO DE TRANSPORTE</p>
@@ -13,8 +13,17 @@
         </div>
         
         <div class="hero-arrows">
-          <span class="arrow-btn">❮</span>
-          <span class="arrow-btn">❯</span>
+          <span class="arrow-btn" @click="anteriorSlide">❮</span>
+          <span class="arrow-btn" @click="siguienteSlide">❯</span>
+        </div>
+
+        <div class="carrusel-indicadores">
+          <span 
+            v-for="(img, index) in imagenesCarrusel" 
+            :key="index"
+            :class="{ activo: indiceActivo === index }"
+            @click="indiceActivo = index"
+          ></span>
         </div>
       </div>
     </div>
@@ -38,7 +47,6 @@
             <input type="password" id="password" v-model="password" placeholder="••••••••••••" required />
           </div>
 
-   
           <div v-if="errorMensaje" class="alerta-error">
             {{ errorMensaje }}
           </div>
@@ -59,23 +67,50 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 
-
 import imagenAutobus from "../assets/icons/autobus_login.png"
+import imagenBus2 from "../assets/icons/autobus_register.png"
+import imagenBus3 from "../assets/icons/autobus_login2.png"
+
 const router = useRouter()
 const email = ref('')
 const password = ref('')
-
-
 const cargando = ref(false)
 const errorMensaje = ref('')
+
+const imagenesCarrusel = [imagenAutobus, imagenBus2, imagenBus3]
+const indiceActivo = ref(0)
+let temporizador = null
+
+const siguienteSlide = () => {
+  if (indiceActivo.value < imagenesCarrusel.length - 1) {
+    indiceActivo.value++
+  } else {
+    indiceActivo.value = 0
+  }
+}
+
+const anteriorSlide = () => {
+  if (indiceActivo.value > 0) {
+    indiceActivo.value--
+  } else {
+    indiceActivo.value = imagenesCarrusel.length - 1
+  }
+}
+
+onMounted(() => {
+  temporizador = setInterval(siguienteSlide, 4500)
+})
+
+onUnmounted(() => {
+  if (temporizador) clearInterval(temporizador)
+})
 
 const manejarLogin = async () => {
   cargando.value = true
   errorMensaje.value = ''
-
 
   const URL_API = 'https://localhost:7221/api/auth/login'
 
@@ -86,12 +121,11 @@ const manejarLogin = async () => {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        email: email.value,
-        password: password.value
+        correo: email.value,
+        contrasena: password.value
       })
     })
 
-  
     if (!respuesta.ok) {
       if (respuesta.status === 401) {
         throw new Error('Correo o contraseña incorrectos.')
@@ -99,18 +133,19 @@ const manejarLogin = async () => {
       throw new Error('Ocurrió un error al intentar conectar con el servidor.')
     }
 
-
     const data = await respuesta.json()
-
 
     if (data && data.token) {
       localStorage.setItem('token_transporte', data.token)
+      localStorage.setItem('usuario_rol', data.rol)
 
+      console.log('Login exitoso. Rol detectado:', data.rol)
       
-      console.log('Login exitoso, token almacenado.')
-      
-
-      router.push('/')
+      if (data.rol === 'Operador') {
+        router.push('/dashboard/operador')
+      } else {
+        router.push('/') 
+      }
     } else {
       throw new Error('La respuesta del servidor no contiene un token válido.')
     }
@@ -125,9 +160,8 @@ const manejarLogin = async () => {
 </script>
 
 <style scoped>
-
 .login-layout {
-display: grid;
+  display: grid;
   grid-template-columns: 58fr 42fr;
   height: 100vh; 
   width: 100vw;
@@ -136,13 +170,13 @@ display: grid;
   font-family: system-ui, -apple-system, sans-serif;
 }
 
-
 .login-hero-side {
   position: relative;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-color: #111827;
+  transition: background-image 0.6s ease-in-out;
 }
 
 .hero-overlay {
@@ -193,6 +227,7 @@ display: grid;
   gap: 20px;
   color: #ffffff;
   opacity: 0.7;
+  z-index: 20;
 }
 
 .arrow-btn {
@@ -200,8 +235,36 @@ display: grid;
   font-size: 0.9rem;
   padding: 5px;
   user-select: none;
+  transition: opacity 0.2s;
 }
 
+.arrow-btn:hover {
+  opacity: 1;
+}
+
+.carrusel-indicadores {
+  position: absolute;
+  bottom: 24px;
+  left: 60px;
+  display: flex;
+  gap: 8px;
+  z-index: 20;
+}
+
+.carrusel-indicadores span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.carrusel-indicadores span.activo {
+  background-color: #ffffff;
+  width: 20px;
+  border-radius: 4px;
+}
 
 .login-form-side {
   background-color: #ffffff;
@@ -266,7 +329,6 @@ display: grid;
   border-color: var(--text-muted, #9ca3af);
 }
 
-
 .btn-login {
   width: 100%;
   background-color: #222222;
@@ -302,7 +364,6 @@ display: grid;
   text-decoration: underline;
 }
 
-
 @media (max-width: 768px) {
   .login-layout {
     grid-template-columns: 1fr;
@@ -322,6 +383,7 @@ display: grid;
   border: 1px solid #fee2e2;
   text-align: center;
 }
+
 button:disabled {
   background-color: #9ca3af;
   cursor: not-allowed;
