@@ -5,7 +5,6 @@ using SistemaTransporte.Application.Interfaces;
 
 namespace Sistema_Transporte.Controllers
 {
-    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class SolicitudesTransporteController : ControllerBase
