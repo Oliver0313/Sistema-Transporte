@@ -6,7 +6,7 @@ using SistemaTransporte.Infrastructure.Data;
 
 namespace Sistema_Transporte.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "SuperAdmin,Administrador")]
     [ApiController]
     [Route("api/[controller]")]
     public class ReportesController : ControllerBase
