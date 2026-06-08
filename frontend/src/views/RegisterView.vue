@@ -156,13 +156,13 @@ const manejarRegistro = async () => {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        Nombre: nombre.value,
-        Apellido: apellido.value,
-        Correo: email.value,
-        Contrasena: password.value,
-        RolId: 3 
-      })
+     body: JSON.stringify({
+  nombre: nombre.value,
+  apellido: apellido.value,
+  correo: email.value,
+  contrasena: password.value,
+  rolId: 3 
+})
     })
 
     if (!respuesta.ok) {

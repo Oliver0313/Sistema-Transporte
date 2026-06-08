@@ -85,8 +85,8 @@
             <img src="../../assets/icons/avatar.png" alt="Avatar" class="user-avatar" />
           </div>
           <div class="user-info">
-            <span class="user-name">Karen</span>
-            <span class="user-role">Operador</span>
+            <span class="user-name">{{ nombreUsuario }}</span>
+            <span class="user-role">{{ rolUsuario }}</span>
           </div>
         </div>
       </header>
@@ -102,19 +102,33 @@
 </template>
 
 <script setup>
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
+const nombreUsuario = ref('Usuario')
+const rolUsuario = ref('Operador')
+
+onMounted(() => {
+
+  const nombreGuardado = localStorage.getItem('usuario_nombre')
+  const rolGuardado = localStorage.getItem('usuario_rol')
+
+  if (nombreGuardado) nombreUsuario.value = nombreGuardado
+  if (rolGuardado) rolUsuario.value = rolGuardado
+})
+
 const cerrarSesion = () => {
   localStorage.removeItem('token_transporte')
   localStorage.removeItem('usuario_rol')
+  localStorage.removeItem('usuario_nombre') 
   router.push('/login')
 }
 </script>
 
 <style>
-/* Inyección absoluta desde la carpeta src/ de tu proyecto real */
+
 @import '/src/assets/styles/variables.css';
 @import '/src/assets/styles/reset.css';
 

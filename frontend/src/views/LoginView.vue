@@ -138,6 +138,7 @@ const manejarLogin = async () => {
     if (data && data.token) {
       localStorage.setItem('token_transporte', data.token)
       localStorage.setItem('usuario_rol', data.rol)
+      localStorage.setItem('usuario_nombre', data.nombre)
 
       console.log('Login exitoso. Rol detectado:', data.rol)
       
