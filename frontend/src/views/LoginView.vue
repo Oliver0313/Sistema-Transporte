@@ -141,12 +141,15 @@ const manejarLogin = async () => {
       localStorage.setItem('usuario_nombre', data.nombre)
 
       console.log('Login exitoso. Rol detectado:', data.rol)
-      
-      if (data.rol === 'Operador') {
-        router.push('/dashboard/operador')
-      } else {
-        router.push('/') 
-      }
+
+// Convertimos a minúsculas o aseguramos que el rol redirija bien
+if (data.rol === 'Operador') {
+  router.push('/operador/dashboard')
+} else {
+  // Si no es operador (o por si acaso), mándalo también al dashboard principal nuevo
+  // Evitamos a toda costa que intente buscar la raíz vieja '/' si está rompiendo
+  router.push('/operador/dashboard') 
+}
     } else {
       throw new Error('La respuesta del servidor no contiene un token válido.')
     }
