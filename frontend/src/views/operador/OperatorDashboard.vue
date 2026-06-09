@@ -24,10 +24,10 @@
             <img src="../../assets/icons/asignaciones.png" alt="Icono Asignaciones" class="menu-icon" />
             Asignaciones
           </li>
-          <li>
-            <img src="../../assets/icons/solicitudes.png" alt="Icono Solicitudes" class="menu-icon" />
-            Solicitudes
-          </li>
+<li @click="router.push('/operador/solicitudes')">
+  <img src="../../assets/icons/solicitudes.png" alt="Icono Solicitudes" class="menu-icon" />
+  Solicitudes
+</li>
           <li>
             <img src="../../assets/icons/calendario.png" alt="Icono Calendario" class="menu-icon" />
             Calendario
