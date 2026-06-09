@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using SistemaTransporte.Application.DTOs.Reportes;
 using SistemaTransporte.Domain.Enums;
 using SistemaTransporte.Infrastructure.Data;
 
@@ -21,86 +22,112 @@ namespace Sistema_Transporte.Controllers
         [HttpGet("vehiculos")]
         public async Task<IActionResult> ReporteVehiculos()
         {
-            return Ok(new
+            var reporte = new VehiculoReporteDto
             {
-                totalVehiculos = await _context.Vehiculos.CountAsync(),
-                disponibles = await _context.Vehiculos.CountAsync(v => v.Estado == EstadoVehiculo.Disponible),
-                enViaje = await _context.Vehiculos.CountAsync(v => v.Estado == EstadoVehiculo.EnViaje),
-                enMantenimiento = await _context.Vehiculos.CountAsync(v => v.Estado == EstadoVehiculo.EnMantenimiento),
-                fueraDeServicio = await _context.Vehiculos.CountAsync(v => v.Estado == EstadoVehiculo.FueraDeServicio)
-            });
+                TotalVehiculos = await _context.Vehiculos.CountAsync(),
+                Disponibles = await _context.Vehiculos.CountAsync(v => v.Estado == EstadoVehiculo.Disponible),
+                EnViaje = await _context.Vehiculos.CountAsync(v => v.Estado == EstadoVehiculo.EnViaje),
+                EnMantenimiento = await _context.Vehiculos.CountAsync(v => v.Estado == EstadoVehiculo.EnMantenimiento),
+                FueraDeServicio = await _context.Vehiculos.CountAsync(v => v.Estado == EstadoVehiculo.FueraDeServicio)
+            };
+
+            return Ok(reporte);
         }
 
         [HttpGet("conductores")]
         public async Task<IActionResult> ReporteConductores()
         {
-            return Ok(new
+            var reporte = new ConductorReporteDto
             {
-                totalConductores = await _context.Conductores.CountAsync(),
-                disponibles = await _context.Conductores.CountAsync(c => c.Estado == EstadoConductor.Disponible),
-                enViaje = await _context.Conductores.CountAsync(c => c.Estado == EstadoConductor.EnViaje),
-                suspendidos = await _context.Conductores.CountAsync(c => c.Estado == EstadoConductor.Suspendido),
-                inactivos = await _context.Conductores.CountAsync(c => c.Estado == EstadoConductor.Inactivo)
-            });
+                TotalConductores = await _context.Conductores.CountAsync(),
+                Disponibles = await _context.Conductores.CountAsync(c => c.Estado == EstadoConductor.Disponible),
+                EnViaje = await _context.Conductores.CountAsync(c => c.Estado == EstadoConductor.EnViaje),
+                Suspendidos = await _context.Conductores.CountAsync(c => c.Estado == EstadoConductor.Suspendido),
+                Inactivos = await _context.Conductores.CountAsync(c => c.Estado == EstadoConductor.Inactivo)
+            };
+
+            return Ok(reporte);
         }
 
         [HttpGet("solicitudes")]
         public async Task<IActionResult> ReporteSolicitudes()
         {
-            return Ok(new
+            var reporte = new SolicitudReporteDto
             {
-                totalSolicitudes = await _context.SolicitudesTransporte.CountAsync(),
-                pendientes = await _context.SolicitudesTransporte.CountAsync(s => s.Estado == EstadoSolicitud.Pendiente),
-                aprobadas = await _context.SolicitudesTransporte.CountAsync(s => s.Estado == EstadoSolicitud.Aprobada),
-                rechazadas = await _context.SolicitudesTransporte.CountAsync(s => s.Estado == EstadoSolicitud.Rechazada),
-                canceladas = await _context.SolicitudesTransporte.CountAsync(s => s.Estado == EstadoSolicitud.Cancelada),
-                finalizadas = await _context.SolicitudesTransporte.CountAsync(s => s.Estado == EstadoSolicitud.Finalizada)
-            });
+                TotalSolicitudes = await _context.SolicitudesTransporte.CountAsync(),
+                Pendientes = await _context.SolicitudesTransporte.CountAsync(s => s.Estado == EstadoSolicitud.Pendiente),
+                Aprobadas = await _context.SolicitudesTransporte.CountAsync(s => s.Estado == EstadoSolicitud.Aprobada),
+                Rechazadas = await _context.SolicitudesTransporte.CountAsync(s => s.Estado == EstadoSolicitud.Rechazada),
+                Canceladas = await _context.SolicitudesTransporte.CountAsync(s => s.Estado == EstadoSolicitud.Cancelada),
+                Finalizadas = await _context.SolicitudesTransporte.CountAsync(s => s.Estado == EstadoSolicitud.Finalizada)
+            };
+
+            return Ok(reporte);
         }
 
         [HttpGet("viajes")]
         public async Task<IActionResult> ReporteViajes()
         {
-            return Ok(new
+            var totalViajes = await _context.Viajes.CountAsync();
+            var finalizados = await _context.Viajes.CountAsync(v => v.Estado == EstadoViaje.Finalizado);
+
+            var reporte = new ViajeReporteDto
             {
-                totalViajes = await _context.Viajes.CountAsync(),
-                programados = await _context.Viajes.CountAsync(v => v.Estado == EstadoViaje.Programado),
-                enCurso = await _context.Viajes.CountAsync(v => v.Estado == EstadoViaje.EnCurso),
-                finalizados = await _context.Viajes.CountAsync(v => v.Estado == EstadoViaje.Finalizado),
-                cancelados = await _context.Viajes.CountAsync(v => v.Estado == EstadoViaje.Cancelado),
-                totalPasajeros = await _context.Viajes.SumAsync(v => v.CantidadPasajeros),
-                distanciaTotal = await _context.Viajes.SumAsync(v => v.DistanciaRecorrida)
-            });
+                TotalViajes = totalViajes,
+                Programados = await _context.Viajes.CountAsync(v => v.Estado == EstadoViaje.Programado),
+                EnCurso = await _context.Viajes.CountAsync(v => v.Estado == EstadoViaje.EnCurso),
+                Finalizados = finalizados,
+                Cancelados = await _context.Viajes.CountAsync(v => v.Estado == EstadoViaje.Cancelado),
+                TotalPasajeros = await _context.Viajes.SumAsync(v => v.CantidadPasajeros),
+                DistanciaTotal = await _context.Viajes.SumAsync(v => v.DistanciaRecorrida),
+                PorcentajeFinalizados = totalViajes == 0 ? 0 : finalizados * 100m / totalViajes
+            };
+
+            return Ok(reporte);
         }
 
         [HttpGet("mantenimientos")]
         public async Task<IActionResult> ReporteMantenimientos()
         {
-            return Ok(new
+            var totalMantenimientos = await _context.Mantenimientos.CountAsync();
+            var costoTotal = await _context.Mantenimientos.SumAsync(m => m.Costo);
+
+            var reporte = new MantenimientoReporteDto
             {
-                totalMantenimientos = await _context.Mantenimientos.CountAsync(),
-                programados = await _context.Mantenimientos.CountAsync(m => m.Estado == EstadoMantenimiento.Programado),
-                pendientes = await _context.Mantenimientos.CountAsync(m => m.Estado == EstadoMantenimiento.Pendiente),
-                enProgreso = await _context.Mantenimientos.CountAsync(m => m.Estado == EstadoMantenimiento.EnProgreso),
-                completados = await _context.Mantenimientos.CountAsync(m => m.Estado == EstadoMantenimiento.Completado),
-                vencidos = await _context.Mantenimientos.CountAsync(m => m.Estado == EstadoMantenimiento.Vencido),
-                costoTotal = await _context.Mantenimientos.SumAsync(m => m.Costo)
-            });
+                TotalMantenimientos = totalMantenimientos,
+                Programados = await _context.Mantenimientos.CountAsync(m => m.Estado == EstadoMantenimiento.Programado),
+                Pendientes = await _context.Mantenimientos.CountAsync(m => m.Estado == EstadoMantenimiento.Pendiente),
+                EnProgreso = await _context.Mantenimientos.CountAsync(m => m.Estado == EstadoMantenimiento.EnProgreso),
+                Completados = await _context.Mantenimientos.CountAsync(m => m.Estado == EstadoMantenimiento.Completado),
+                Vencidos = await _context.Mantenimientos.CountAsync(m => m.Estado == EstadoMantenimiento.Vencido),
+                CostoTotal = costoTotal,
+                CostoPromedio = totalMantenimientos == 0 ? 0 : costoTotal / totalMantenimientos
+            };
+
+            return Ok(reporte);
         }
 
         [HttpGet("combustible")]
         public async Task<IActionResult> ReporteCombustible()
         {
-            return Ok(new
+            var totalGalones = await _context.ConsumosCombustible.SumAsync(c => c.Galones);
+            var totalGastado = await _context.ConsumosCombustible.SumAsync(c => c.Costo);
+            var totalKilometros = await _context.ConsumosCombustible.SumAsync(c => c.KilometrosRecorridos);
+
+            var reporte = new CombustibleReporteDto
             {
-                totalRegistros = await _context.ConsumosCombustible.CountAsync(),
-                totalGalones = await _context.ConsumosCombustible.SumAsync(c => c.Galones),
-                totalGastado = await _context.ConsumosCombustible.SumAsync(c => c.Costo),
-                totalKilometros = await _context.ConsumosCombustible.SumAsync(c => c.KilometrosRecorridos),
-                pendientes = await _context.ConsumosCombustible.CountAsync(c => c.Estado == EstadoCombustible.Pendiente),
-                aprobados = await _context.ConsumosCombustible.CountAsync(c => c.Estado == EstadoCombustible.Aprobado),
-                rechazados = await _context.ConsumosCombustible.CountAsync(c => c.Estado == EstadoCombustible.Rechazado)
-            });
+                TotalRegistros = await _context.ConsumosCombustible.CountAsync(),
+                TotalGalones = totalGalones,
+                TotalGastado = totalGastado,
+                TotalKilometros = totalKilometros,
+                Pendientes = await _context.ConsumosCombustible.CountAsync(c => c.Estado == EstadoCombustible.Pendiente),
+                Aprobados = await _context.ConsumosCombustible.CountAsync(c => c.Estado == EstadoCombustible.Aprobado),
+                Rechazados = await _context.ConsumosCombustible.CountAsync(c => c.Estado == EstadoCombustible.Rechazado),
+                CostoPromedioPorGalon = totalGalones == 0 ? 0 : totalGastado / totalGalones,
+                RendimientoKmPorGalon = totalGalones == 0 ? 0 : totalKilometros / totalGalones
+            };
+
+            return Ok(reporte);
         }
     }
 }
