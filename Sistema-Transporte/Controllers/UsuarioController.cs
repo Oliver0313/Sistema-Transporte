@@ -5,6 +5,7 @@ using SistemaTransporte.Application.Interfaces;
 
 namespace Sistema_Transporte.Controllers
 {
+    [Authorize(Roles = "SuperAdmin")]
     [ApiController]
     [Route("api/[controller]")]
     public class UsuariosController : ControllerBase

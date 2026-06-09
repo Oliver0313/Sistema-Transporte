@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Sistema_Transporte.Controllers
 {
+    [Authorize(Roles = "SuperAdmin,Administrador")]
     [ApiController]
     [Route("api/[controller]")]
     public class DashboardController : ControllerBase
