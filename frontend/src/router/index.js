@@ -1,35 +1,40 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../views/LoginView.vue'
-import RegisterView from '../views/RegisterView.vue' 
+import RegisterView from '../views/RegisterView.vue'
+import DashboardLayout from '../layouts/DashboardLayout.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
-      redirect: '/login' 
+      redirect: '/login'
     },
-
     {
       path: '/login',
       name: 'login',
       component: LoginView
     },
     {
-      path: '/register', 
+      path: '/register',
       name: 'register',
       component: RegisterView
     },
-
     {
-      path: '/operador/dashboard',
-      name: 'OperatorDashboard',
-      component: () => import('../views/operador/OperatorDashboard.vue')
-    },
-    {
-      path: '/operador/solicitudes',
-      name: 'OperatorSolicitudes',
-      component: () => import('../views/operador/OperatorSolicitudes.vue')
+      path: '/',
+      component: DashboardLayout,
+      children: [
+        {
+          path: 'dashboard',
+          name: 'Dashboard',
+          component: () => import('../views/DashboardView.vue')
+        },
+        {
+          path: 'operador/solicitudes',
+          name: 'OperatorSolicitudes',
+          component: () => import('../views/operador/OperatorSolicitudes.vue')
+        }
+      ]
     }
   ]
 })
