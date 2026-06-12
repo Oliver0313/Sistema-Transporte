@@ -1,6 +1,5 @@
 <template>
   <header class="app-header">
-
     <div class="header-left">
       <button class="menu-button">
         ☰
@@ -10,28 +9,17 @@
     </div>
 
     <div class="header-center">
-      <input
-        type="text"
-        placeholder="Buscar..."
-        class="search-input"
-      />
+      <input type="text" placeholder="Buscar..." class="search-input" />
     </div>
 
     <div class="header-right">
-
-      <img
-        src="../assets/icons/avatar.png"
-        alt="Avatar"
-        class="user-avatar"
-      />
+      <img src="../assets/icons/avatar.png" alt="Avatar" class="user-avatar" />
 
       <div class="user-info">
         <span>{{ nombreUsuario }}</span>
         <small>{{ rolUsuario }}</small>
       </div>
-
     </div>
-
   </header>
 </template>
 
@@ -42,11 +30,8 @@ const nombreUsuario = ref('Usuario')
 const rolUsuario = ref('Operador')
 
 onMounted(() => {
-  nombreUsuario.value =
-    localStorage.getItem('usuario_nombre') || 'Usuario'
-
-  rolUsuario.value =
-    localStorage.getItem('usuario_rol') || 'Operador'
+  nombreUsuario.value = localStorage.getItem('usuario_nombre') || 'Usuario'
+  rolUsuario.value = localStorage.getItem('usuario_rol') || 'Operador'
 })
 </script>
 
