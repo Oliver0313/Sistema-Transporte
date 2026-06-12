@@ -20,16 +20,16 @@ import AppHeader from '../components/AppHeader.vue'
 <style>
 .dashboard-layout {
   display: grid;
-  grid-template-columns: var(--sidebar-width) 1fr;
+  grid-template-columns: 260px 1fr;
   height: 100vh;
   width: 100vw;
   overflow: hidden;
 }
 
 .main-content {
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  height: 100vh;
   overflow: hidden;
 }
 
@@ -37,6 +37,6 @@ import AppHeader from '../components/AppHeader.vue'
   flex: 1;
   padding: 24px;
   overflow-y: auto;
-  background-color: var(--bg-main);
+  background: #f5f6f8;
 }
 </style>

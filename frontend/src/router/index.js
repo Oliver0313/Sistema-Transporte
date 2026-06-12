@@ -30,9 +30,9 @@ const router = createRouter({
           component: () => import('../views/DashboardView.vue')
         },
         {
-          path: 'operador/solicitudes',
-          name: 'OperatorSolicitudes',
-          component: () => import('../views/operador/OperatorSolicitudes.vue')
+          path: 'solicitudes',
+          name: 'Solicitudes',
+          component: () => import('../views/SolicitudesView.vue')
         }
       ]
     }

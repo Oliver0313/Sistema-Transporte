@@ -1,5 +1,5 @@
 <template>
-  <aside class="sidebar">
+  <aside class="app-sidebar">
     <div class="logo-container">
       <h2>Transporte</h2>
       <h3>SmartRoute</h3>
@@ -8,60 +8,60 @@
     <nav class="menu">
       <ul>
         <li @click="router.push('/dashboard')">
-          <img src="../assets/icons/dashboard.png" alt="Dashboard" class="menu-icon" />
+          <img src="../assets/icons/dashboard.png" class="menu-icon" />
           Dashboard
         </li>
 
-        <li @click="router.push('/operador/solicitudes')">
-          <img src="../assets/icons/solicitudes.png" alt="Solicitudes" class="menu-icon" />
+        <li @click="router.push('/solicitudes')">
+          <img src="../assets/icons/solicitudes.png" class="menu-icon" />
           Solicitudes
         </li>
 
-        <li>
-          <img src="../assets/icons/vehiculos.png" alt="Vehículos" class="menu-icon" />
+        <li @click="router.push('/vehiculos')">
+          <img src="../assets/icons/vehiculos.png" class="menu-icon" />
           Vehículos
         </li>
 
-        <li>
-          <img src="../assets/icons/conductores.png" alt="Conductores" class="menu-icon" />
+        <li @click="router.push('/conductores')">
+          <img src="../assets/icons/conductores.png" class="menu-icon" />
           Conductores
         </li>
 
-        <li>
-          <img src="../assets/icons/asignaciones.png" alt="Asignaciones" class="menu-icon" />
+        <li @click="router.push('/asignaciones')">
+          <img src="../assets/icons/asignaciones.png" class="menu-icon" />
           Asignaciones
         </li>
 
-        <li>
-          <img src="../assets/icons/calendario.png" alt="Calendario" class="menu-icon" />
-          Calendario
+        <li @click="router.push('/viajes')">
+          <img src="../assets/icons/rutas.png" class="menu-icon" />
+          Viajes
         </li>
 
-        <li>
-          <img src="../assets/icons/herramientas.png" alt="Mantenimiento" class="menu-icon" />
+        <li @click="router.push('/mantenimiento')">
+          <img src="../assets/icons/herramientas.png" class="menu-icon" />
           Mantenimiento
         </li>
 
-        <li>
-          <img src="../assets/icons/combustible.png" alt="Combustible" class="menu-icon" />
+        <li @click="router.push('/combustible')">
+          <img src="../assets/icons/combustible.png" class="menu-icon" />
           Combustible
         </li>
 
-        <li>
-          <img src="../assets/icons/reportes.png" alt="Reportes" class="menu-icon" />
+        <li @click="router.push('/reportes')">
+          <img src="../assets/icons/reportes.png" class="menu-icon" />
           Reportes
         </li>
 
-        <li>
-          <img src="../assets/icons/rutas.png" alt="Viajes" class="menu-icon" />
-          Viajes
+        <li v-if="esSuperAdmin" @click="router.push('/usuarios')">
+          <img src="../assets/icons/conductores.png" class="menu-icon" />
+          Usuarios
         </li>
       </ul>
     </nav>
 
     <div class="sidebar-footer">
       <button class="btn-logout" @click="cerrarSesion">
-        <img src="../assets/icons/logout.png" alt="Logout" class="menu-icon" />
+        <img src="../assets/icons/logout.png" class="menu-icon" />
         Cerrar Sesión
       </button>
     </div>
@@ -69,115 +69,97 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
-const cerrarSesion = () => {
-  localStorage.removeItem('token_transporte')
-  localStorage.removeItem('usuario_nombre')
-  localStorage.removeItem('usuario_rol')
+const rolUsuario = localStorage.getItem('usuario_rol') || ''
+const esSuperAdmin = computed(() => rolUsuario === 'SuperAdmin')
 
+const cerrarSesion = () => {
+  localStorage.clear()
   router.push('/login')
 }
 </script>
 
 <style scoped>
-.sidebar {
-  background-color: var(--color-sidebar-bg);
-  color: var(--color-sidebar-text);
+.app-sidebar {
+  width: 260px;
+  min-width: 260px;
+  height: 100vh;
+  background: #111827;
+  color: #d1d5db;
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 30px;
-  height: 100vh;
+  gap: 28px;
 }
 
 .logo-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
   text-align: center;
-  width: 100%;
 }
 
 .logo-container h2 {
-  color: #ffffff;
+  color: white;
+  margin: 0;
   font-size: 1.25rem;
-  font-weight: 400;
-  text-align: center;
 }
 
 .logo-container h3 {
-  color: var(--color-sidebar-text);
+  color: #9ca3af;
+  margin: 4px 0 0;
   font-size: 0.9rem;
-  font-weight: 400;
-  margin-top: 1px;
 }
 
 .menu ul {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
   padding: 0;
   margin: 0;
   list-style: none;
 }
 
 .menu li {
-  padding: 8px 15px;
-  border-radius: var(--radius-md);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 0.875rem;
-  font-weight: 400;
   display: flex;
   align-items: center;
   gap: 12px;
+  padding: 9px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.menu li:hover {
+  background: rgba(255,255,255,.08);
+  color: white;
 }
 
 .menu-icon {
   width: 18px;
   height: 18px;
   object-fit: contain;
-  display: block;
-}
-
-.menu li:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: #ffffff;
-}
-
-.menu li.active {
-  background-color: var(--color-accent);
-  color: var(--color-sidebar-active);
 }
 
 .sidebar-footer {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 16px;
   margin-top: auto;
+  border-top: 1px solid rgba(255,255,255,.1);
+  padding-top: 14px;
 }
 
 .btn-logout {
   width: 100%;
-  padding: 12px 16px;
-  border-radius: var(--radius-md);
-  color: #ffffff;
-  font-weight: 500;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: white;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  transition: background-color 0.2s ease;
-  text-align: center;
-  background: transparent;
-  border: none;
-  cursor: pointer;
+  gap: 10px;
 }
 
 .btn-logout:hover {
-  background-color: rgba(239, 68, 68, 0.1);
+  background: rgba(239,68,68,.15);
 }
 </style>
