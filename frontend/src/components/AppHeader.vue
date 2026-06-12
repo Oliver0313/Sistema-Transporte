@@ -1,30 +1,37 @@
 <template>
-  <header class="navbar">
-    <div class="navbar-left">
-      <button class="btn-menu">
-        <img src="../assets/icons/menu.png" alt="Menú" class="icon-nav" />
+  <header class="app-header">
+
+    <div class="header-left">
+      <button class="menu-button">
+        ☰
       </button>
 
       <span class="navbar-title">Inicio</span>
     </div>
 
-    <div class="navbar-center">
-      <div class="search-container">
-        <input type="text" placeholder="Buscar..." class="search-input" />
-        <img src="../assets/icons/search.png" alt="Buscar" class="icon-search" />
-      </div>
+    <div class="header-center">
+      <input
+        type="text"
+        placeholder="Buscar..."
+        class="search-input"
+      />
     </div>
 
-    <div class="navbar-right">
-      <div class="user-avatar-container">
-        <img src="../assets/icons/avatar.png" alt="Avatar" class="user-avatar" />
-      </div>
+    <div class="header-right">
+
+      <img
+        src="../assets/icons/avatar.png"
+        alt="Avatar"
+        class="user-avatar"
+      />
 
       <div class="user-info">
-        <span class="user-name">{{ nombreUsuario }}</span>
-        <span class="user-role">{{ rolUsuario }}</span>
+        <span>{{ nombreUsuario }}</span>
+        <small>{{ rolUsuario }}</small>
       </div>
+
     </div>
+
   </header>
 </template>
 
@@ -35,119 +42,81 @@ const nombreUsuario = ref('Usuario')
 const rolUsuario = ref('Operador')
 
 onMounted(() => {
-  nombreUsuario.value = localStorage.getItem('usuario_nombre') || 'Usuario'
-  rolUsuario.value = localStorage.getItem('usuario_rol') || 'Operador'
+  nombreUsuario.value =
+    localStorage.getItem('usuario_nombre') || 'Usuario'
+
+  rolUsuario.value =
+    localStorage.getItem('usuario_rol') || 'Operador'
 })
 </script>
 
 <style scoped>
-.navbar {
-  height: var(--navbar-height);
-  background-color: var(--bg-surface);
-  border-bottom: 1px solid var(--border-color);
+.app-header {
+  height: 70px;
+  background: white;
+  border-bottom: 1px solid #e5e7eb;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
 }
 
-.navbar-left {
+.header-left {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.btn-menu {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  border-radius: var(--radius-sm);
-  transition: background-color 0.2s;
+.menu-button {
   border: none;
   background: transparent;
+  font-size: 20px;
   cursor: pointer;
 }
 
-.btn-menu:hover {
-  background-color: var(--bg-main);
-}
-
 .navbar-title {
-  font-size: 1.1rem;
-  font-weight: 400;
-  color: var(--text-main);
+  font-weight: 600;
+  color: #111827;
 }
 
-.navbar-center {
-  width: 100%;
-  max-width: 400px;
-  margin: 0 24px;
-  margin-right: 32px;
+.header-center {
+  width: 350px;
   margin-left: auto;
-}
-
-.search-container {
-  display: flex;
-  align-items: center;
-  position: relative;
-  width: 100%;
+  margin-right: 40px;
 }
 
 .search-input {
   width: 100%;
-  padding: 8px 40px 8px 16px;
-  border: 1px solid var(--border-color);
+  padding: 10px 14px;
   border-radius: 20px;
-  font-size: 0.875rem;
-  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
 }
 
-.icon-search {
-  position: absolute;
-  right: 14px;
-  width: 16px;
-  height: 16px;
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-.navbar-right {
+.header-right {
   display: flex;
   align-items: center;
   gap: 12px;
-  flex-shrink: 0;
 }
 
 .user-avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: #e5e7eb;
   object-fit: cover;
 }
 
 .user-info {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  text-align: right;
 }
 
-.user-name {
-  font-size: 0.95rem;
+.user-info span {
   font-weight: 600;
-  color: var(--text-main);
-  line-height: 1.2;
+  color: #111827;
 }
 
-.user-role {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-.icon-nav {
-  width: 20px;
-  height: 20px;
-  object-fit: contain;
+.user-info small {
+  color: #6b7280;
 }
 </style>
