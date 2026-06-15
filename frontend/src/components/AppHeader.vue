@@ -1,6 +1,5 @@
 <template>
   <header class="app-header">
-
     <div class="header-left">
       <button class="menu-button">
         ☰
@@ -18,7 +17,6 @@
     </div>
 
     <div class="header-right">
-
       <img
         src="../assets/icons/avatar.png"
         alt="Avatar"
@@ -29,9 +27,7 @@
         <span>{{ nombreUsuario }}</span>
         <small>{{ rolUsuario }}</small>
       </div>
-
     </div>
-
   </header>
 </template>
 
@@ -42,11 +38,8 @@ const nombreUsuario = ref('Usuario')
 const rolUsuario = ref('Operador')
 
 onMounted(() => {
-  nombreUsuario.value =
-    localStorage.getItem('usuario_nombre') || 'Usuario'
-
-  rolUsuario.value =
-    localStorage.getItem('usuario_rol') || 'Operador'
+  nombreUsuario.value = localStorage.getItem('usuario_nombre') || 'Usuario'
+  rolUsuario.value = localStorage.getItem('usuario_rol') || 'Operador'
 })
 </script>
 
