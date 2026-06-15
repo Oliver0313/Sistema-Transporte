@@ -67,29 +67,24 @@
           <span>Ver todas</span>
         </div>
 
-        <div class="request-item">
+        <div
+          v-for="solicitud in solicitudesRecientes"
+          :key="solicitud.id"
+          class="request-item"
+        >
           <div>
-            <strong>Recursos Humanos</strong>
-            <p>Transporte para capacitación</p>
+            <strong>{{ solicitud.areaSolicitante }}</strong>
+            <p>{{ solicitud.motivo }}</p>
           </div>
-          <span class="badge pendiente">Pendiente</span>
+
+          <span :class="['badge', obtenerClaseEstado(solicitud.estado)]">
+            {{ formatearEstado(solicitud.estado) }}
+          </span>
         </div>
 
-        <div class="request-item">
-          <div>
-            <strong>Finanzas</strong>
-            <p>Reunión con proveedores</p>
-          </div>
-          <span class="badge aprobada">Aprobada</span>
-        </div>
-
-        <div class="request-item">
-          <div>
-            <strong>Tecnología</strong>
-            <p>Soporte en sucursal</p>
-          </div>
-          <span class="badge viaje">En viaje</span>
-        </div>
+        <p v-if="solicitudesRecientes.length === 0" class="empty-text">
+          No hay solicitudes recientes.
+        </p>
       </section>
     </div>
 
@@ -150,6 +145,7 @@
 import { ref, onMounted } from 'vue'
 
 const resumen = ref({})
+const solicitudesRecientes = ref([])
 
 const cargarDashboard = async () => {
   const token = localStorage.getItem('token_transporte')
@@ -165,7 +161,49 @@ const cargarDashboard = async () => {
   }
 }
 
-onMounted(cargarDashboard)
+const cargarSolicitudesRecientes = async () => {
+  const token = localStorage.getItem('token_transporte')
+
+  const response = await fetch('https://localhost:7221/api/solicitudestransporte', {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+
+  if (response.ok) {
+    const data = await response.json()
+    solicitudesRecientes.value = data.slice(0, 3)
+  }
+}
+
+const formatearEstado = (estado) => {
+  const estados = {
+    1: 'Pendiente',
+    2: 'Aprobada',
+    3: 'Rechazada',
+    4: 'Cancelada',
+    5: 'Finalizada'
+  }
+
+  return estados[estado] || 'Pendiente'
+}
+
+const obtenerClaseEstado = (estado) => {
+  const clases = {
+    1: 'pendiente',
+    2: 'aprobada',
+    3: 'rechazada',
+    4: 'cancelada',
+    5: 'finalizada'
+  }
+
+  return clases[estado] || 'pendiente'
+}
+
+onMounted(() => {
+  cargarDashboard()
+  cargarSolicitudesRecientes()
+})
 </script>
 
 <style scoped>
@@ -377,6 +415,11 @@ onMounted(cargarDashboard)
   .dashboard-middle,
   .dashboard-bottom {
     grid-template-columns: 1fr;
+  }
+
+  .empty-text {
+  color: #6b7280;
+  font-size: 0.9rem;
   }
 }
 </style>

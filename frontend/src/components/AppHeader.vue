@@ -13,7 +13,11 @@
     </div>
 
     <div class="header-right">
-      <img src="../assets/icons/avatar.png" alt="Avatar" class="user-avatar" />
+      <img
+        src="../assets/icons/avatar.png"
+        alt="Avatar"
+        class="user-avatar"
+      />
 
       <div class="user-info">
         <span>{{ nombreUsuario }}</span>
