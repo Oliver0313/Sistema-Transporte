@@ -95,21 +95,29 @@
           <span>Ver agenda</span>
         </div>
 
-        <div class="trip-item">
-          <span>09:00 AM</span>
+        <div
+          v-for="viaje in viajesProximos"
+          :key="viaje.id"
+          class="trip-item"
+        >
+          <span>{{ formatearHora(viaje.fechaHoraSalida) }}</span>
+
           <div>
-            <strong>Capacitación del personal</strong>
-            <p>Recursos Humanos</p>
+            <strong>{{ viaje.origen }} → {{ viaje.destino }}</strong>
+
+            <p>
+              {{ viaje.cantidadPasajeros }} pasajeros ·
+              {{ formatearEstadoViaje(viaje.estado) }}
+            </p>
           </div>
         </div>
 
-        <div class="trip-item">
-          <span>11:30 AM</span>
-          <div>
-            <strong>Reunión con proveedores</strong>
-            <p>Finanzas</p>
-          </div>
-        </div>
+        <p
+          v-if="viajesProximos.length === 0"
+          class="empty-text"
+        >
+          No hay viajes programados.
+        </p>
       </section>
 
       <section class="panel">
@@ -161,6 +169,23 @@ const cargarDashboard = async () => {
   }
 }
 
+const viajesProximos = ref([])
+const cargarViajesProximos = async () => {
+  const token = localStorage.getItem('token_transporte')
+
+  const response = await fetch('https://localhost:7221/api/Viajes', {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+
+  if (response.ok) {
+    const data = await response.json()
+
+    viajesProximos.value = data.slice(0, 3)
+  }
+}
+
 const cargarSolicitudesRecientes = async () => {
   const token = localStorage.getItem('token_transporte')
 
@@ -200,9 +225,31 @@ const obtenerClaseEstado = (estado) => {
   return clases[estado] || 'pendiente'
 }
 
+const formatearHora = (fecha) => {
+  if (!fecha) return '---'
+
+  return new Date(fecha).toLocaleTimeString('es-DO', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  })
+}
+
+const formatearEstadoViaje = (estado) => {
+  const estados = {
+    1: 'Programado',
+    2: 'En curso',
+    3: 'Finalizado',
+    4: 'Cancelado'
+  }
+
+  return estados[estado] || 'Sin estado'
+}
+
 onMounted(() => {
   cargarDashboard()
   cargarSolicitudesRecientes()
+  cargarViajesProximos()
 })
 </script>
 
@@ -405,6 +452,11 @@ onMounted(() => {
 .fuel-box {
   flex-direction: column;
   gap: 6px;
+}
+
+.empty-text {
+  color: #6b7280;
+  font-size: 0.9rem;
 }
 
 @media (max-width: 1200px) {
