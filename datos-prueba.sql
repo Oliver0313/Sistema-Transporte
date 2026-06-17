@@ -1,11 +1,3 @@
--- Vehículos de prueba
-
-INSERT INTO Vehiculos
-(Matricula, Anio, Marca, Modelo, Capacidad, Estado)
-VALUES
-('A123456', 2012,  'Toyota', 'Hiace', 15, 1),
-('B654321', 2015, 'Hyundai', 'H1', 12, 2),
-('C987654', 2017, 'Ford', 'Transit', 18, 1);
 
 -- Conductores de prueba
 
