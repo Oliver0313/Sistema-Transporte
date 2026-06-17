@@ -1,9 +1,9 @@
 <template>
   <div class="dashboard-layout">
-    <AppSidebar />
+    <AppSidebar :class="{ 'sidebar-hidden': !sidebarVisible }" />
 
     <div class="main-content">
-      <AppHeader />
+      <AppHeader @toggle-sidebar="toggleSidebar" />
 
       <main class="view-container">
         <RouterView />
@@ -13,8 +13,16 @@
 </template>
 
 <script setup>
-import AppSidebar from '../components/AppSidebar.vue'
-import AppHeader from '../components/AppHeader.vue'
+  import { ref } from 'vue'
+  import { RouterView } from 'vue-router'
+  import AppSidebar from '../components/AppSidebar.vue'
+  import AppHeader from '../components/AppHeader.vue'
+
+  const sidebarVisible = ref(true)
+
+  const toggleSidebar = () => {
+    sidebarVisible.value = !sidebarVisible.value
+  }
 </script>
 
 <style>
@@ -38,5 +46,9 @@ import AppHeader from '../components/AppHeader.vue'
   padding: 24px;
   overflow-y: auto;
   background: #f5f6f8;
+}
+
+.sidebar-hidden {
+  display: none;
 }
 </style>

@@ -7,10 +7,6 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
-      redirect: '/login'
-    },
-    {
       path: '/login',
       name: 'login',
       component: LoginView
@@ -25,6 +21,10 @@ const router = createRouter({
       component: DashboardLayout,
       children: [
         {
+          path: '',
+          redirect: '/dashboard'
+        },
+        {
           path: 'dashboard',
           name: 'Dashboard',
           component: () => import('../views/DashboardView.vue')
@@ -38,6 +38,11 @@ const router = createRouter({
           path: 'vehiculos',
           name: 'Vehiculos',
           component: () => import('../views/VehiculosView.vue')
+        },
+        {
+          path: 'conductores',
+          name: 'Conductores',
+          component: () => import('../views/ConductoresView.vue')
         }
       ]
     }

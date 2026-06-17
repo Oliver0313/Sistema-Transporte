@@ -88,7 +88,7 @@ const cerrarSesion = () => {
   width: 260px;
   min-width: 260px;
   height: 100vh;
-  background: #111827;
+  background-color: #111827;
   color: #d1d5db;
   padding: 20px;
   display: flex;
@@ -101,15 +101,17 @@ const cerrarSesion = () => {
 }
 
 .logo-container h2 {
-  color: white;
+  color: #ffffff;
   margin: 0;
   font-size: 1.25rem;
+  font-weight: 500;
 }
 
 .logo-container h3 {
   color: #9ca3af;
   margin: 4px 0 0;
   font-size: 0.9rem;
+  font-weight: 400;
 }
 
 .menu ul {
@@ -124,25 +126,29 @@ const cerrarSesion = () => {
   gap: 12px;
   padding: 9px 14px;
   border-radius: 10px;
+  color: #d1d5db;
   cursor: pointer;
   font-size: 0.875rem;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .menu li:hover {
-  background: rgba(255,255,255,.08);
-  color: white;
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
 }
 
 .menu-icon {
   width: 18px;
   height: 18px;
   object-fit: contain;
+  display: block;
+  flex-shrink: 0;
 }
 
 .sidebar-footer {
   margin-top: auto;
-  border-top: 1px solid rgba(255,255,255,.1);
   padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .btn-logout {
@@ -151,7 +157,7 @@ const cerrarSesion = () => {
   border: none;
   border-radius: 10px;
   background: transparent;
-  color: white;
+  color: #ffffff;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -160,6 +166,6 @@ const cerrarSesion = () => {
 }
 
 .btn-logout:hover {
-  background: rgba(239,68,68,.15);
+  background-color: rgba(239, 68, 68, 0.15);
 }
 </style>
