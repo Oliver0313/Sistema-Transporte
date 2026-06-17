@@ -403,23 +403,22 @@ const crearSolicitud = async () => {
 </script>
 
 <style>
-@import '/src/assets/styles/variables.css';
-@import '/src/assets/styles/reset.css';
-
 /* Header de la página */
 .section-header-mockup {
-  margin-bottom: 20px;
+  margin-bottom: 26px;
 }
 
 .section-header-mockup h2 {
-  font-size: 1.5rem;
-  font-weight: 700;
+  font-size: 1.8rem;
+  font-weight: 800;
   color: #111827;
+  margin: 0;
 }
 
 .section-header-mockup p {
   color: #6b7280;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
+  margin-top: 6px;
 }
 
 /* Filtros */
@@ -427,9 +426,9 @@ const crearSolicitud = async () => {
   display: flex;
   gap: 16px;
   align-items: end;
-  background: #fff;
+  background: #ffffff;
   padding: 20px;
-  border-radius: 12px;
+  border-radius: 18px;
   margin-bottom: 24px;
   border: 1px solid #e5e7eb;
 }
@@ -444,6 +443,12 @@ const crearSolicitud = async () => {
   padding: 10px 14px 10px 40px;
   border: 1px solid #e5e7eb;
   border-radius: 20px;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.filter-search-input:focus {
+  border-color: #9ca3af;
 }
 
 .filter-search-icon {
@@ -453,6 +458,7 @@ const crearSolicitud = async () => {
   transform: translateY(-50%);
   width: 16px;
   height: 16px;
+  opacity: 0.45;
 }
 
 .filter-group-item {
@@ -461,11 +467,25 @@ const crearSolicitud = async () => {
   gap: 6px;
 }
 
+.filter-group-item label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #374151;
+}
+
 .mockup-select,
 .mockup-date-input {
-  padding: 10px;
-  border-radius: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
   border: 1px solid #e5e7eb;
+  font-size: 0.9rem;
+  background: #ffffff;
+  outline: none;
+}
+
+.mockup-select:focus,
+.mockup-date-input:focus {
+  border-color: #9ca3af;
 }
 
 /* Botones */
@@ -476,22 +496,37 @@ const crearSolicitud = async () => {
   color: white;
   border: none;
   padding: 10px 18px;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.btn-filter-action:hover,
+.btn-new-solicitud-trigger:hover,
+.btn-submit-mockup:hover {
+  opacity: 0.92;
+}
+
+.btn-new-solicitud-trigger {
+  margin-left: auto;
 }
 
 .btn-cancel-mockup {
   background: #e5e7eb;
+  color: #374151;
   border: none;
   padding: 10px 18px;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 700;
 }
 
 /* Tabla */
 .card-panel-mockup {
   background: white;
-  border-radius: 12px;
+  border-radius: 18px;
   border: 1px solid #e5e7eb;
   overflow: hidden;
 }
@@ -510,19 +545,27 @@ const crearSolicitud = async () => {
   padding: 14px;
   text-align: left;
   font-size: 0.85rem;
+  font-weight: 700;
+  color: #374151;
+  white-space: nowrap;
 }
 
 .custom-table-mockup td {
   padding: 14px;
   border-top: 1px solid #e5e7eb;
+  font-size: 0.9rem;
+  color: #374151;
+  vertical-align: middle;
 }
 
 /* Estados */
 .status-pill-mockup {
-  padding: 4px 10px;
-  border-radius: 20px;
+  padding: 5px 11px;
+  border-radius: 999px;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700;
+  display: inline-block;
+  white-space: nowrap;
 }
 
 .pendiente {
@@ -551,19 +594,48 @@ const crearSolicitud = async () => {
 }
 
 /* Acciones */
+.actions-cell-fixed {
+  text-align: center;
+}
+
 .actions-wrapper {
   display: flex;
   gap: 8px;
   justify-content: center;
+  align-items: center;
 }
 
 .action-btn-mockup {
   width: 30px;
   height: 30px;
   border: 1px solid #e5e7eb;
-  border-radius: 6px;
+  border-radius: 8px;
   background-color: white;
   cursor: pointer;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 14px;
+}
+
+.action-btn-mockup:hover:not(:disabled) {
+  background-color: #f3f4f6;
+}
+
+.btn-disabled {
+  opacity: 0.25;
+  cursor: not-allowed;
+}
+
+.icon-view {
+  background-image: url('../assets/icons/ver.png');
+}
+
+.icon-edit {
+  background-image: url('../assets/icons/editar-negro.png');
+}
+
+.icon-delete {
+  background-image: url('../assets/icons/eliminar.png');
 }
 
 /* Modal */
@@ -574,14 +646,16 @@ const crearSolicitud = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 999;
 }
 
 .modal-container-central {
   background: white;
   width: 650px;
   max-width: 95%;
-  border-radius: 12px;
+  border-radius: 18px;
   padding: 24px;
+  box-shadow: 0 15px 35px rgba(0,0,0,.12);
 }
 
 .form-panel-header-central {
@@ -589,6 +663,23 @@ const crearSolicitud = async () => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.form-panel-header-central h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.btn-close-modal {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: #6b7280;
+  cursor: pointer;
 }
 
 .form-solicitud-mockup {
@@ -603,11 +694,24 @@ const crearSolicitud = async () => {
   gap: 6px;
 }
 
+.form-group-mockup label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #374151;
+}
+
 .form-group-mockup input,
 .form-group-mockup textarea {
   padding: 10px;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.form-group-mockup input:focus,
+.form-group-mockup textarea:focus {
+  border-color: #9ca3af;
 }
 
 .form-row-mockup {
@@ -622,15 +726,68 @@ const crearSolicitud = async () => {
   gap: 10px;
 }
 
+/* Detalle */
+.detalle-solicitud-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.detalle-item strong {
+  display: block;
+  font-size: 0.8rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.detalle-item p {
+  color: #111827;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.detalle-motivo-text {
+  background: #f9fafb;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+}
+
 /* Toast */
 .toast-error-moderno {
   position: fixed;
   top: 20px;
   right: 20px;
   background: white;
-  border-left: 4px solid red;
+  border-left: 4px solid #dc2626;
   padding: 16px;
   border-radius: 10px;
   box-shadow: 0 10px 20px rgba(0,0,0,.1);
+  z-index: 1000;
+  min-width: 320px;
+}
+
+.toast-title {
+  font-weight: 800;
+  color: #111827;
+  font-size: 0.85rem;
+}
+
+.toast-text {
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+
+.btn-close-toast {
+  background: transparent;
+  border: none;
+  font-size: 1.2rem;
+  color: #6b7280;
+  cursor: pointer;
+  position: absolute;
+  top: 10px;
+  right: 12px;
 }
 </style>
