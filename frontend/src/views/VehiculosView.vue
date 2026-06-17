@@ -138,7 +138,6 @@
     </section>
   </div>
 
-  <!-- Modal Formulario -->
   <div v-if="mostrarFormulario" class="modal-overlay-mockup" @click.self="mostrarFormulario = false">
     <div class="modal-container-central">
       <div class="form-panel-header-central">
@@ -209,7 +208,7 @@
     </div>
   </div>
 
-  <!-- Modal Detalle -->
+
   <div v-if="mostrarDetalle" class="modal-overlay-mockup" @click.self="mostrarDetalle = false">
     <div class="modal-container-central">
       <div class="form-panel-header-central">
@@ -244,7 +243,7 @@
     </div>
   </div>
 
-  <!-- Toast -->
+
   <div v-if="mensajeNotificacion" class="toast-error-moderno">
     <div class="toast-content">
       <span class="toast-title">Notificación</span>
@@ -508,7 +507,6 @@ onMounted(() => {
 
 .btn-disabled { opacity: 0.15; cursor: not-allowed; }
 
-/* Filtros */
 .filters-bar-mockup {
   display: flex;
   gap: 16px;
@@ -604,8 +602,6 @@ onMounted(() => {
   background-size: 14px;
   cursor: pointer;
 }
-
-/* Modal */
 .modal-overlay-mockup {
   position: fixed;
   inset: 0;
@@ -677,12 +673,11 @@ onMounted(() => {
   cursor: pointer;
 }
 
-/* Detalle */
+
 .detalle-solicitud-wrapper { display: flex; flex-direction: column; gap: 12px; }
 .detalle-item strong { font-size: 0.82rem; color: #6b7280; }
 .detalle-item p { margin: 2px 0 0 0; font-size: 0.95rem; color: #111827; }
 
-/* Toast */
 .toast-error-moderno {
   position: fixed;
   top: 20px;
