@@ -5,7 +5,6 @@ using SistemaTransporte.Application.Interfaces;
 
 namespace Sistema_Transporte.Controllers
 {
-    [Authorize(Roles = "SuperAdmin,Administrador")]
     [ApiController]
     [Route("api/[controller]")]
     public class VehiculosController : ControllerBase
@@ -18,6 +17,7 @@ namespace Sistema_Transporte.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "SuperAdmin,Administrador,Supervisor,Operador")]
         public async Task<IActionResult> GetAll()
         {
             var vehiculos = await _vehiculoService.GetAllAsync();
@@ -25,6 +25,7 @@ namespace Sistema_Transporte.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "SuperAdmin,Administrador,Supervisor,Operador")]
         public async Task<IActionResult> GetById(int id)
         {
             var vehiculo = await _vehiculoService.GetByIdAsync(id);
@@ -34,8 +35,9 @@ namespace Sistema_Transporte.Controllers
 
             return Ok(vehiculo);
         }
-
+        
         [HttpPost]
+        [Authorize(Roles = "SuperAdmin,Administrador")]
         public async Task<IActionResult> Create(CrearVehiculoDto dto)
         {
             var vehiculo = await _vehiculoService.CreateAsync(dto);
@@ -43,6 +45,7 @@ namespace Sistema_Transporte.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "SuperAdmin,Administrador")]
         public async Task<IActionResult> Update(int id, ActualizarVehiculoDto dto)
         {
             var actualizado = await _vehiculoService.UpdateAsync(id, dto);
@@ -54,6 +57,7 @@ namespace Sistema_Transporte.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "SuperAdmin,Administrador")]
         public async Task<IActionResult> Delete(int id)
         {
             var eliminado = await _vehiculoService.DeleteAsync(id);
