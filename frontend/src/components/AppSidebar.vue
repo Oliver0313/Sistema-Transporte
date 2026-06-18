@@ -6,58 +6,63 @@
     </div>
 
     <nav class="menu">
-      <ul>
-        <li @click="router.push('/dashboard')">
-          <img src="../assets/icons/dashboard.png" class="menu-icon" />
-          Dashboard
-        </li>
+  <ul>
+    <li @click="router.push('/dashboard')">
+      <img src="../assets/icons/dashboard.png" class="menu-icon" />
+      Dashboard
+    </li>
 
-        <li @click="router.push('/solicitudes')">
-          <img src="../assets/icons/solicitudes.png" class="menu-icon" />
-          Solicitudes
-        </li>
+    <li @click="router.push('/vehiculos')">
+      <img src="../assets/icons/vehiculos.png" class="menu-icon" />
+      Vehículos
+    </li>
 
-        <li @click="router.push('/vehiculos')">
-          <img src="../assets/icons/vehiculos.png" class="menu-icon" />
-          Vehículos
-        </li>
+    <li @click="router.push('/conductores')">
+      <img src="../assets/icons/conductores.png" class="menu-icon" />
+      Conductores
+    </li>
 
-        <li @click="router.push('/conductores')">
-          <img src="../assets/icons/conductores.png" class="menu-icon" />
-          Conductores
-        </li>
+    <li @click="router.push('/asignaciones')">
+      <img src="../assets/icons/asignaciones.png" class="menu-icon" />
+      Asignaciones
+    </li>
 
-        <li @click="router.push('/asignaciones')">
-          <img src="../assets/icons/asignaciones.png" class="menu-icon" />
-          Asignaciones
-        </li>
+    <li @click="router.push('/solicitudes')">
+      <img src="../assets/icons/solicitudes.png" class="menu-icon" />
+      Solicitudes
+    </li>
 
-        <li @click="router.push('/viajes')">
-          <img src="../assets/icons/rutas.png" class="menu-icon" />
-          Viajes
-        </li>
+    <li @click="router.push('/calendario')">
+      <img src="../assets/icons/calendario.png" class="menu-icon" />
+      Calendario
+    </li>
 
-        <li @click="router.push('/mantenimiento')">
-          <img src="../assets/icons/herramientas.png" class="menu-icon" />
-          Mantenimiento
-        </li>
+    <li @click="router.push('/mantenimiento')">
+      <img src="../assets/icons/herramientas.png" class="menu-icon" />
+      Manteniemiento
+    </li>
 
-        <li @click="router.push('/combustible')">
-          <img src="../assets/icons/combustible.png" class="menu-icon" />
-          Combustible
-        </li>
+    <li @click="router.push('/combustible')">
+      <img src="../assets/icons/combustible.png" class="menu-icon" />
+      Combustible
+    </li>
 
-        <li @click="router.push('/reportes')">
-          <img src="../assets/icons/reportes.png" class="menu-icon" />
-          Reportes
-        </li>
+    <li @click="router.push('/reportes')">
+      <img src="../assets/icons/reportes.png" class="menu-icon" />
+      Reportes
+    </li>
 
-        <li v-if="esSuperAdmin" @click="router.push('/usuarios')">
-          <img src="../assets/icons/conductores.png" class="menu-icon" />
-          Usuarios
-        </li>
-      </ul>
-    </nav>
+  <li v-if="esSuperAdmin" @click="router.push('/usuarios')">
+  <img src="../assets/icons/usuarios.png" class="menu-icon" />
+  Usuarios
+</li>
+
+    <li @click="router.push('/viajes')">
+      <img src="../assets/icons/rutas.png" class="menu-icon" />
+      Viajes
+    </li>
+  </ul>
+</nav>
 
     <div class="sidebar-footer">
       <button class="btn-logout" @click="cerrarSesion">
@@ -75,7 +80,11 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const rolUsuario = localStorage.getItem('usuario_rol') || ''
-const esSuperAdmin = computed(() => rolUsuario === 'SuperAdmin')
+console.log('ROL EXACTO:', JSON.stringify(rolUsuario))
+
+const esSuperAdmin = computed(() => 
+  ['SuperAdmin', 'Administrador', 'administrador', 'superadmin'].includes(rolUsuario)
+)
 
 const cerrarSesion = () => {
   localStorage.clear()
