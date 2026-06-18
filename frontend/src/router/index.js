@@ -43,6 +43,12 @@ const router = createRouter({
           path: 'conductores',
           name: 'Conductores',
           component: () => import('../views/ConductoresView.vue')
+        },
+
+        {
+          path: 'asignaciones',
+          name: 'Asignaciones',
+          component: () => import('../views/AsignacionesView.vue')
         }
       ]
     }
