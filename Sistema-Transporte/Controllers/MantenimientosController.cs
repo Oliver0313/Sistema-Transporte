@@ -5,7 +5,6 @@ using SistemaTransporte.Application.Interfaces;
 
 namespace Sistema_Transporte.Controllers
 {
-    [Authorize(Roles = "SuperAdmin,Administrador")]
     [ApiController]
     [Route("api/[controller]")]
     public class MantenimientosController : ControllerBase
@@ -18,6 +17,7 @@ namespace Sistema_Transporte.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "SuperAdmin,Administrador,Supervisor,Operador")]
         public async Task<IActionResult> GetAll()
         {
             var mantenimientos = await _mantenimientoService.GetAllAsync();
@@ -25,6 +25,7 @@ namespace Sistema_Transporte.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize(Roles = "SuperAdmin,Administrador,Supervisor,Operador")]
         public async Task<IActionResult> GetById(int id)
         {
             var mantenimiento = await _mantenimientoService.GetByIdAsync(id);
@@ -36,6 +37,7 @@ namespace Sistema_Transporte.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "SuperAdmin,Administrador")]
         public async Task<IActionResult> Create(CrearMantenimientoDto dto)
         {
             var mantenimiento = await _mantenimientoService.CreateAsync(dto);
@@ -47,6 +49,7 @@ namespace Sistema_Transporte.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "SuperAdmin,Administrador")]
         public async Task<IActionResult> Update(int id, ActualizarMantenimientoDto dto)
         {
             var actualizado = await _mantenimientoService.UpdateAsync(id, dto);
@@ -58,6 +61,7 @@ namespace Sistema_Transporte.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "SuperAdmin,Administrador")]
         public async Task<IActionResult> Delete(int id)
         {
             var eliminado = await _mantenimientoService.DeleteAsync(id);
