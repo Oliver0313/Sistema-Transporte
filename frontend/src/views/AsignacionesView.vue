@@ -5,44 +5,180 @@
       <p>Gestión y consulta de asignaciones de transporte</p>
     </div>
 
+    <div class="stats-grid">
+      <div class="stat-card">
+        <span>Total</span>
+        <strong>{{ totalAsignaciones }}</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>En curso</span>
+        <strong>{{ asignacionesEnCurso }}</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>Completas</span>
+        <strong>{{ asignacionesCompletas }}</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>Canceladas</span>
+        <strong>{{ asignacionesCanceladas }}</strong>
+      </div>
+
+        <button class="btn-primary" @click="mostrarModal = true">
+          Nueva Asignación
+        </button>
+    </div>
+
     <div class="card-panel">
-      <div class="table-responsive">
-        <table class="asignaciones-table">
+      <div class="toolbar">
+        <input
+          v-model="filtroBusqueda"
+          type="text"
+          placeholder="Buscar asignación..."
+          class="search-box"
+        />
+      </div>
+
+      <div class="asignaciones-layout">
+        <div class="table-responsive">
+          <table class="asignaciones-table">
             <thead>
-            <tr>
+              <tr>
                 <th>Solicitud</th>
                 <th>Conductor</th>
                 <th>Vehículo</th>
                 <th>Fecha asignación</th>
                 <th>Usuario asignador</th>
                 <th>Estado</th>
-            </tr>
+              </tr>
             </thead>
 
             <tbody>
-            <tr v-for="asignacion in asignaciones" :key="asignacion.id">
+              <tr
+                v-for="asignacion in asignacionesFiltradas"
+                :key="asignacion.id"
+                class="clickable-row"
+                @click="asignacionSeleccionada = asignacion"
+              >
                 <td>#{{ asignacion.solicitudTransporteId }}</td>
                 <td>#{{ asignacion.conductorId }}</td>
                 <td>#{{ asignacion.vehiculoId }}</td>
                 <td>{{ formatearFecha(asignacion.fechaHoraAsignacion) }}</td>
                 <td>#{{ asignacion.usuarioAsignadorId }}</td>
                 <td>
-                <span :class="['estado-badge', obtenerClaseEstado(asignacion.estado)]">
+                  <span :class="['estado-badge', obtenerClaseEstado(asignacion.estado)]">
                     {{ formatearEstado(asignacion.estado) }}
-                </span>
+                  </span>
                 </td>
-            </tr>
+              </tr>
             </tbody>
-        </table>
+          </table>
         </div>
+
+        <aside class="detalle-panel">
+          <h3>Detalle de asignación</h3>
+
+          <div v-if="asignacionSeleccionada" class="detalle-content">
+            <p><strong>ID:</strong> #{{ asignacionSeleccionada.id }}</p>
+            <p><strong>Solicitud:</strong> #{{ asignacionSeleccionada.solicitudTransporteId }}</p>
+            <p><strong>Conductor:</strong> #{{ asignacionSeleccionada.conductorId }}</p>
+            <p><strong>Vehículo:</strong> #{{ asignacionSeleccionada.vehiculoId }}</p>
+            <p><strong>Usuario:</strong> #{{ asignacionSeleccionada.usuarioAsignadorId }}</p>
+            <p><strong>Estado:</strong> {{ formatearEstado(asignacionSeleccionada.estado) }}</p>
+            <p><strong>Fecha:</strong> {{ formatearFecha(asignacionSeleccionada.fechaHoraAsignacion) }}</p>
+          </div>
+
+          <p v-else class="empty-text">
+            Selecciona una asignación para ver el detalle.
+          </p>
+        </aside>
+      </div>
     </div>
   </div>
+
+  <div v-if="mostrarModal" class="modal-overlay">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h3>Nueva asignación</h3>
+
+      <button class="btn-close" @click="mostrarModal = false">
+        ×
+      </button>
+    </div>
+
+    <form class="form-grid">
+      <input
+        v-model.number="formAsignacion.solicitudTransporteId"
+        type="number"
+        placeholder="ID Solicitud"
+      />
+
+      <input
+        v-model.number="formAsignacion.conductorId"
+        type="number"
+        placeholder="ID Conductor"
+      />
+
+      <input
+        v-model.number="formAsignacion.vehiculoId"
+        type="number"
+        placeholder="ID Vehículo"
+      />
+
+      <input
+        v-model.number="formAsignacion.usuarioAsignadorId"
+        type="number"
+        placeholder="ID Usuario asignador"
+      />
+
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="btn-cancel"
+          @click="mostrarModal = false"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          class="btn-primary"
+          @click="guardarAsignacion"
+        >
+          Guardar asignación
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 
 const asignaciones = ref([])
+const filtroBusqueda = ref('')
+const asignacionSeleccionada = ref(null)
+
+const mostrarModal = ref(false)
+
+const formAsignacion = ref({
+  solicitudTransporteId: '',
+  conductorId: '',
+  vehiculoId: '',
+  usuarioAsignadorId: ''
+})
+
+const asignacionesFiltradas = computed(() => {
+  return asignaciones.value.filter(a =>
+    a.solicitudTransporteId?.toString().includes(filtroBusqueda.value) ||
+    a.conductorId?.toString().includes(filtroBusqueda.value) ||
+    a.vehiculoId?.toString().includes(filtroBusqueda.value) ||
+    a.usuarioAsignadorId?.toString().includes(filtroBusqueda.value)
+  )
+})
 
 const cargarAsignaciones = async () => {
   const token = localStorage.getItem('token_transporte')
@@ -55,8 +191,26 @@ const cargarAsignaciones = async () => {
 
   if (response.ok) {
     asignaciones.value = await response.json()
+
+    if (asignaciones.value.length > 0) {
+      asignacionSeleccionada.value = asignaciones.value[0]
+    }
   }
 }
+
+const totalAsignaciones = computed(() => asignaciones.value.length)
+
+const asignacionesEnCurso = computed(() =>
+  asignaciones.value.filter(a => a.estado === 1).length
+)
+
+const asignacionesCompletas = computed(() =>
+  asignaciones.value.filter(a => a.estado === 4).length
+)
+
+const asignacionesCanceladas = computed(() =>
+  asignaciones.value.filter(a => a.estado === 3).length
+)
 
 const formatearFecha = (fecha) => {
   if (!fecha) return '---'
@@ -91,6 +245,41 @@ const obtenerClaseEstado = (estado) => {
   }
 
   return clases[estado] || 'activa'
+}
+
+const guardarAsignacion = async () => {
+  const token = localStorage.getItem('token_transporte')
+
+  const payload = {
+    solicitudTransporteId: Number(formAsignacion.value.solicitudTransporteId),
+    conductorId: Number(formAsignacion.value.conductorId),
+    vehiculoId: Number(formAsignacion.value.vehiculoId),
+    usuarioAsignadorId: Number(formAsignacion.value.usuarioAsignadorId)
+  }
+
+  const response = await fetch('https://localhost:7221/api/Asignaciones', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+  })
+
+  if (response.ok) {
+    mostrarModal.value = false
+
+    formAsignacion.value = {
+      solicitudTransporteId: '',
+      conductorId: '',
+      vehiculoId: '',
+      usuarioAsignadorId: ''
+    }
+
+    await cargarAsignaciones()
+  } else {
+    alert('No se pudo crear la asignación.')
+  }
 }
 
 onMounted(() => {
@@ -173,5 +362,139 @@ onMounted(() => {
 .finalizada {
   background: #e5e7eb;
   color: #374151;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stat-card span {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.stat-card strong {
+  font-size: 2rem;
+  color: #111827;
+}
+
+.btn-primary {
+  background: #111827;
+  color: white;
+  border: none;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.asignaciones-layout {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 20px;
+}
+
+.detalle-panel {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 18px;
+}
+
+.detalle-panel h3 {
+  margin-top: 0;
+  color: #111827;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.detalle-content p {
+  margin-bottom: 12px;
+  color: #374151;
+  font-size: 0.9rem;
+}
+
+.empty-text {
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.clickable-row {
+  cursor: pointer;
+}
+
+.clickable-row:hover {
+  background: #f9fafb;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-container {
+  width: 600px;
+  max-width: 95%;
+  background: white;
+  border-radius: 18px;
+  padding: 24px;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-close {
+  border: none;
+  background: transparent;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.form-grid input {
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+.modal-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-cancel {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 10px;
+  background: #e5e7eb;
+  cursor: pointer;
 }
 </style>
