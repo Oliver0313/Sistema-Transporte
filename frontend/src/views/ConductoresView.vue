@@ -314,16 +314,14 @@ onMounted(() => {
 }
 
 .section-header h2 {
-  font-size: 1.8rem;
-  font-weight: 800;
+  font-size: 1.5rem;
+  font-weight: 700;
   color: #111827;
-  margin: 0;
 }
 
 .section-header p {
+  font-size: .9rem;
   color: #6b7280;
-  font-size: 0.95rem;
-  margin-top: 6px;
 }
 
 .card-panel {
@@ -345,17 +343,11 @@ onMounted(() => {
 .conductores-table th {
   background: #f9fafb;
   padding: 14px;
-  text-align: left;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #374151;
+  font-size: .85rem;
 }
 
 .conductores-table td {
   padding: 14px;
-  border-top: 1px solid #e5e7eb;
-  font-size: 0.9rem;
-  color: #374151;
 }
 
 .estado-badge {
@@ -460,5 +452,13 @@ onMounted(() => {
   border-radius: 10px;
   background: #e5e7eb;
   cursor: pointer;
+}
+
+.stat-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
 }
 </style>

@@ -5,27 +5,46 @@
       <p>Gestión y consulta de asignaciones de transporte</p>
     </div>
 
-    <div class="stats-grid">
+      <div class="stats-grid">
       <div class="stat-card">
-        <span>Total</span>
-        <strong>{{ totalAsignaciones }}</strong>
+        <div class="stat-icon">📊</div>
+        <div class="stat-info">
+          <span>Total</span>
+          <strong>{{ totalAsignaciones }}</strong>
+        </div>
       </div>
 
       <div class="stat-card">
-        <span>En curso</span>
-        <strong>{{ asignacionesEnCurso }}</strong>
+        <div class="stat-icon">✅</div>
+        <div class="stat-info">
+          <span>Activas</span>
+          <strong>{{ asignacionesActivas }}</strong>
+        </div>
       </div>
 
       <div class="stat-card">
-        <span>Completas</span>
-        <strong>{{ asignacionesCompletas }}</strong>
+        <div class="stat-icon">🚐</div>
+        <div class="stat-info">
+          <span>En curso</span>
+          <strong>{{ asignacionesEnCurso }}</strong>
+        </div>
       </div>
 
       <div class="stat-card">
-        <span>Canceladas</span>
-        <strong>{{ asignacionesCanceladas }}</strong>
+        <div class="stat-icon">🏁</div>
+        <div class="stat-info">
+          <span>Completas</span>
+          <strong>{{ asignacionesCompletas }}</strong>
+        </div>
       </div>
 
+      <div class="stat-card">
+        <div class="stat-icon">❌</div>
+        <div class="stat-info">
+          <span>Canceladas</span>
+          <strong>{{ asignacionesCanceladas }}</strong>
+        </div>
+      </div>
     </div>
 
     <div class="content-layout">
@@ -472,6 +491,10 @@ const obtenerVehiculo = (id) => {
   return `${vehiculo.marca} ${vehiculo.modelo} - ${vehiculo.matricula}`
 }
 
+const asignacionesActivas = computed(() =>
+  asignaciones.value.filter(a => a.estado === 1).length
+)
+
 const obtenerSolicitud = (id) => {
   const solicitud = solicitudes.value.find(s => s.id === id)
 
@@ -492,16 +515,16 @@ onMounted(() => {
 }
 
 .section-header h2 {
-  font-size: 1.8rem;
-  font-weight: 800;
-  color: #111827;
   margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
 }
 
 .section-header p {
-  color: #6b7280;
-  font-size: 0.95rem;
   margin-top: 6px;
+  color: #6b7280;
+  font-size: 0.9rem;
 }
 
 .card-panel {
@@ -523,17 +546,11 @@ onMounted(() => {
 .asignaciones-table th {
   background: #f9fafb;
   padding: 14px;
-  text-align: left;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #374151;
+  font-size: .85rem;
 }
 
 .asignaciones-table td {
   padding: 14px;
-  border-top: 1px solid #e5e7eb;
-  font-size: 0.9rem;
-  color: #374151;
 }
 
 .estado-badge {
@@ -571,13 +588,14 @@ onMounted(() => {
 }
 
 .stat-card {
-  background: white;
+  background: #ffffff;
   border: 1px solid #e5e7eb;
   border-radius: 16px;
-  padding: 18px;
+  padding: 16px;
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.04);
 }
 
 .stat-card span {
@@ -790,5 +808,32 @@ onMounted(() => {
   padding: 10px 12px;
   border-radius: 10px;
   font-size: 0.9rem;
+}
+
+.stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-info span {
+  font-size: 0.85rem;
+  color: #4b5563;
+  font-weight: 500;
+}
+
+.stat-info strong {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #111827;
 }
 </style>
