@@ -26,9 +26,6 @@
         <strong>{{ asignacionesCanceladas }}</strong>
       </div>
 
-      <button class="btn-primary" @click="mostrarModal = true">
-        Nueva Asignación
-      </button>
     </div>
 
     <div class="content-layout">
@@ -40,6 +37,13 @@
             placeholder="Buscar asignación..."
             class="search-box"
           />
+
+          <button
+            class="btn-primary"
+            @click="abrirModal"
+          >
+            + Nueva Asignación
+          </button>
         </div>
 
         <div class="tabs">
@@ -96,15 +100,22 @@
                 class="clickable-row"
                 @click="asignacionSeleccionada = asignacion"
               >
-                <td>#{{ asignacion.solicitudTransporteId }}</td>
-                <td>#{{ asignacion.conductorId }}</td>
-                <td>#{{ asignacion.vehiculoId }}</td>
+                <td>{{ obtenerSolicitud(asignacion.solicitudTransporteId) }}</td>
+                <td>{{ obtenerConductor(asignacion.conductorId) }}</td>
+                <td>{{ obtenerVehiculo(asignacion.vehiculoId) }}</td>
                 <td>{{ formatearFecha(asignacion.fechaHoraAsignacion) }}</td>
                 <td>#{{ asignacion.usuarioAsignadorId }}</td>
+
                 <td>
                   <span :class="['estado-badge', obtenerClaseEstado(asignacion.estado)]">
                     {{ formatearEstado(asignacion.estado) }}
                   </span>
+                </td>
+              </tr>
+
+              <tr v-if="asignacionesFiltradas.length === 0">
+                <td colspan="6" class="empty-table">
+                  No se encontraron asignaciones.
                 </td>
               </tr>
             </tbody>
@@ -128,17 +139,17 @@
 
           <div class="detail-card">
             <span>Conductor</span>
-            <strong>#{{ asignacionSeleccionada.conductorId }}</strong>
+            <strong>{{ obtenerConductor(asignacionSeleccionada.conductorId) }}</strong>
           </div>
 
           <div class="detail-card">
             <span>Vehículo</span>
-            <strong>#{{ asignacionSeleccionada.vehiculoId }}</strong>
+            <strong>{{ obtenerVehiculo(asignacionSeleccionada.vehiculoId) }}</strong>
           </div>
 
           <div class="detail-card">
             <span>Usuario asignador</span>
-            <strong>#{{ asignacionSeleccionada.usuarioAsignadorId }}</strong>
+            <strong>{{ obtenerSolicitud(asignacionSeleccionada.solicitudTransporteId) }}</strong>
           </div>
 
           <div class="detail-card">
@@ -169,29 +180,48 @@
         </div>
 
         <form class="form-grid">
-          <input
-            v-model.number="formAsignacion.solicitudTransporteId"
-            type="number"
-            placeholder="ID Solicitud"
-          />
+                  <select v-model.number="formAsignacion.solicitudTransporteId">
+          <option value="">Seleccione una solicitud</option>
+          <option
+            v-for="solicitud in solicitudes.filter(s => s.estado === 2)"
+            :key="solicitud.id"
+            :value="solicitud.id"
+          >
+            #{{ solicitud.id }} - {{ solicitud.areaSolicitante }} - {{ solicitud.destino }}
+          </option>
+        </select>
 
-          <input
-            v-model.number="formAsignacion.conductorId"
-            type="number"
-            placeholder="ID Conductor"
-          />
+        <select v-model.number="formAsignacion.conductorId">
+          <option value="">Seleccione un conductor</option>
+          <option
+            v-for="conductor in conductores.filter(c => c.estado === 1)"
+            :key="conductor.id"
+            :value="conductor.id"
+          >
+            #{{ conductor.id }} - {{ conductor.nombre }} {{ conductor.apellido }}
+          </option>
+        </select>
 
-          <input
-            v-model.number="formAsignacion.vehiculoId"
-            type="number"
-            placeholder="ID Vehículo"
-          />
+        <select v-model.number="formAsignacion.vehiculoId">
+          <option value="">Seleccione un vehículo</option>
+          <option
+            v-for="vehiculo in vehiculos.filter(v => v.estado === 1)"
+            :key="vehiculo.id"
+            :value="vehiculo.id"
+          >
+            #{{ vehiculo.id }} - {{ vehiculo.marca }} {{ vehiculo.modelo }} - {{ vehiculo.matricula }}
+          </option>
+        </select>
 
           <input
             v-model.number="formAsignacion.usuarioAsignadorId"
             type="number"
             placeholder="ID Usuario asignador"
           />
+
+          <p v-if="errorModal" class="modal-error">
+            {{ errorModal }}
+          </p>
 
           <div class="modal-actions">
             <button
@@ -220,10 +250,16 @@
 import { ref, onMounted, computed } from 'vue'
 
 const asignaciones = ref([])
+const solicitudes = ref([])
+const conductores = ref([])
+const vehiculos = ref([])
+
 const filtroBusqueda = ref('')
+const filtroEstado = ref('todas')
 const asignacionSeleccionada = ref(null)
 
 const mostrarModal = ref(false)
+const errorModal = ref('')
 
 const formAsignacion = ref({
   solicitudTransporteId: '',
@@ -233,15 +269,27 @@ const formAsignacion = ref({
 })
 
 const asignacionesFiltradas = computed(() => {
+  const texto = filtroBusqueda.value.toLowerCase().trim()
+
   let resultado = asignaciones.value
 
-  if (filtroBusqueda.value) {
-    resultado = resultado.filter(a =>
-      a.solicitudTransporteId?.toString().includes(filtroBusqueda.value) ||
-      a.conductorId?.toString().includes(filtroBusqueda.value) ||
-      a.vehiculoId?.toString().includes(filtroBusqueda.value) ||
-      a.usuarioAsignadorId?.toString().includes(filtroBusqueda.value)
-    )
+  if (texto) {
+    resultado = resultado.filter(a => {
+      const solicitud = obtenerSolicitud(a.solicitudTransporteId).toLowerCase()
+      const conductor = obtenerConductor(a.conductorId).toLowerCase()
+      const vehiculo = obtenerVehiculo(a.vehiculoId).toLowerCase()
+      const estado = formatearEstado(a.estado).toLowerCase()
+      const fecha = formatearFecha(a.fechaHoraAsignacion).toLowerCase()
+
+      return (
+        solicitud.includes(texto) ||
+        conductor.includes(texto) ||
+        vehiculo.includes(texto) ||
+        estado.includes(texto) ||
+        fecha.includes(texto) ||
+        a.id?.toString().includes(texto)
+      )
+    })
   }
 
   if (filtroEstado.value === 'activas') {
@@ -258,6 +306,20 @@ const asignacionesFiltradas = computed(() => {
 
   return resultado
 })
+
+const totalAsignaciones = computed(() => asignaciones.value.length)
+
+const asignacionesEnCurso = computed(() =>
+  asignaciones.value.filter(a => a.estado === 1).length
+)
+
+const asignacionesCompletas = computed(() =>
+  asignaciones.value.filter(a => a.estado === 4).length
+)
+
+const asignacionesCanceladas = computed(() =>
+  asignaciones.value.filter(a => a.estado === 3).length
+)
 
 const cargarAsignaciones = async () => {
   const token = localStorage.getItem('token_transporte')
@@ -277,19 +339,87 @@ const cargarAsignaciones = async () => {
   }
 }
 
-const totalAsignaciones = computed(() => asignaciones.value.length)
+const cargarDatosFormulario = async () => {
+  const token = localStorage.getItem('token_transporte')
 
-const asignacionesEnCurso = computed(() =>
-  asignaciones.value.filter(a => a.estado === 1).length
-)
+  const [solicitudesRes, conductoresRes, vehiculosRes] = await Promise.all([
+    fetch('https://localhost:7221/api/solicitudestransporte', {
+      headers: { Authorization: `Bearer ${token}` }
+    }),
+    fetch('https://localhost:7221/api/Conductores', {
+      headers: { Authorization: `Bearer ${token}` }
+    }),
+    fetch('https://localhost:7221/api/Vehiculos', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+  ])
 
-const asignacionesCompletas = computed(() =>
-  asignaciones.value.filter(a => a.estado === 4).length
-)
+  if (solicitudesRes.ok) {
+    solicitudes.value = await solicitudesRes.json()
+  }
 
-const asignacionesCanceladas = computed(() =>
-  asignaciones.value.filter(a => a.estado === 3).length
-)
+  if (conductoresRes.ok) {
+    conductores.value = await conductoresRes.json()
+  }
+
+  if (vehiculosRes.ok) {
+    vehiculos.value = await vehiculosRes.json()
+  }
+}
+
+const abrirModal = () => {
+  errorModal.value = ''
+  mostrarModal.value = true
+  cargarDatosFormulario()
+}
+
+const guardarAsignacion = async () => {
+  errorModal.value = ''
+
+  if (
+    !formAsignacion.value.solicitudTransporteId ||
+    !formAsignacion.value.conductorId ||
+    !formAsignacion.value.vehiculoId ||
+    !formAsignacion.value.usuarioAsignadorId
+  ) {
+    errorModal.value = 'Completa todos los campos antes de guardar.'
+    return
+  }
+
+  const token = localStorage.getItem('token_transporte')
+
+  const payload = {
+    solicitudTransporteId: Number(formAsignacion.value.solicitudTransporteId),
+    conductorId: Number(formAsignacion.value.conductorId),
+    vehiculoId: Number(formAsignacion.value.vehiculoId),
+    usuarioAsignadorId: Number(formAsignacion.value.usuarioAsignadorId)
+  }
+
+  const response = await fetch('https://localhost:7221/api/Asignaciones', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify(payload)
+  })
+
+  if (response.ok) {
+    mostrarModal.value = false
+
+    formAsignacion.value = {
+      solicitudTransporteId: '',
+      conductorId: '',
+      vehiculoId: '',
+      usuarioAsignadorId: ''
+    }
+
+    await cargarAsignaciones()
+  } else {
+    const textoError = await response.text()
+    errorModal.value = textoError || 'No se pudo crear la asignación.'
+  }
+}
 
 const formatearFecha = (fecha) => {
   if (!fecha) return '---'
@@ -326,45 +456,33 @@ const obtenerClaseEstado = (estado) => {
   return clases[estado] || 'activa'
 }
 
-const guardarAsignacion = async () => {
-  const token = localStorage.getItem('token_transporte')
+const obtenerConductor = (id) => {
+  const conductor = conductores.value.find(c => c.id === id)
 
-  const payload = {
-    solicitudTransporteId: Number(formAsignacion.value.solicitudTransporteId),
-    conductorId: Number(formAsignacion.value.conductorId),
-    vehiculoId: Number(formAsignacion.value.vehiculoId),
-    usuarioAsignadorId: Number(formAsignacion.value.usuarioAsignadorId)
-  }
+  if (!conductor) return `#${id}`
 
-  const response = await fetch('https://localhost:7221/api/Asignaciones', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify(payload)
-  })
-
-  if (response.ok) {
-    mostrarModal.value = false
-
-    formAsignacion.value = {
-      solicitudTransporteId: '',
-      conductorId: '',
-      vehiculoId: '',
-      usuarioAsignadorId: ''
-    }
-
-    await cargarAsignaciones()
-  } else {
-    alert('No se pudo crear la asignación.')
-  }
+  return `${conductor.nombre} ${conductor.apellido}`
 }
 
-const filtroEstado = ref('todas')
+const obtenerVehiculo = (id) => {
+  const vehiculo = vehiculos.value.find(v => v.id === id)
+
+  if (!vehiculo) return `#${id}`
+
+  return `${vehiculo.marca} ${vehiculo.modelo} - ${vehiculo.matricula}`
+}
+
+const obtenerSolicitud = (id) => {
+  const solicitud = solicitudes.value.find(s => s.id === id)
+
+  if (!solicitud) return `#${id}`
+
+  return `${solicitud.areaSolicitante} - ${solicitud.destino}`
+}
 
 onMounted(() => {
   cargarAsignaciones()
+  cargarDatosFormulario()
 })
 </script>
 
@@ -475,10 +593,15 @@ onMounted(() => {
 .btn-primary {
   background: #111827;
   color: white;
-  border: none;
-  border-radius: 14px;
-  font-weight: 700;
+  border: 1px solid #111827;
+  padding: 10px 18px;
+  border-radius: 12px;
   cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-primary:hover {
+  background: #374151;
 }
 
 .asignaciones-layout {
@@ -595,6 +718,7 @@ onMounted(() => {
 .toolbar {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   margin-bottom: 20px;
 }
 
@@ -651,5 +775,20 @@ onMounted(() => {
 
 .clickable-row:hover {
   background: #f9fafb;
+}
+
+.form-grid select {
+  padding: 10px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+}
+
+.modal-error {
+  grid-column: 1 / -1;
+  color: #991b1b;
+  background: #fee2e2;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 0.9rem;
 }
 </style>
