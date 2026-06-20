@@ -262,15 +262,15 @@ onMounted(() => {
 
 .dashboard-header h2 {
   margin: 0;
-  font-size: 1.8rem;
-  font-weight: 800;
+  font-size: 1.5rem;
+  font-weight: 700;
   color: #111827;
 }
 
 .dashboard-header p {
   margin-top: 6px;
   color: #6b7280;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 .stats-grid {
@@ -282,18 +282,19 @@ onMounted(() => {
 .stat-card {
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 18px;
-  padding: 20px;
-  min-height: 165px;
+  border-radius: 16px;
+  padding: 16px;
+  min-height: 125px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   background: #f3f4f6;
   display: flex;
   align-items: center;
@@ -301,20 +302,20 @@ onMounted(() => {
 }
 
 .stat-card strong {
-  font-size: 2rem;
+  font-size: 1.4rem;
+  font-weight: 700;
   color: #111827;
-  line-height: 1;
 }
 
 .stat-card span {
+  font-size: 0.85rem;
+  font-weight: 600;
   color: #111827;
-  font-weight: 700;
-  font-size: 0.9rem;
 }
 
 .stat-card p {
-  color: #9ca3af;
   font-size: 0.8rem;
+  color: #9ca3af;
   margin: 0;
 }
 
@@ -333,8 +334,9 @@ onMounted(() => {
 .panel {
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 18px;
+  border-radius: 16px;
   padding: 20px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .panel-header {
@@ -346,9 +348,9 @@ onMounted(() => {
 
 .panel-header h3 {
   margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
   color: #111827;
-  font-size: 1rem;
-  font-weight: 800;
 }
 
 .panel-header span {
@@ -413,6 +415,17 @@ onMounted(() => {
   color: #166534;
 }
 
+.rechazada {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.cancelada {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.finalizada,
 .viaje {
   background: #dbeafe;
   color: #1d4ed8;
@@ -439,7 +452,7 @@ onMounted(() => {
 
 .circle-status strong,
 .fuel-box strong {
-  font-size: 2rem;
+  font-size: 1.7rem;
   color: #111827;
 }
 
@@ -467,11 +480,6 @@ onMounted(() => {
   .dashboard-middle,
   .dashboard-bottom {
     grid-template-columns: 1fr;
-  }
-
-  .empty-text {
-  color: #6b7280;
-  font-size: 0.9rem;
   }
 }
 </style>
