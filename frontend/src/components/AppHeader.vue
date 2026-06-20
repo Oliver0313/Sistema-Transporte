@@ -33,9 +33,21 @@ import { ref, onMounted } from 'vue'
 const nombreUsuario = ref('Usuario')
 const rolUsuario = ref('Operador')
 
+const obtenerRolVisual = (rolReal) => {
+  const rolesVisuales = {
+    SuperAdmin: 'Administrador',
+    Administrador: 'Supervisor',
+    Operador: 'Operador'
+  }
+
+  return rolesVisuales[rolReal] || rolReal || 'Operador'
+}
+
 onMounted(() => {
+  const rolReal = localStorage.getItem('usuario_rol')
+
   nombreUsuario.value = localStorage.getItem('usuario_nombre') || 'Usuario'
-  rolUsuario.value = localStorage.getItem('usuario_rol') || 'Operador'
+  rolUsuario.value = obtenerRolVisual(rolReal)
 })
 </script>
 
