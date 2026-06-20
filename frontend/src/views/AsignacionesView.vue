@@ -26,22 +26,56 @@
         <strong>{{ asignacionesCanceladas }}</strong>
       </div>
 
-        <button class="btn-primary" @click="mostrarModal = true">
-          Nueva Asignación
-        </button>
+      <button class="btn-primary" @click="mostrarModal = true">
+        Nueva Asignación
+      </button>
     </div>
 
-    <div class="card-panel">
-      <div class="toolbar">
-        <input
-          v-model="filtroBusqueda"
-          type="text"
-          placeholder="Buscar asignación..."
-          class="search-box"
-        />
-      </div>
+    <div class="content-layout">
+      <div class="main-content">
+        <div class="toolbar">
+          <input
+            v-model="filtroBusqueda"
+            type="text"
+            placeholder="Buscar asignación..."
+            class="search-box"
+          />
+        </div>
 
-      <div class="asignaciones-layout">
+        <div class="tabs">
+      <button
+        class="tab"
+        :class="{ active: filtroEstado === 'todas' }"
+        @click="filtroEstado = 'todas'"
+      >
+        Todas
+      </button>
+
+      <button
+        class="tab"
+        :class="{ active: filtroEstado === 'activas' }"
+        @click="filtroEstado = 'activas'"
+      >
+        Activas
+      </button>
+
+      <button
+        class="tab"
+        :class="{ active: filtroEstado === 'finalizadas' }"
+        @click="filtroEstado = 'finalizadas'"
+      >
+        Finalizadas
+      </button>
+
+      <button
+        class="tab"
+        :class="{ active: filtroEstado === 'canceladas' }"
+        @click="filtroEstado = 'canceladas'"
+      >
+        Canceladas
+      </button>
+    </div>
+
         <div class="table-responsive">
           <table class="asignaciones-table">
             <thead>
@@ -49,8 +83,8 @@
                 <th>Solicitud</th>
                 <th>Conductor</th>
                 <th>Vehículo</th>
-                <th>Fecha asignación</th>
-                <th>Usuario asignador</th>
+                <th>Fecha</th>
+                <th>Usuario</th>
                 <th>Estado</th>
               </tr>
             </thead>
@@ -76,83 +110,110 @@
             </tbody>
           </table>
         </div>
+      </div>
 
-        <aside class="detalle-panel">
-          <h3>Detalle de asignación</h3>
+      <aside class="detalle-panel">
+        <h3>Detalle de Asignación</h3>
 
-          <div v-if="asignacionSeleccionada" class="detalle-content">
-            <p><strong>ID:</strong> #{{ asignacionSeleccionada.id }}</p>
-            <p><strong>Solicitud:</strong> #{{ asignacionSeleccionada.solicitudTransporteId }}</p>
-            <p><strong>Conductor:</strong> #{{ asignacionSeleccionada.conductorId }}</p>
-            <p><strong>Vehículo:</strong> #{{ asignacionSeleccionada.vehiculoId }}</p>
-            <p><strong>Usuario:</strong> #{{ asignacionSeleccionada.usuarioAsignadorId }}</p>
-            <p><strong>Estado:</strong> {{ formatearEstado(asignacionSeleccionada.estado) }}</p>
-            <p><strong>Fecha:</strong> {{ formatearFecha(asignacionSeleccionada.fechaHoraAsignacion) }}</p>
+        <div v-if="asignacionSeleccionada">
+          <div class="detail-card">
+            <span>ID</span>
+            <strong>#{{ asignacionSeleccionada.id }}</strong>
           </div>
 
-          <p v-else class="empty-text">
-            Selecciona una asignación para ver el detalle.
-          </p>
-        </aside>
+          <div class="detail-card">
+            <span>Solicitud</span>
+            <strong>#{{ asignacionSeleccionada.solicitudTransporteId }}</strong>
+          </div>
+
+          <div class="detail-card">
+            <span>Conductor</span>
+            <strong>#{{ asignacionSeleccionada.conductorId }}</strong>
+          </div>
+
+          <div class="detail-card">
+            <span>Vehículo</span>
+            <strong>#{{ asignacionSeleccionada.vehiculoId }}</strong>
+          </div>
+
+          <div class="detail-card">
+            <span>Usuario asignador</span>
+            <strong>#{{ asignacionSeleccionada.usuarioAsignadorId }}</strong>
+          </div>
+
+          <div class="detail-card">
+            <span>Estado</span>
+            <strong>{{ formatearEstado(asignacionSeleccionada.estado) }}</strong>
+          </div>
+
+          <div class="detail-card">
+            <span>Fecha</span>
+            <strong>{{ formatearFecha(asignacionSeleccionada.fechaHoraAsignacion) }}</strong>
+          </div>
+        </div>
+
+        <p v-else class="empty-text">
+          Selecciona una asignación para ver el detalle.
+        </p>
+      </aside>
+    </div>
+
+    <div v-if="mostrarModal" class="modal-overlay">
+      <div class="modal-container">
+        <div class="modal-header">
+          <h3>Nueva asignación</h3>
+
+          <button class="btn-close" @click="mostrarModal = false">
+            ×
+          </button>
+        </div>
+
+        <form class="form-grid">
+          <input
+            v-model.number="formAsignacion.solicitudTransporteId"
+            type="number"
+            placeholder="ID Solicitud"
+          />
+
+          <input
+            v-model.number="formAsignacion.conductorId"
+            type="number"
+            placeholder="ID Conductor"
+          />
+
+          <input
+            v-model.number="formAsignacion.vehiculoId"
+            type="number"
+            placeholder="ID Vehículo"
+          />
+
+          <input
+            v-model.number="formAsignacion.usuarioAsignadorId"
+            type="number"
+            placeholder="ID Usuario asignador"
+          />
+
+          <div class="modal-actions">
+            <button
+              type="button"
+              class="btn-cancel"
+              @click="mostrarModal = false"
+            >
+              Cancelar
+            </button>
+
+            <button
+              type="button"
+              class="btn-primary"
+              @click="guardarAsignacion"
+            >
+              Guardar asignación
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
-
-  <div v-if="mostrarModal" class="modal-overlay">
-  <div class="modal-container">
-    <div class="modal-header">
-      <h3>Nueva asignación</h3>
-
-      <button class="btn-close" @click="mostrarModal = false">
-        ×
-      </button>
-    </div>
-
-    <form class="form-grid">
-      <input
-        v-model.number="formAsignacion.solicitudTransporteId"
-        type="number"
-        placeholder="ID Solicitud"
-      />
-
-      <input
-        v-model.number="formAsignacion.conductorId"
-        type="number"
-        placeholder="ID Conductor"
-      />
-
-      <input
-        v-model.number="formAsignacion.vehiculoId"
-        type="number"
-        placeholder="ID Vehículo"
-      />
-
-      <input
-        v-model.number="formAsignacion.usuarioAsignadorId"
-        type="number"
-        placeholder="ID Usuario asignador"
-      />
-
-      <div class="modal-actions">
-        <button
-          type="button"
-          class="btn-cancel"
-          @click="mostrarModal = false"
-        >
-          Cancelar
-        </button>
-
-        <button
-          type="button"
-          class="btn-primary"
-          @click="guardarAsignacion"
-        >
-          Guardar asignación
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
 </template>
 
 <script setup>
@@ -172,12 +233,30 @@ const formAsignacion = ref({
 })
 
 const asignacionesFiltradas = computed(() => {
-  return asignaciones.value.filter(a =>
-    a.solicitudTransporteId?.toString().includes(filtroBusqueda.value) ||
-    a.conductorId?.toString().includes(filtroBusqueda.value) ||
-    a.vehiculoId?.toString().includes(filtroBusqueda.value) ||
-    a.usuarioAsignadorId?.toString().includes(filtroBusqueda.value)
-  )
+  let resultado = asignaciones.value
+
+  if (filtroBusqueda.value) {
+    resultado = resultado.filter(a =>
+      a.solicitudTransporteId?.toString().includes(filtroBusqueda.value) ||
+      a.conductorId?.toString().includes(filtroBusqueda.value) ||
+      a.vehiculoId?.toString().includes(filtroBusqueda.value) ||
+      a.usuarioAsignadorId?.toString().includes(filtroBusqueda.value)
+    )
+  }
+
+  if (filtroEstado.value === 'activas') {
+    resultado = resultado.filter(a => a.estado === 1)
+  }
+
+  if (filtroEstado.value === 'finalizadas') {
+    resultado = resultado.filter(a => a.estado === 4)
+  }
+
+  if (filtroEstado.value === 'canceladas') {
+    resultado = resultado.filter(a => a.estado === 3)
+  }
+
+  return resultado
 })
 
 const cargarAsignaciones = async () => {
@@ -281,6 +360,8 @@ const guardarAsignacion = async () => {
     alert('No se pudo crear la asignación.')
   }
 }
+
+const filtroEstado = ref('todas')
 
 onMounted(() => {
   cargarAsignaciones()
@@ -496,5 +577,79 @@ onMounted(() => {
   border-radius: 10px;
   background: #e5e7eb;
   cursor: pointer;
+}
+
+.content-layout {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 24px;
+}
+
+.main-content {
+  background: white;
+  border-radius: 18px;
+  padding: 20px;
+  border: 1px solid #e5e7eb;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.search-box {
+  width: 320px;
+  padding: 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+}
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tab {
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  background: #f3f4f6;
+}
+
+.tab.active {
+  background: #111827;
+  color: white;
+}
+
+.detalle-panel {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.detail-card {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+
+.detail-card span {
+  display: block;
+  color: #6b7280;
+  font-size: .8rem;
+}
+
+.detail-card strong {
+  color: #111827;
+  font-size: 1rem;
+}
+
+.clickable-row:hover {
+  background: #f9fafb;
 }
 </style>
