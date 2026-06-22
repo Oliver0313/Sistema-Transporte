@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SistemaTransporte.Domain.Enums;
 using SistemaTransporte.Infrastructure.Data;
+using System.Threading.Tasks;
 
 namespace Sistema_Transporte.Controllers
 {
