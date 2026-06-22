@@ -53,7 +53,9 @@
       <section class="panel panel-map">
         <div class="panel-header">
           <h3>Viajes activos en tiempo real</h3>
-          <span>Ver todos</span>
+          <span class="dashboard-link" @click="router.push('/viajes')">
+            Ver todos
+        </span>
         </div>
 
         <div class="dashboard-map">
@@ -64,7 +66,9 @@
       <section class="panel">
         <div class="panel-header">
           <h3>Solicitudes recientes</h3>
-          <span>Ver todas</span>
+          <span class="dashboard-link" @click="router.push('/solicitudes')">
+            Ver todas
+          </span>
         </div>
 
         <div
@@ -92,7 +96,9 @@
       <section class="panel">
         <div class="panel-header">
           <h3>Próximos viajes programados</h3>
-          <span>Ver agenda</span>
+          <span class="dashboard-link" @click="router.push('/calendario')">
+            Ver agenda
+          </span>
         </div>
 
         <div
@@ -123,7 +129,9 @@
       <section class="panel">
         <div class="panel-header">
           <h3>Estado de vehículos</h3>
-          <span>Ver todos</span>
+          <span class="dashboard-link" @click="router.push('/vehiculos')">
+          Ver todos
+        </span>
         </div>
 
         <div class="vehicle-status">
@@ -134,10 +142,12 @@
         </div>
       </section>
 
-      <section class="panel">
+      <section v-if="puedeVerTodo" class="panel">
         <div class="panel-header">
           <h3>Consumo de combustible</h3>
-          <span>Ver reporte</span>
+          <span class="dashboard-link" @click="router.push('/combustible')">
+            Ver reporte
+          </span>
         </div>
 
         <div class="fuel-box">
@@ -153,6 +163,30 @@
 import { ref, onMounted } from 'vue'
 import MapaViaje from '../components/MapaViaje.vue'
 
+import { useRouter } from 'vue-router'
+
+import { computed } from 'vue'
+
+const rolUsuario = (localStorage.getItem('usuario_rol') || '').trim().toLowerCase()
+
+const esSuperAdmin = computed(() => rolUsuario === 'superadmin')
+const esAdministrador = computed(() => rolUsuario === 'administrador')
+const esSupervisor = computed(() => rolUsuario === 'supervisor')
+const esOperador = computed(() => rolUsuario === 'operador')
+
+const puedeVerTodo = computed(() =>
+  esSuperAdmin.value || esAdministrador.value
+)
+
+const puedeVerGestion = computed(() =>
+  esSuperAdmin.value || esAdministrador.value || esSupervisor.value
+)
+
+const puedeVerOperativo = computed(() =>
+  puedeVerGestion.value || esOperador.value
+)
+
+const router = useRouter()
 const resumen = ref({})
 const solicitudesRecientes = ref([])
 
@@ -482,5 +516,15 @@ onMounted(() => {
   .dashboard-bottom {
     grid-template-columns: 1fr;
   }
+}
+
+.dashboard-link{
+  cursor:pointer;
+  color:#2563eb;
+  font-weight:600;
+}
+
+.dashboard-link:hover{
+  text-decoration:underline;
 }
 </style>

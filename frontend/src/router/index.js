@@ -50,7 +50,7 @@ const router = createRouter({
           name: 'Vehiculos',
           component: () => import('../views/VehiculosView.vue'),
           meta: {
-            roles: ['SuperAdmin', 'Administrador', 'Supervisor']
+            roles: ['SuperAdmin', 'Administrador', 'Supervisor', 'Operador']
           }
         },
 
@@ -59,7 +59,7 @@ const router = createRouter({
           name: 'Conductores',
           component: () => import('../views/ConductoresView.vue'),
           meta: {
-            roles: ['SuperAdmin', 'Administrador', 'Supervisor']
+            roles: ['SuperAdmin', 'Administrador', 'Supervisor', 'Operador']
           }
         },
 
@@ -68,7 +68,7 @@ const router = createRouter({
           name: 'Asignaciones',
           component: () => import('../views/AsignacionesView.vue'),
           meta: {
-            roles: ['SuperAdmin', 'Administrador', 'Supervisor']
+            roles: ['SuperAdmin', 'Administrador', 'Supervisor', 'Operador']
           }
         },
 
@@ -95,7 +95,7 @@ const router = createRouter({
           name: 'Usuarios',
           component: () => import('../views/UsuariosView.vue'),
           meta: {
-            roles: ['SuperAdmin', 'Administrador']
+            roles: ['SuperAdmin', 'Administrador', 'Supervisor', 'Operador']
           }
         },
         
