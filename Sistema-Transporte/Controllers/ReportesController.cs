@@ -18,89 +18,90 @@ namespace Sistema_Transporte.Controllers
             _context = context;
         }
 
-        [HttpGet("vehiculos")]
-        public async Task<IActionResult> ReporteVehiculos()
+        [HttpGet("viajes-por-mes")]
+        public async Task<IActionResult> GetViajesPorMes([FromQuery] int anio)
         {
-            return Ok(new
-            {
-                totalVehiculos = await _context.Vehiculos.CountAsync(),
-                disponibles = await _context.Vehiculos.CountAsync(v => v.Estado == EstadoVehiculo.Disponible),
-                enViaje = await _context.Vehiculos.CountAsync(v => v.Estado == EstadoVehiculo.EnViaje),
-                enMantenimiento = await _context.Vehiculos.CountAsync(v => v.Estado == EstadoVehiculo.EnMantenimiento),
-                fueraDeServicio = await _context.Vehiculos.CountAsync(v => v.Estado == EstadoVehiculo.FueraDeServicio)
-            });
+            var viajes = await _context.Viajes
+                .Where(v => v.FechaHoraSalida.Year == anio)
+                .GroupBy(v => v.FechaHoraSalida.Month)
+                .Select(g => new
+                {
+                    Mes = g.Key == 1 ? "Ene" : g.Key == 2 ? "Feb" : g.Key == 3 ? "Mar" : g.Key == 4 ? "Abr" : g.Key == 5 ? "May" : g.Key == 6 ? "Jun" : g.Key == 7 ? "Jul" : g.Key == 8 ? "Ago" : g.Key == 9 ? "Sep" : g.Key == 10 ? "Oct" : g.Key == 11 ? "Nov" : "Dic",
+                    Cantidad = g.Count()
+                })
+                .ToListAsync();
+
+            return Ok(viajes);
         }
 
-        [HttpGet("conductores")]
-        public async Task<IActionResult> ReporteConductores()
+        [HttpGet("combustible-por-mes")]
+        public async Task<IActionResult> GetCombustiblePorMes([FromQuery] int anio)
         {
-            return Ok(new
-            {
-                totalConductores = await _context.Conductores.CountAsync(),
-                disponibles = await _context.Conductores.CountAsync(c => c.Estado == EstadoConductor.Disponible),
-                enViaje = await _context.Conductores.CountAsync(c => c.Estado == EstadoConductor.EnViaje),
-                suspendidos = await _context.Conductores.CountAsync(c => c.Estado == EstadoConductor.Suspendido),
-                inactivos = await _context.Conductores.CountAsync(c => c.Estado == EstadoConductor.Inactivo)
-            });
+            var consumo = await _context.ConsumosCombustible
+                .Where(c => c.Fecha.Year == anio)
+                .GroupBy(c => c.Fecha.Month)
+                .Select(g => new
+                {
+                    Mes = g.Key == 1 ? "Ene" : g.Key == 2 ? "Feb" : g.Key == 3 ? "Mar" : g.Key == 4 ? "Abr" : g.Key == 5 ? "May" : g.Key == 6 ? "Jun" : g.Key == 7 ? "Jul" : g.Key == 8 ? "Ago" : g.Key == 9 ? "Sep" : g.Key == 10 ? "Oct" : g.Key == 11 ? "Nov" : "Dic",
+                    Galones = g.Sum(c => c.Galones)
+                })
+                .ToListAsync();
+
+            return Ok(consumo);
         }
 
-        [HttpGet("solicitudes")]
-        public async Task<IActionResult> ReporteSolicitudes()
+        [HttpGet("vehiculos-mas-usados")]
+        public async Task<IActionResult> GetVehiculosMasUsados()
         {
-            return Ok(new
-            {
-                totalSolicitudes = await _context.SolicitudesTransporte.CountAsync(),
-                pendientes = await _context.SolicitudesTransporte.CountAsync(s => s.Estado == EstadoSolicitud.Pendiente),
-                aprobadas = await _context.SolicitudesTransporte.CountAsync(s => s.Estado == EstadoSolicitud.Aprobada),
-                rechazadas = await _context.SolicitudesTransporte.CountAsync(s => s.Estado == EstadoSolicitud.Rechazada),
-                canceladas = await _context.SolicitudesTransporte.CountAsync(s => s.Estado == EstadoSolicitud.Cancelada),
-                finalizadas = await _context.SolicitudesTransporte.CountAsync(s => s.Estado == EstadoSolicitud.Finalizada)
-            });
+            var vehiculos = await (from viaje in _context.Viajes
+                                   join asignacion in _context.Asignaciones on viaje.AsignacionId equals asignacion.Id
+                                   join vehiculo in _context.Vehiculos on asignacion.VehiculoId equals vehiculo.Id
+                                   group viaje by new { vehiculo.Marca, vehiculo.Modelo, vehiculo.Matricula } into g
+                                   select new
+                                   {
+                                       Vehiculo = g.Key.Marca + " " + g.Key.Modelo + " (" + g.Key.Matricula + ")",
+                                       Viajes = g.Count()
+                                   })
+                                   .OrderByDescending(x => x.Viajes)
+                                   .Take(5)
+                                   .ToListAsync();
+
+            return Ok(vehiculos);
         }
 
-        [HttpGet("viajes")]
-        public async Task<IActionResult> ReporteViajes()
+        [HttpGet("solicitudes-por-area")]
+        public async Task<IActionResult> GetSolicitudesPorArea()
         {
-            return Ok(new
-            {
-                totalViajes = await _context.Viajes.CountAsync(),
-                programados = await _context.Viajes.CountAsync(v => v.Estado == EstadoViaje.Programado),
-                enCurso = await _context.Viajes.CountAsync(v => v.Estado == EstadoViaje.EnCurso),
-                finalizados = await _context.Viajes.CountAsync(v => v.Estado == EstadoViaje.Finalizado),
-                cancelados = await _context.Viajes.CountAsync(v => v.Estado == EstadoViaje.Cancelado),
-                totalPasajeros = await _context.Viajes.SumAsync(v => v.CantidadPasajeros),
-                distanciaTotal = await _context.Viajes.SumAsync(v => v.DistanciaRecorrida)
-            });
+            var solicitudes = await _context.SolicitudesTransporte
+                .GroupBy(s => s.AreaSolicitante)
+                .Select(g => new
+                {
+                    Area = g.Key ?? "Sin Área",
+                    Cantidad = g.Count()
+                })
+                .OrderByDescending(x => x.Cantidad)
+                .ToListAsync();
+
+            return Ok(solicitudes);
         }
 
-        [HttpGet("mantenimientos")]
-        public async Task<IActionResult> ReporteMantenimientos()
+        [HttpGet("conductores-mas-viajes")]
+        public async Task<IActionResult> GetConductoresMasViajes()
         {
-            return Ok(new
-            {
-                totalMantenimientos = await _context.Mantenimientos.CountAsync(),
-                programados = await _context.Mantenimientos.CountAsync(m => m.Estado == EstadoMantenimiento.Programado),
-                pendientes = await _context.Mantenimientos.CountAsync(m => m.Estado == EstadoMantenimiento.Pendiente),
-                enProgreso = await _context.Mantenimientos.CountAsync(m => m.Estado == EstadoMantenimiento.EnProgreso),
-                completados = await _context.Mantenimientos.CountAsync(m => m.Estado == EstadoMantenimiento.Completado),
-                vencidos = await _context.Mantenimientos.CountAsync(m => m.Estado == EstadoMantenimiento.Vencido),
-                costoTotal = await _context.Mantenimientos.SumAsync(m => m.Costo)
-            });
-        }
+            var conductores = await (from viaje in _context.Viajes
+                                     join asignacion in _context.Asignaciones on viaje.AsignacionId equals asignacion.Id
+                                     join conductor in _context.Conductores on asignacion.ConductorId equals conductor.Id
+                                     group viaje by new { conductor.Nombre, conductor.Apellido } into g
+                                     select new
+                                     {
+                                         Conductor = g.Key.Nombre + " " + g.Key.Apellido,
+                                         Viajes = g.Count()
+                                     })
+                                     .OrderByDescending(x => x.Viajes)
+                                     .Take(5)
+                                     .ToListAsync();
 
-        [HttpGet("combustible")]
-        public async Task<IActionResult> ReporteCombustible()
-        {
-            return Ok(new
-            {
-                totalRegistros = await _context.ConsumosCombustible.CountAsync(),
-                totalGalones = await _context.ConsumosCombustible.SumAsync(c => c.Galones),
-                totalGastado = await _context.ConsumosCombustible.SumAsync(c => c.Costo),
-                totalKilometros = await _context.ConsumosCombustible.SumAsync(c => c.KilometrosRecorridos),
-                pendientes = await _context.ConsumosCombustible.CountAsync(c => c.Estado == EstadoCombustible.Pendiente),
-                aprobados = await _context.ConsumosCombustible.CountAsync(c => c.Estado == EstadoCombustible.Aprobado),
-                rechazados = await _context.ConsumosCombustible.CountAsync(c => c.Estado == EstadoCombustible.Rechazado)
-            });
+            return Ok(conductores);
         }
     }
 }
