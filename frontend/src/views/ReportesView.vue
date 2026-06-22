@@ -297,6 +297,32 @@
       <button class="btn-close-toast" @click="mensajeFlotante = ''">×</button>
     </div>
 
+    <div class="tabla-impresion-pdf">
+      <div class="print-header">
+        <h1>SISTEMA DE GESTIÓN DE TRANSPORTE</h1>
+        <h2>Reporte Consolidado de Flota - Año {{ filtroAnio }} (Mes: {{ filtroPeriodo }})</h2>
+        <p>Área: {{ filtroArea.toUpperCase() }} | Fecha de generación: {{ new Date().toLocaleDateString() }}</p>
+      </div>
+
+      <table class="reporte-print-table">
+        <thead>
+          <tr>
+            <th>Métrica / Indicador</th>
+            <th>Valor Registrado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Viajes Realizados</td><td><strong>{{ kpis.viajes.totalViajes }}</strong></td></tr>
+          <tr><td>Consumo Total de Combustible</td><td><strong>{{ kpis.combustible.totalGalones }} L</strong></td></tr>
+          <tr><td>Solicitudes Procesadas</td><td><strong>{{ kpis.solicitudes.totalSolicitudes }}</strong></td></tr>
+          <tr><td>Conductores Activos</td><td><strong>{{ kpis.conductores.totalConductores }}</strong></td></tr>
+          <tr><td>Gasto / Inversión de Combustible</td><td><strong>{{ formatearCosto(kpis.combustible.totalGastado) }}</strong></td></tr>
+          <tr><td>Kilómetros Totales Recorridos</td><td><strong>{{ kpis.combustible.totalKilometros.toLocaleString() }} km</strong></td></tr>
+          <tr><td>Rendimiento Promedio de Flota</td><td><strong>{{ kpis.combustible.rendimientoKmPorGalon.toFixed(2) }} km/gal</strong></td></tr>
+        </tbody>
+      </table>
+    </div>
+
   </div>
 </template>
 
@@ -470,17 +496,39 @@ onMounted(() => cargarReportes())
 </script>
 
 <style scoped>
+/* 1. Forzamos a que todo el contenedor y elementos hereden la fuente base limpia */
+.rep-page,
+.rep-page * {
+  font-family: inherit !important;
+}
+
 .rep-page {
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
 
+/* 2. Tu cabecera original */
 .section-header { margin-bottom: 20px; }
 .section-header h2 { margin: 0; font-size: 1.5rem; font-weight: 700; color: #111827; }
 .section-header p { margin-top: 6px; color: #6b7280; font-size: 0.9rem; }
 
+/* 3. APLICAR LA MISMA FORMA DE TU <p> A TODOS LOS TEXTOS SECUNDARIOS Y LEYENDAS */
+/* Esto quita cualquier "otra forma" extraña en los textos de abajo */
+.rep-kpi-label,
+.rep-chart-subtitle,
+.rep-metrica-label,
+.rep-bar-label,
+.rep-rank-count,
+.rep-empty,
+.custom-table-mockup td {
+  color: #6b7280 !important;
+  font-size: 0.9rem !important;
+  font-weight: 500 !important; /* Peso limpio y normal como el de tu <p> */
+  text-transform: none !important; /* Quita mayúsculas automáticas si las había */
+}
 
+/* 4. Filtros superiores unificados */
 .rep-filters-bar {
   display: flex;
   align-items: center;
@@ -502,10 +550,11 @@ onMounted(() => cargarReportes())
   padding: 5px 10px 5px 12px;
 }
 
-.rep-filter-label { font-size: 0.82rem; font-weight: 600; color: #6b7280; white-space: nowrap; }
-.rep-pill-select { border: none; background: transparent; font-size: 0.85rem; font-weight: 700; color: #111827; outline: none; cursor: pointer; padding: 0 2px; }
+.rep-filter-label { font-size: 0.88rem; font-weight: 600; color: #6b7280; white-space: nowrap; }
+.rep-pill-select { border: none; background: transparent; font-size: 0.88rem; font-weight: 700; color: #111827; outline: none; cursor: pointer; padding: 0 2px; }
 .rep-pill-select:disabled { cursor: not-allowed; color: #9ca3af; }
 
+/* Botones */
 .rep-btn-generar {
   background: #111827;
   color: #fff;
@@ -544,7 +593,7 @@ onMounted(() => cargarReportes())
 .btn-export.pdf   { background: #f0fdf4; color: #16a34a; border-color: #86efac; }
 .btn-export.excel { background: #fff7ed; color: #ea580c; border-color: #fdba74; }
 
-
+/* Contenedores de Kpis y Gráficos */
 .rep-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 .rep-kpi-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 20px; padding: 28px 20px 20px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
 .rep-kpi-icon-wrap { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
@@ -553,54 +602,49 @@ onMounted(() => cargarReportes())
 .rep-icon-yellow { background: #fffbeb; }
 .rep-icon-purple { background: #f5f3ff; }
 .rep-kpi-img { width: 26px; height: 26px; object-fit: contain; }
-.rep-kpi-valor { font-size: 2.2rem; font-weight: 800; color: #111827; line-height: 1; }
-.rep-kpi-label { font-size: 0.82rem; color: #9ca3af; font-weight: 600; margin-top: 4px; }
+
+/* Los números grandes e importantes mantendrán el color oscuro y peso de tus h2 */
+.rep-kpi-valor { font-size: 2.2rem; font-weight: 700; color: #111827; line-height: 1; }
+.rep-metrica-valor { font-size: 1.25rem; font-weight: 700; color: #111827; }
 
 .rep-charts-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
 .rep-chart-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 18px; padding: 20px; }
-.rep-chart-title { font-size: 0.95rem; font-weight: 800; color: #111827; }
-.rep-chart-subtitle { font-size: 0.75rem; color: #9ca3af; font-weight: 500; margin-top: 2px; margin-bottom: 16px; }
+.rep-chart-title, .rep-metricas-title { font-size: 1.1rem; font-weight: 700; color: #111827; }
 
+/* Barras gráficos */
 .rep-bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 100px; }
 .rep-bar-col { display: flex; flex-direction: column; align-items: center; flex: 1; height: 100%; justify-content: flex-end; gap: 4px; }
 .rep-bar-wrapper { width: 100%; height: 80px; display: flex; align-items: flex-end; }
 .rep-bar-fill { width: 100%; border-radius: 3px 3px 0 0; transition: height 0.4s ease; }
 .dark-bar { background: #111827; }
-.rep-bar-label { font-size: 0.55rem; font-weight: 600; color: #9ca3af; text-transform: uppercase; text-align: center; }
 
+/* Elementos de listas internas */
 .rep-vehiculos-card { display: flex; flex-direction: column; }
 .rep-vehiculos-list { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
 .rep-vehiculo-row { display: flex; align-items: center; gap: 10px; }
-.rep-vehiculo-name { font-size: 0.78rem; font-weight: 600; color: #374151; min-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rep-vehiculo-name { font-size: 0.88rem; font-weight: 600; color: #374151; min-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rep-vehiculo-bar-track { flex: 1; height: 7px; background: #f3f4f6; border-radius: 4px; overflow: hidden; }
 .rep-vehiculo-bar-fill { height: 100%; background: #111827; border-radius: 4px; transition: width 0.4s ease; }
 
-
 .rep-metricas-panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 18px; padding: 20px 24px; }
 .rep-metricas-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-.rep-metricas-title { font-size: 1rem; font-weight: 800; color: #111827; }
 .rep-badge-gray { font-size: 0.72rem; font-weight: 700; background: #f3f4f6; color: #6b7280; padding: 4px 12px; border-radius: 10px; border: 1px solid #e5e7eb; }
 .rep-metricas-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
 .rep-metrica-item { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
-.rep-metrica-label { font-size: 0.65rem; font-weight: 700; color: #9ca3af; letter-spacing: 0.5px; text-transform: uppercase; }
-.rep-metrica-valor { font-size: 1.25rem; font-weight: 800; color: #111827; }
 
-
+/* Tablas */
 .rep-tabla-panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 18px; overflow: hidden; padding: 20px 24px 0; }
 .custom-table-mockup { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
 .custom-table-mockup th { color: #374151; font-weight: 700; padding: 10px 14px; text-align: left; border-bottom: 2px solid #f3f4f6; }
-.custom-table-mockup td { padding: 14px; color: #111827; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
 .rep-tend-track { width: 160px; height: 7px; background: #f3f4f6; border-radius: 4px; overflow: hidden; }
 .rep-tend-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
-
 
 .rep-lists-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .rep-list-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 18px; padding: 20px; }
 .rep-rank-item { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
 .rep-rank-header { display: flex; justify-content: space-between; align-items: center; }
 .rep-rank-num { width: 18px; height: 18px; background: #111827; color: #fff; border-radius: 50%; font-size: 0.6rem; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.rep-rank-name { font-size: 0.82rem; font-weight: 600; color: #111827; }
-.rep-rank-count { font-size: 0.78rem; font-weight: 700; color: #6b7280; white-space: nowrap; }
+.rep-rank-name { font-size: 0.88rem; font-weight: 600; color: #111827; }
 
 .status-pill-mockup { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
 .pendiente  { background: #fef3c7; color: #92400e; }
@@ -612,25 +656,109 @@ onMounted(() => cargarReportes())
 .rep-loading-spinner { width: 34px; height: 34px; border: 3px solid #e5e7eb; border-top-color: #111827; border-radius: 50%; animation: rep-spin 0.7s linear infinite; }
 @keyframes rep-spin { to { transform: rotate(360deg); } }
 
-.rep-empty { color: #9ca3af; font-size: 0.83rem; text-align: center; padding: 16px 0; font-weight: 500; }
-
-
 @media print {
-  body, .rep-page { background: #ffffff !important; color: #111827 !important; padding: 0 !important; margin: 0 !important; width: 100% !important; }
-  .rep-filters-bar, .rep-export-group, .rep-btn-generar, .rep-btn-limpiar, .badge-read-only { display: none !important; }
-  
-  .rep-kpi-grid { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 12px !important; page-break-inside: avoid !important; }
-  .rep-charts-row { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 12px !important; page-break-inside: avoid !important; }
-  .rep-lists-row { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 12px !important; page-break-inside: avoid !important; }
-  
-  .rep-kpi-card, .rep-chart-card, .rep-metricas-panel, .rep-tabla-panel, .rep-list-card {
-    border: 1px solid #e5e7eb !important; 
-    box-shadow: none !important; 
-    page-break-inside: avoid !important; 
-    break-inside: avoid !important;
-    padding: 14px !important;
+  /* 1. Ocultar absolutamente TODO el Layout general del sistema */
+  /* (Sidebar, Navbar, buscador, contenedor global del router) */
+  body *, 
+  #app *,
+  .sidebar, 
+  .navbar,
+  .app-sidebar,
+  .app-header,
+  header,
+  aside,
+  .nav-container,
+  .user-profile-bar {
+    display: none !important;
   }
-  .rep-kpi-valor { font-size: 1.6rem !important; }
-  .rep-bar-fill, .rep-vehiculo-bar-fill, .rep-tend-fill { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+  /* 2. Forzar a que solo la tabla de impresión y sus padres directos sean visibles */
+  html, body, #app, .rep-page, .tabla-impresion-pdf, .tabla-impresion-pdf * {
+    display: block !important;
+    visibility: visible !important;
+  }
+
+  /* 3. Limpiar márgenes de la página de impresión para que no salgan bordes raros */
+  @page {
+    margin: 1.5cm !important;
+  }
+
+  .tabla-impresion-pdf {
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+  }
+
+  /* 4. Estructura del Encabezado del Reporte */
+  .print-header {
+    text-align: center !important;
+    margin-bottom: 25px !important;
+    border-bottom: 2px solid #111827 !important;
+    padding-bottom: 12px !important;
+  }
+
+  .print-header h1 {
+    font-size: 1.6rem !important;
+    font-weight: 800 !important;
+    margin: 0 !important;
+    color: #111827 !important;
+    text-transform: uppercase !important;
+  }
+
+  .print-header h2 {
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    margin: 6px 0 !important;
+    color: #374151 !important;
+  }
+
+  .print-header p {
+    font-size: 0.85rem !important;
+    color: #6b7280 !important;
+    margin: 0 !important;
+  }
+
+  /* 5. Diseño formal de la Tabla de Datos */
+  .reporte-print-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin-top: 15px !important;
+  }
+
+  .reporte-print-table th {
+    background-color: #f3f4f6 !important;
+    color: #111827 !important;
+    font-weight: 700 !important;
+    border: 1px solid #bcbfc2 !important;
+    padding: 12px 14px !important;
+    text-align: left !important;
+    font-size: 0.9rem !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .reporte-print-table td {
+    border: 1px solid #d1d5db !important;
+    padding: 12px 14px !important;
+    color: #111827 !important;
+    font-size: 0.9rem !important;
+  }
+  
+  .reporte-print-table tr:nth-child(even) {
+    background-color: #f9fafb !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+/* Evitar que se renderice en pantalla durante la navegación estándar */
+@media screen {
+  .tabla-impresion-pdf {
+    display: none !important;
+  }
 }
 </style>
