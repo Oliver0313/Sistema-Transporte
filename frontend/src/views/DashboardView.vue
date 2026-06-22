@@ -56,8 +56,8 @@
           <span>Ver todos</span>
         </div>
 
-        <div class="map-placeholder">
-          Mapa próximamente
+        <div class="dashboard-map">
+          <MapaViaje />
         </div>
       </section>
 
@@ -151,6 +151,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import MapaViaje from '../components/MapaViaje.vue'
 
 const resumen = ref({})
 const solicitudesRecientes = ref([])

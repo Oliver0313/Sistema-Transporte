@@ -5,8 +5,7 @@ using SistemaTransporte.Application.Interfaces;
 
 namespace Sistema_Transporte.Controllers
 {
-
-    [Authorize(Roles = "SuperAdmin,Administrador,Supervisor,Operador")]
+    [Authorize(Roles = "SuperAdmin,Administrador")]
     [ApiController]
     [Route("api/[controller]")]
     public class ConductoresController : ControllerBase
@@ -37,7 +36,6 @@ namespace Sistema_Transporte.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "SuperAdmin,Administrador")]
         public async Task<IActionResult> Create(CrearConductorDto dto)
         {
             var conductor = await _conductorService.CreateAsync(dto);
@@ -45,7 +43,6 @@ namespace Sistema_Transporte.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "SuperAdmin,Administrador")]
         public async Task<IActionResult> Update(int id, ActualizarConductorDto dto)
         {
             var actualizado = await _conductorService.UpdateAsync(id, dto);
@@ -57,7 +54,6 @@ namespace Sistema_Transporte.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "SuperAdmin,Administrador")]
         public async Task<IActionResult> Delete(int id)
         {
             var eliminado = await _conductorService.DeleteAsync(id);

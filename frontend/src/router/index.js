@@ -55,10 +55,11 @@ const router = createRouter({
           name: 'Mantenimiento',
           component: () => import('../views/MantenimientoView.vue')
         },
+
         {
-          path: 'combustible',
-          name: 'Combustible',
-          component: () => import('../views/CombustibleView.vue')
+          path: 'viajes',
+          name: 'Viajes',
+          component: () => import('../views/ViajesView.vue')
         }
       ]
     }
