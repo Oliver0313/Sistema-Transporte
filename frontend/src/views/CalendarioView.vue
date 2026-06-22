@@ -79,15 +79,7 @@
           </div>
           <span class="total-indicators-text">{{ solicitudesFiltradas.length }} viajes programados</span>
           
-          <button 
-            class="btn-shortcut-new-trip" 
-            :class="{ 'btn-disabled': !puedeCrear }"
-            :disabled="!puedeCrear"
-            :title="!puedeCrear ? 'No permitido para tu rol' : ''"
-            @click="redireccionarNuevaSolicitud"
-          >
-            Nuevo viaje
-          </button>
+       
         </div>
 
         <div class="grid-calendar-table">
@@ -463,6 +455,7 @@ onMounted(() => {
   background: #fefce8;
 }
 
+
 .calendar-filters-top {
   display: flex;
   gap: 12px;
@@ -470,39 +463,53 @@ onMounted(() => {
   padding: 16px;
   border-radius: 16px;
   border: 1px solid #e5e7eb;
-  align-items: center;
+  align-items: center; 
 }
+
 
 .mockup-select-modern, 
 .mockup-date-modern {
-  padding: 10px 14px;
+  height: 40px;
+  padding: 0 14px;
   border-radius: 10px;
   border: 1px solid #e5e7eb;
   font-size: 0.88rem;
   outline: none;
   background: white;
+  box-sizing: border-box;
 }
 
+
 .btn-today-action {
+  height: 40px;
   background: #f3f4f6;
   color: #111827;
   border: 1px solid #e5e7eb;
-  padding: 10px 16px;
+  padding: 0 16px;
   border-radius: 10px;
   font-weight: 700;
+  font-size: 0.88rem;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
 }
 
+
 .btn-clear-filters {
+  height: 40px;
   background: #111827;
   color: #ffffff;
   border: none;
-  padding: 10px 18px;
+  padding: 0 18px;
   border-radius: 10px;
   font-weight: 700;
   font-size: 0.9rem;
   cursor: pointer;
   transition: opacity 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  box-sizing: border-box;
 }
 
 .btn-clear-filters:hover {
