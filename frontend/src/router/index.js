@@ -27,12 +27,18 @@ const router = createRouter({
         {
           path: 'dashboard',
           name: 'Dashboard',
-          component: () => import('../views/DashboardView.vue')
+          component: () => import('../views/DashboardView.vue'),
+          meta: {
+            roles: ['SuperAdmin', 'Administrador', 'Supervisor', 'Operador']
+          }
         },
         {
           path: 'solicitudes',
           name: 'Solicitudes',
-          component: () => import('../views/SolicitudesView.vue')
+          component: () => import('../views/SolicitudesView.vue'),
+          meta: {
+            roles: ['SuperAdmin', 'Administrador', 'Supervisor', 'Operador']
+          }
         },
         {
           path: 'calendario',
@@ -42,45 +48,92 @@ const router = createRouter({
         {
           path: 'vehiculos',
           name: 'Vehiculos',
-          component: () => import('../views/VehiculosView.vue')
+          component: () => import('../views/VehiculosView.vue'),
+          meta: {
+            roles: ['SuperAdmin', 'Administrador', 'Supervisor']
+          }
         },
+
         {
           path: 'conductores',
           name: 'Conductores',
-          component: () => import('../views/ConductoresView.vue')
+          component: () => import('../views/ConductoresView.vue'),
+          meta: {
+            roles: ['SuperAdmin', 'Administrador', 'Supervisor']
+          }
         },
 
         {
           path: 'asignaciones',
           name: 'Asignaciones',
-          component: () => import('../views/AsignacionesView.vue')
+          component: () => import('../views/AsignacionesView.vue'),
+          meta: {
+            roles: ['SuperAdmin', 'Administrador', 'Supervisor']
+          }
         },
+
         {
           path: 'mantenimiento',
           name: 'Mantenimiento',
-          component: () => import('../views/MantenimientoView.vue')
+          component: () => import('../views/MantenimientoView.vue'),
+          meta: {
+            roles: ['SuperAdmin', 'Administrador']
+          }
         },
 
         {
           path: 'viajes',
           name: 'Viajes',
-          component: () => import('../views/ViajesView.vue')
+          component: () => import('../views/ViajesView.vue'),
+          meta: {
+            roles: ['SuperAdmin', 'Administrador', 'Supervisor', 'Operador']
+          }
         },
 
         {
           path: 'usuarios',
           name: 'Usuarios',
-          component: () => import('../views/UsuariosView.vue')
+          component: () => import('../views/UsuariosView.vue'),
+          meta: {
+            roles: ['SuperAdmin', 'Administrador']
+          }
         },
         
         {
           path: 'combustible',
           name: 'Combustible',
-          component: () => import('../views/CombustibleView.vue')
+          component: () => import('../views/CombustibleView.vue'),
+          meta: {
+            roles: ['SuperAdmin', 'Administrador']
+          }
         }
       ]
     }
   ]
+})
+
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem('token_transporte')
+  const rol = localStorage.getItem('usuario_rol')
+
+  // rutas públicas
+  if (to.path === '/login' || to.path === '/register') {
+    return next()
+  }
+
+  // sin login
+  if (!token) {
+    return next('/login')
+  }
+
+  // validar roles
+  if (to.meta.roles) {
+    if (!to.meta.roles.includes(rol)) {
+      return next('/dashboard')
+    }
+  }
+
+  next()
 })
 
 export default router
