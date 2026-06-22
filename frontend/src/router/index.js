@@ -49,7 +49,6 @@ const router = createRouter({
           name: 'Conductores',
           component: () => import('../views/ConductoresView.vue')
         },
-
         {
           path: 'asignaciones',
           name: 'Asignaciones',
@@ -60,7 +59,6 @@ const router = createRouter({
           name: 'Mantenimiento',
           component: () => import('../views/MantenimientoView.vue')
         },
-
         {
           path: 'viajes',
           name: 'Viajes',
@@ -73,6 +71,11 @@ const router = createRouter({
           path: 'combustible',
           name: 'Combustible',
           component: () => import('../views/CombustibleView.vue')
+        },
+        {
+          path: 'reportes',
+          name: 'Reportes',
+          component: () => import('../views/ReportesView.vue')
         }
       ]
     }
