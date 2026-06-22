@@ -1,3 +1,5 @@
+// Guardando el archivo para que vuelva
+
 <template>
   <div class="section-header-mockup">
     <h2>Combustible</h2>
