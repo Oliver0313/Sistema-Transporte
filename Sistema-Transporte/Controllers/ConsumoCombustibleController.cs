@@ -5,8 +5,7 @@ using SistemaTransporte.Application.Interfaces;
 
 namespace Sistema_Transporte.Controllers
 {
-
-    [Authorize(Roles = "SuperAdmin,Administrador,Supervisor,Operador")]
+    [Authorize(Roles = "SuperAdmin,Administrador")]
     [ApiController]
     [Route("api/[controller]")]
     public class ConsumosCombustibleController : ControllerBase
@@ -37,7 +36,6 @@ namespace Sistema_Transporte.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "SuperAdmin,Administrador")]
         public async Task<IActionResult> Create(CrearConsumoCombustibleDto dto)
         {
             var consumo = await _consumoService.CreateAsync(dto);
@@ -46,7 +44,6 @@ namespace Sistema_Transporte.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = "SuperAdmin,Administrador")]
         public async Task<IActionResult> Update(int id, ActualizarConsumoCombustibleDto dto)
         {
             var actualizado = await _consumoService.UpdateAsync(id, dto);
@@ -58,7 +55,6 @@ namespace Sistema_Transporte.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "SuperAdmin,Administrador")]
         public async Task<IActionResult> Delete(int id)
         {
             var eliminado = await _consumoService.DeleteAsync(id);
