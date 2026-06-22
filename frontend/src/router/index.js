@@ -17,6 +17,12 @@ const router = createRouter({
       component: RegisterView
     },
     {
+      path: '/forgot-password',
+      name: 'ForgotPassword',
+      component: () => import('../views/ForgotPasswordView.vue')
+    },
+
+    {
       path: '/',
       component: DashboardLayout,
       children: [
@@ -43,14 +49,17 @@ const router = createRouter({
         {
           path: 'calendario',
           name: 'Calendario',
-          component: () => import('../views/CalendarioView.vue')
+          component: () => import('../views/CalendarioView.vue'),
+          meta: {
+            roles: ['SuperAdmin', 'Administrador', 'Supervisor', 'Operador']
+          }
         },
         {
           path: 'vehiculos',
           name: 'Vehiculos',
           component: () => import('../views/VehiculosView.vue'),
           meta: {
-            roles: ['SuperAdmin', 'Administrador', 'Supervisor']
+            roles: ['SuperAdmin', 'Administrador', 'Supervisor', 'Operador']
           }
         },
 
@@ -59,7 +68,7 @@ const router = createRouter({
           name: 'Conductores',
           component: () => import('../views/ConductoresView.vue'),
           meta: {
-            roles: ['SuperAdmin', 'Administrador', 'Supervisor']
+            roles: ['SuperAdmin', 'Administrador', 'Supervisor', 'Operador']
           }
         },
 
@@ -116,17 +125,14 @@ router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token_transporte')
   const rol = localStorage.getItem('usuario_rol')
 
-  // rutas públicas
   if (to.path === '/login' || to.path === '/register') {
     return next()
   }
 
-  // sin login
   if (!token) {
     return next('/login')
   }
 
-  // validar roles
   if (to.meta.roles) {
     if (!to.meta.roles.includes(rol)) {
       return next('/dashboard')

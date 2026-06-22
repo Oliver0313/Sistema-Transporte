@@ -17,17 +17,17 @@
           Solicitudes
         </li>
 
-        <li v-if="puedeVerGestion" @click="router.push('/vehiculos')">
+        <li v-if="puedeVerOperativo" @click="router.push('/vehiculos')">
           <img src="../assets/icons/vehiculos.png" class="menu-icon" />
           Vehículos
         </li>
 
-        <li v-if="puedeVerGestion" @click="router.push('/conductores')">
+        <li v-if="puedeVerOperativo" @click="router.push('/conductores')">
           <img src="../assets/icons/conductores.png" class="menu-icon" />
           Conductores
         </li>
 
-        <li v-if="puedeVerGestion" @click="router.push('/asignaciones')">
+        <li v-if="puedeVerOperativo" @click="router.push('/asignaciones')">
           <img src="../assets/icons/asignaciones.png" class="menu-icon" />
           Asignaciones
         </li>
@@ -37,7 +37,7 @@
           Viajes
         </li>
 
-        <li v-if="puedeVerGestion" @click="router.push('/reportes')">
+        <li v-if="puedeVerOperativo" @click="router.push('/reportes')">
           <img src="../assets/icons/reportes.png" class="menu-icon" />
           Reportes
         </li>
