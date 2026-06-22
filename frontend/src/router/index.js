@@ -68,6 +68,8 @@ const router = createRouter({
           path: 'usuarios',
           name: 'Usuarios',
           component: () => import('../views/UsuariosView.vue')
+        },
+        {
           path: 'combustible',
           name: 'Combustible',
           component: () => import('../views/CombustibleView.vue')
