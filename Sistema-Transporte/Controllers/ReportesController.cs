@@ -7,7 +7,6 @@ using SistemaTransporte.Infrastructure.Data;
 
 namespace Sistema_Transporte.Controllers
 {
-    // 🔒 Se agregaron los roles Supervisor y Operador para permitirles la consulta de datos
     [Authorize(Roles = "SuperAdmin,Administrador,Supervisor,Operador")]
     [ApiController]
     [Route("api/[controller]")]
