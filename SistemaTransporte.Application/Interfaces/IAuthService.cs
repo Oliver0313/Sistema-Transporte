@@ -6,5 +6,7 @@ namespace SistemaTransporte.Application.Interfaces
     {
         Task<AuthResponseDto> RegisterAsync(RegisterDto dto);
         Task<AuthResponseDto?> LoginAsync(LoginDto dto);
+        Task<object> ForgotPasswordAsync(ForgotPasswordDto dto);
+        Task<object?> ResetPasswordAsync(ResetPasswordDto dto);
     }
 }
