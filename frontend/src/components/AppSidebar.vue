@@ -12,47 +12,47 @@
           Dashboard
         </li>
 
-        <li @click="router.push('/solicitudes')">
+        <li v-if="puedeVerOperativo" @click="router.push('/solicitudes')">
           <img src="../assets/icons/solicitudes.png" class="menu-icon" />
           Solicitudes
         </li>
 
-        <li v-if="puedeVerGestion" @click="router.push('/vehiculos')">
+        <li v-if="puedeVerOperativo" @click="router.push('/vehiculos')">
           <img src="../assets/icons/vehiculos.png" class="menu-icon" />
           Vehículos
         </li>
 
-        <li v-if="puedeVerGestion" @click="router.push('/conductores')">
+        <li v-if="puedeVerOperativo" @click="router.push('/conductores')">
           <img src="../assets/icons/conductores.png" class="menu-icon" />
           Conductores
         </li>
 
-        <li v-if="puedeVerGestion" @click="router.push('/asignaciones')">
+        <li v-if="puedeVerOperativo" @click="router.push('/asignaciones')">
           <img src="../assets/icons/asignaciones.png" class="menu-icon" />
           Asignaciones
         </li>
 
-        <li v-if="puedeVerGestion" @click="router.push('/viajes')">
+        <li v-if="puedeVerOperativo" @click="router.push('/viajes')">
           <img src="../assets/icons/rutas.png" class="menu-icon" />
           Viajes
         </li>
 
-        <li v-if="puedeVerGestion" @click="router.push('/reportes')">
+        <li v-if="puedeVerOperativo" @click="router.push('/reportes')">
           <img src="../assets/icons/reportes.png" class="menu-icon" />
           Reportes
         </li>
 
-        <li v-if="puedeVerAdmin" @click="router.push('/mantenimiento')">
+        <li v-if="puedeVerTodo" @click="router.push('/mantenimiento')">
           <img src="../assets/icons/herramientas.png" class="menu-icon" />
           Mantenimiento
         </li>
 
-        <li v-if="puedeVerAdmin" @click="router.push('/combustible')">
+        <li v-if="puedeVerTodo" @click="router.push('/combustible')">
           <img src="../assets/icons/combustible.png" class="menu-icon" />
           Combustible
         </li>
 
-        <li v-if="puedeVerAdmin" @click="router.push('/usuarios')">
+        <li v-if="puedeVerTodo" @click="router.push('/usuarios')">
           <img src="../assets/icons/conductores.png" class="menu-icon" />
           Usuarios
         </li>
@@ -69,18 +69,29 @@
 </template>
 
 <script setup>
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
 const rolUsuario = localStorage.getItem('usuario_rol') || ''
 
-const esSuperAdmin = rolUsuario === 'SuperAdmin'
-const esAdministrador = rolUsuario === 'Administrador'
-const esOperador = rolUsuario === 'Operador'
+const esSuperAdmin = computed(() => rolUsuario === 'SuperAdmin')
+const esAdministrador = computed(() => rolUsuario === 'Administrador')
+const esSupervisor = computed(() => rolUsuario === 'Supervisor')
+const esOperador = computed(() => rolUsuario === 'Operador')
 
-const puedeVerGestion = esSuperAdmin || esAdministrador
-const puedeVerAdmin = esSuperAdmin
+const puedeVerTodo = computed(() =>
+  esSuperAdmin.value || esAdministrador.value
+)
+
+const puedeVerGestion = computed(() =>
+  esSuperAdmin.value || esAdministrador.value || esSupervisor.value
+)
+
+const puedeVerOperativo = computed(() =>
+  esSuperAdmin.value || esAdministrador.value || esSupervisor.value || esOperador.value
+)
 
 const cerrarSesion = () => {
   localStorage.clear()
