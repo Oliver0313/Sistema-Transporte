@@ -10,8 +10,8 @@
         <img src="../assets/icons/herramienta-negra.png" class="menu-icon" alt="De hoy" />
       </div>
       <div class="mant-card-info">
-        <span class="mant-card-label">De hoy</span>
-        <span class="mant-card-valor">{{ cardDeHoy }}</span>
+        <span>De hoy</span>
+        <h3>{{ cardDeHoy }}</h3>
       </div>
     </div>
 
@@ -20,8 +20,8 @@
         <img src="../assets/icons/alDia.png" class="menu-icon" alt="Al día" />
       </div>
       <div class="mant-card-info">
-        <span class="mant-card-label">Al día</span>
-        <span class="mant-card-valor">{{ cardAlDia }}</span>
+        <span>Al día</span>
+        <h3>{{ cardAlDia }}</h3>
       </div>
     </div>
 
@@ -30,8 +30,8 @@
         <img src="../assets/icons/alerta.png" class="menu-icon" alt="Pendientes" />
       </div>
       <div class="mant-card-info">
-        <span class="mant-card-label">Pendientes</span>
-        <span class="mant-card-valor">{{ cardPendientes }}</span>
+        <span>Pendientes</span>
+        <h3>{{ cardPendientes }}</h3>
       </div>
     </div>
 
@@ -40,8 +40,8 @@
         <img src="../assets/icons/calendario-negro.png" class="menu-icon" alt="Vencidos" />
       </div>
       <div class="mant-card-info">
-        <span class="mant-card-label">Vencidos</span>
-        <span class="mant-card-valor">{{ cardVencidos }}</span>
+        <span>Vencidos</span>
+        <h3>{{ cardVencidos }}</h3>
       </div>
     </div>
 
@@ -50,8 +50,8 @@
         <img src="../assets/icons/disponible-negro.png" class="menu-icon" alt="Completados" />
       </div>
       <div class="mant-card-info">
-        <span class="mant-card-label">Completados (mes)</span>
-        <span class="mant-card-valor">{{ cardCompletadosMes }}</span>
+        <span>Completados (mes)</span>
+        <h3>{{ cardCompletadosMes }}</h3>
       </div>
     </div>
   </div>
@@ -497,8 +497,11 @@ const verDetalleMantenimiento = (mantenimiento) => {
 }
 
 const mostrarAvisoEliminacion = () => {
-  mensajeAvisoFlotante.value = 'Los registros de mantenimiento no pueden eliminarse para preservar el historial del vehículo.'
-  setTimeout(() => { mensajeAvisoFlotante.value = '' }, 5000)
+  mensajeAvisoFlotante.value = 'No se pudo eliminar el registro.'
+  
+  setTimeout(() => { 
+    mensajeAvisoFlotante.value = '' 
+  }, 5000)
 }
 
 
@@ -788,15 +791,37 @@ onMounted(() => {
 
 .mant-card-info { display: flex; flex-direction: column; gap: 2px; }
 
-.mant-card-label {
-  font-size: 0.78rem;
-  color: #6b7280;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
+/* Contenedor de información de la tarjeta */
+.mant-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-.mant-card-valor { font-size: 1.8rem; font-weight: 800; color: #111827; line-height: 1; }
+/* Texto superior de la métrica (Igual a vehículos) */
+.mant-card-info span {
+  font-size: 0.82rem;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: none; /* Quita las mayúsculas toscas */
+  letter-spacing: normal;
+}
+
+/* Valor de la métrica en h3 (Igual a vehículos) */
+.mant-card-info h3 {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+  line-height: 1.2;
+}
+
+/* Evita que las imágenes de los iconos se deformen */
+.menu-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
 
 
 .programado  { background: #e0e7ff; color: #3730a3; }
