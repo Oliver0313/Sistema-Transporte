@@ -49,13 +49,13 @@
       <button class="btn-quick-action" :class="{ 'btn-disabled': !puedeModificarVehiculos }" :disabled="!puedeModificarVehiculos" @click="abrirFormularioModal">
         <img src="../assets/icons/registrar-negro.png" alt="Registrar" /> Registrar vehículo
       </button>
-      <button class="btn-quick-action" :class="{ 'btn-disabled': !puedeGestionarMantenimiento }" :disabled="!puedeGestionarMantenimiento">
+      <button class="btn-quick-action" :class="{ 'btn-disabled': !puedeGestionarMantenimiento }" :disabled="!puedeGestionarMantenimiento" @click="abrirMantenimientoNuevo">
         <img src="../assets/icons/herramienta-negra.png" alt="Mantenimiento" /> Registrar mantenimiento
       </button>
-      <button class="btn-quick-action" :class="{ 'btn-disabled': !puedeModificarVehiculos }" :disabled="!puedeModificarVehiculos">
+      <button class="btn-quick-action" :class="{ 'btn-disabled': !puedeModificarVehiculos }" :disabled="!puedeModificarVehiculos" @click="abrirConsumoNuevo">
         <img src="../assets/icons/gasolina-negro.png" alt="Consumo" /> Registrar consumo
       </button>
-      <button class="btn-quick-action">
+      <button class="btn-quick-action" @click="consultarDisponibilidadCalendario">
         <img src="../assets/icons/calendario-negro.png" alt="Consultar" /> Consultar disponibilidad
       </button>
     </div>
@@ -138,6 +138,7 @@
     </section>
   </div>
 
+  <!-- Modal Formulario Vehículo -->
   <div v-if="mostrarFormulario" class="modal-overlay-mockup" @click.self="mostrarFormulario = false">
     <div class="modal-container-central">
       <div class="form-panel-header-central">
@@ -147,7 +148,7 @@
       <form @submit.prevent="guardarVehiculo" class="form-solicitud-mockup">
         <div class="form-group-mockup">
           <label>Placa / Matrícula</label>
-          <input type="text" v-model="formModel.matricula" placeholder="Ej. A123456" required />
+          <input type="text" v-model="formModel.matricula" placeholder="Ej. A123456" :disabled="esEdicion" required />
         </div>
         <div class="form-row-mockup">
           <div class="form-group-mockup">
@@ -208,6 +209,133 @@
     </div>
   </div>
 
+  <!-- Modal Registrar Mantenimiento -->
+  <div v-if="mostrarMantenimiento" class="modal-overlay-mockup" @click.self="cerrarMantenimiento">
+    <div class="modal-container-central">
+      <div class="form-panel-header-central">
+        <h3>Registrar Mantenimiento de Flota</h3>
+        <button class="btn-close-modal" @click="cerrarMantenimiento">×</button>
+      </div>
+      <form @submit.prevent="guardarMantenimientoApi" class="form-solicitud-mockup">
+        
+        <div class="form-group-mockup">
+          <label>Seleccionar Vehículo</label>
+          <select class="mockup-select" v-model.number="formMantenimiento.vehiculoId" required>
+            <option value="" disabled>Seleccione una unidad...</option>
+            <option v-for="v in vehiculos" :key="v.id" :value="v.id">
+              {{ v.marca }} {{ v.modelo }} - {{ v.matricula }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-row-mockup">
+          <div class="form-group-mockup">
+            <label>Tipo de Mantenimiento</label>
+            <select class="mockup-select" v-model.number="formMantenimiento.tipoMantenimiento" required>
+              <option :value="1">Preventivo</option>
+              <option :value="2">Correctivo</option>
+              <option :value="3">Predictivo</option>
+            </select>
+          </div>
+          <div class="form-group-mockup">
+            <label>Costo total ($)</label>
+            <input type="number" v-model.number="formMantenimiento.costo" min="0" step="0.01" placeholder="0.00" required />
+          </div>
+        </div>
+
+        <div class="form-row-mockup">
+          <div class="form-group-mockup">
+            <label>Fecha del Servicio</label>
+            <input type="datetime-local" v-model="formMantenimiento.fechaMantenimiento" required />
+          </div>
+          <div class="form-group-mockup">
+            <label>Próxima Revisión</label>
+            <input type="datetime-local" v-model="formMantenimiento.proximoMantenimiento" required />
+          </div>
+        </div>
+
+        <div class="form-group-mockup">
+          <label>Taller / Centro de Servicios</label>
+          <input type="text" v-model="formMantenimiento.taller" placeholder="Ej. Taller Central" required />
+        </div>
+
+        <div class="form-group-mockup">
+          <label>Descripción del Trabajo</label>
+          <textarea v-model="formMantenimiento.descripcion" placeholder="Ej. Cambio de aceite y filtros" rows="3" required></textarea>
+        </div>
+
+        <div class="form-actions-central">
+          <button type="button" class="btn-cancel-mockup" @click="cerrarMantenimiento">Cancelar</button>
+          <button type="submit" class="btn-submit-mockup" :disabled="guardandoMantenimiento">
+            {{ guardandoMantenimiento ? 'Enviando a la API...' : 'Registrar Mantenimiento' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal Registrar Consumo Combustible -->
+  <div v-if="mostrarConsumo" class="modal-overlay-mockup" @click.self="cerrarConsumo">
+    <div class="modal-container-central">
+      <div class="form-panel-header-central">
+        <h3>Registrar Consumo de Combustible</h3>
+        <button class="btn-close-modal" @click="cerrarConsumo">×</button>
+      </div>
+      <form @submit.prevent="guardarConsumoApi" class="form-solicitud-mockup">
+        
+        <div class="form-row-mockup">
+          <div class="form-group-mockup">
+            <label>Vehículo</label>
+            <select v-model.number="formConsumo.vehiculoId" class="mockup-select" required>
+              <option value="" disabled>Seleccione vehículo</option>
+              <option v-for="v in vehiculos" :key="v.id" :value="v.id">
+                {{ v.marca }} {{ v.modelo }} - {{ v.matricula }}
+              </option>
+            </select>
+          </div>
+          <div class="form-group-mockup">
+            <label>Conductor</label>
+            <select class="mockup-select" v-model.number="formConsumo.conductorId" required>
+              <option value="" disabled>Seleccione conductor</option>
+              <option v-for="c in conductores" :key="c.id" :value="c.id">
+                {{ c.nombre }} {{ c.apellido || '' }}
+              </option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row-mockup">
+          <div class="form-group-mockup">
+            <label>Galones</label>
+            <input type="number" v-model.number="formConsumo.galones" min="0.1" step="0.01" placeholder="0.00" required />
+          </div>
+          <div class="form-group-mockup">
+            <label>Costo (RD$)</label>
+            <input type="number" v-model.number="formConsumo.costo" min="1" step="0.01" placeholder="RD$" required />
+          </div>
+        </div>
+
+        <div class="form-row-mockup">
+          <div class="form-group-mockup">
+            <label>Kilómetros Recorridos</label>
+            <input type="number" v-model.number="formConsumo.kilometrosRecorridos" min="0" step="0.1" placeholder="0.0" required />
+          </div>
+          <div class="form-group-mockup">
+            <label>Fecha</label>
+            <input type="datetime-local" v-model="formConsumo.fecha" required />
+          </div>
+        </div>
+
+        <div class="form-actions-central">
+          <button type="button" class="btn-cancel-mockup" @click="cerrarConsumo">Cancelar</button>
+          <button type="submit" class="btn-submit-mockup" :disabled="guardandoConsumo">
+            {{ guardandoConsumo ? 'Guardando...' : 'Guardar Registro' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
 
   <div v-if="mostrarDetalle" class="modal-overlay-mockup" @click.self="mostrarDetalle = false">
     <div class="modal-container-central">
@@ -255,7 +383,9 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const rolUsuario = ref('Operador')
 
 const filtroBusqueda = ref('')
@@ -269,6 +399,21 @@ const esEdicion = ref(false)
 const guardando = ref(false)
 const mensajeNotificacion = ref('')
 const vehiculoSeleccionado = ref({})
+const conductores = ref([])
+
+
+const mostrarMantenimiento = ref(false)
+const guardandoMantenimiento = ref(false)
+const formMantenimiento = ref({
+  vehiculoId: '', tipoMantenimiento: '', estado: 1, fechaMantenimiento: '',
+  descripcion: '', costo: 0, taller: '', proximoMantenimiento: ''
+})
+
+const mostrarConsumo = ref(false)
+const guardandoConsumo = ref(false)
+const formConsumo = ref({
+  vehiculoId: '', conductorId: 1, fecha: '', galones: 0, costo: 0, kilometrosRecorridos: 0, estado: 1
+})
 
 const formModel = ref({
   matricula: '', marca: '', modelo: '',
@@ -277,9 +422,16 @@ const formModel = ref({
   imagenUrl: '', kilometraje: 0, estado: 1
 })
 
-const puedeModificarVehiculos = computed(() => rolUsuario.value.toLowerCase() === 'administrador')
-const puedeGestionarMantenimiento = computed(() => ['administrador'].includes(rolUsuario.value.toLowerCase()))
-const puedeEliminarVehiculos = computed(() => rolUsuario.value.toLowerCase() === 'administrador')
+
+const esAdministradorSistema = computed(() => {
+  const r = rolUsuario.value.toLowerCase()
+  return r === 'administrador' || r === 'admin' || r === 'superadmin'
+})
+
+const puedeModificarVehiculos = computed(() => esAdministradorSistema.value)
+const puedeGestionarMantenimiento = computed(() => esAdministradorSistema.value)
+const puedeEliminarVehiculos = computed(() => esAdministradorSistema.value)
+
 
 const fetchVehiculosDeAPI = async () => {
   const token = localStorage.getItem('token_transporte')
@@ -322,7 +474,7 @@ const guardarVehiculo = async () => {
       mostrarFormulario.value = false
       await fetchVehiculosDeAPI()
     } else {
-      mensajeNotificacion.value = 'Error al guardar los cambios.'
+      mensajeNotificacion.value = 'Error al guardar los cambios de la unidad.'
     }
   } catch {
     mensajeNotificacion.value = 'Error de conexión con el servidor.'
@@ -346,6 +498,144 @@ const eliminarVehiculoApi = async (matricula) => {
   }
 }
 
+
+
+const abrirMantenimientoNuevo = () => {
+  const ahora = new Date()
+  const pad = (n) => n.toString().padStart(2, '0')
+  const fechaActualInput = `${ahora.getFullYear()}-${pad(ahora.getMonth()+1)}-${pad(ahora.getDate())}T${pad(ahora.getHours())}:${pad(ahora.getMinutes())}`
+
+  formMantenimiento.value = {
+    vehiculoId: '',
+    tipoMantenimiento: 1, 
+    estado: 1, 
+    fechaMantenimiento: fechaActualInput,
+    descripcion: '',
+    costo: '',
+    taller: '',
+    proximoMantenimiento: fechaActualInput
+  }
+  mostrarMantenimiento.value = true
+}
+
+const cerrarMantenimiento = () => {
+  mostrarMantenimiento.value = false
+  guardandoMantenimiento.value = false
+}
+
+const guardarMantenimientoApi = async () => {
+  guardandoMantenimiento.value = true
+  const token = localStorage.getItem('token_transporte')
+  
+  const payload = {
+    vehiculoId: parseInt(formMantenimiento.value.vehiculoId),
+    tipoMantenimiento: formMantenimiento.value.tipoMantenimiento,
+    estado: parseInt(formMantenimiento.value.estado),
+    fechaMantenimiento: new Date(formMantenimiento.value.fechaMantenimiento).toISOString(),
+    descripcion: formMantenimiento.value.descripcion,
+    costo: parseFloat(formMantenimiento.value.costo) || 0,
+    taller: formMantenimiento.value.taller,
+    proximoMantenimiento: new Date(formMantenimiento.value.proximoMantenimiento).toISOString()
+  }
+
+  try {
+    const response = await fetch('https://localhost:7221/api/Mantenimientos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+      body: JSON.stringify(payload)
+    })
+    if (response.ok) {
+      cerrarMantenimiento()
+      mensajeNotificacion.value = 'Mantenimiento registrado y guardado con éxito.'
+      await fetchVehiculosDeAPI()
+    } else {
+      mensajeNotificacion.value = 'La API rechazó el registro de mantenimiento.'
+    }
+  } catch (error) {
+    console.error(error)
+    mensajeNotificacion.value = 'Error al comunicar con el endpoint de mantenimientos.'
+  } finally {
+    guardandoMantenimiento.value = false
+  }
+}
+
+
+const abrirConsumoNuevo = async () => {
+  const ahora = new Date()
+  const pad = (n) => n.toString().padStart(2, '0')
+  const fechaActualInput = `${ahora.getFullYear()}-${pad(ahora.getMonth()+1)}-${pad(ahora.getDate())}T${pad(ahora.getHours())}:${pad(ahora.getMinutes())}`
+
+  if (conductores.value.length === 0) {
+    try {
+      const token = localStorage.getItem('token_transporte')
+      const response = await fetch('https://localhost:7221/api/Conductores', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      if (response.ok) conductores.value = await response.json()
+    } catch (err) { console.error("Error cargando choferes:", err) }
+  }
+
+  formConsumo.value = {
+    vehiculoId: '',
+    conductorId: '',
+    fecha: fechaActualInput,
+    galones: '',
+    costo: '',
+    kilometrosRecorridos: '',
+    estado: 1
+  }
+  mostrarConsumo.value = true
+}
+
+const cerrarConsumo = () => {
+  mostrarConsumo.value = false
+  guardandoConsumo.value = false
+}
+
+const guardarConsumoApi = async () => {
+  guardandoConsumo.value = true
+  const token = localStorage.getItem('token_transporte')
+
+  const payload = {
+    vehiculoId: parseInt(formConsumo.value.vehiculoId),
+    conductorId: parseInt(formConsumo.value.conductorId),
+    fecha: new Date(formConsumo.value.fecha).toISOString(),
+    galones: parseFloat(formConsumo.value.galones) || 0,
+    costo: parseFloat(formConsumo.value.costo) || 0,
+    kilometrosRecorridos: parseInt(formConsumo.value.kilometrosRecorridos) || 0,
+    estado: parseInt(formConsumo.value.estado)
+  }
+
+  try {
+  
+    const response = await fetch('https://localhost:7221/api/ConsumosCombustible', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json', 
+        'Authorization': `Bearer ${token}` 
+      },
+      body: JSON.stringify(payload)
+    })
+    
+    if (response.ok) {
+      cerrarConsumo()
+      mensajeNotificacion.value = 'Consumo de combustible registrado con éxito.'
+    } else {
+      mensajeNotificacion.value = 'Error de validación en los datos del consumo.'
+    }
+  } catch (error) {
+    console.error(error)
+    mensajeNotificacion.value = 'No se pudo conectar con el servidor.'
+  } {
+    guardandoConsumo.value = false
+  }
+}
+
+const consultarDisponibilidadCalendario = () => {
+  router.push('/calendario')
+}
+
+
 const abrirFormularioModal = () => {
   esEdicion.value = false
   formModel.value = { matricula: '', marca: '', modelo: '', anio: new Date().getFullYear(), color: '', capacidad: 5, tipo: '', imagenUrl: '', kilometraje: 0, estado: 1 }
@@ -362,6 +652,7 @@ const verDetalleVehiculo = (vehiculo) => {
   vehiculoSeleccionado.value = { ...vehiculo }
   mostrarDetalle.value = true
 }
+
 
 const totalVehiculos = computed(() => vehiculos.value.length)
 const disponiblesContador = computed(() => vehiculos.value.filter(v => v.estado === 1).length)
@@ -402,6 +693,9 @@ onMounted(() => {
 </script>
 
 <style>
+@import '/src/assets/styles/variables.css';
+@import '/src/assets/styles/reset.css';
+
 .section-header-mockup {
   margin-bottom: 20px;
 }
@@ -471,6 +765,11 @@ onMounted(() => {
   gap: 12px;
 }
 
+.action-btn-mockup:hover:not(:disabled) {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+}
+
 .btn-quick-action {
   background: #ffffff;
   border: 1px solid #e5e7eb;
@@ -502,7 +801,12 @@ onMounted(() => {
 .icon-edit { background-image: url('../assets/icons/editar-negro.png'); background-size: 14px; background-repeat: no-repeat; background-position: center; }
 .icon-delete { background-image: url('../assets/icons/eliminar.png'); background-size: 14px; background-repeat: no-repeat; background-position: center; }
 
-.btn-disabled { opacity: 0.15; cursor: not-allowed; }
+.btn-disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  background-color: #f3f4f6;
+}
+
 
 .filters-bar-mockup {
   display: flex;
@@ -551,7 +855,7 @@ onMounted(() => {
   cursor: pointer;
 }
 
-/* Tabla */
+
 .solicitudes-grid.full-width-table { width: 100%; }
 
 .card-panel-mockup {
@@ -590,15 +894,33 @@ onMounted(() => {
   width: 120px;
 }
 
-.action-btn-mockup {
-  width: 28px;
-  height: 28px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  background: #ffffff center no-repeat;
-  background-size: 14px;
-  cursor: pointer;
+.actions-wrapper {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  min-width: 110px; 
 }
+
+.action-btn-mockup {
+  width: 32px;  
+  height: 32px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px; 
+  background-color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+ 
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 16px 16px; 
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+
 .modal-overlay-mockup {
   position: fixed;
   inset: 0;
@@ -674,6 +996,7 @@ onMounted(() => {
 .detalle-solicitud-wrapper { display: flex; flex-direction: column; gap: 12px; }
 .detalle-item strong { font-size: 0.82rem; color: #6b7280; }
 .detalle-item p { margin: 2px 0 0 0; font-size: 0.95rem; color: #111827; }
+
 
 .toast-error-moderno {
   position: fixed;
