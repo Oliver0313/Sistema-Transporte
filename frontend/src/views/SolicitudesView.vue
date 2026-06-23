@@ -250,7 +250,7 @@
 
   <div v-if="mensajeErrorFlotante" class="toast-error-moderno">
     <div class="toast-content">
-      <span class="toast-title">Alerta de Validación</span>
+      <span class="toast-title">Notificación</span>
       <p class="toast-text">{{ mensajeErrorFlotante }}</p>
     </div>
     <button class="btn-close-toast" @click="mensajeErrorFlotante = ''">×</button>
@@ -288,7 +288,7 @@ const formModel = ref({
 const mostrarDetalle = ref(false)
 const solicitudSeleccionada = ref({})
 
-// Extrae de forma segura el rol asignado desde el JWT encapsulado en el LocalStorage
+
 const obtenerRolDesdeToken = () => {
   const token = localStorage.getItem('token_transporte')
   if (!token) return
@@ -309,9 +309,7 @@ const obtenerRolDesdeToken = () => {
   }
 }
 
-// ====================================================
-// EVALUADORES REACTIVOS DE CONTROL DE ACCESOS POR ROL
-// ====================================================
+
 const esSupervisor = computed(() => {
   return userRole.value.toLowerCase() === 'supervisor'
 })
@@ -321,7 +319,7 @@ const puedeCrear = computed(() => {
   return rol === 'operador' || rol === 'admin' || rol === 'superadmin'
 })
 
-// Cambia estas líneas en tu código actual:
+
 const puedeEditarOAsignar = computed(() => {
   const rol = userRole.value.toLowerCase()
   return rol === 'supervisor' || rol === 'admin' || rol === 'superadmin' || rol === 'administrador'
@@ -331,7 +329,7 @@ const puedeEliminar = computed(() => {
   const rol = userRole.value.toLowerCase()
   return rol === 'admin' || rol === 'superadmin' || rol === 'administrador'
 })
-// ====================================================
+
 
 const verDetalleSolicitud = (solicitud) => {
   solicitudSeleccionada.value = { ...solicitud }
@@ -387,7 +385,7 @@ const formatearFechaVista = (fechaIso) => {
   })
 }
 
-// Mapea la fecha Iso al formato requerido por los inputs datetime-local de HTML5
+
 const formatearFechaInput = (fechaIso) => {
   if (!fechaIso) return ''
   const d = new Date(fechaIso)
@@ -419,7 +417,6 @@ const abrirModificarSolicitud = (solicitud) => {
     conductorAsignado: solicitud.conductorAsignado || ''
   }
 
-  // Comportamiento inteligente: Al abrir un supervisor cambia por defecto el estado a Aprobada (2)
   if (esSupervisor.value && formModel.value.estado === 1) {
     formModel.value.estado = 2
   }
@@ -438,7 +435,7 @@ const guardarSolicitud = async () => {
   const salida = new Date(formModel.value.fechaHoraSalida)
   const regreso = new Date(formModel.value.fechaHoraRegreso)
 
-  // Omitir validación de tiempos si el supervisor solo está haciendo asignaciones de recursos
+
   if (!esSupervisor.value) {
     if (salida.getTime() === regreso.getTime()) {
       mensajeErrorFlotante.value = 'La fecha y hora de salida no puede ser igual a la de regreso.'
@@ -509,13 +506,11 @@ const eliminarSolicitud = async (id) => {
     })
     
     if (response.ok) {
-      // Si todo sale bien, refresca la tabla
       await fetchSolicitudesDeAPI()
     } else {
-      // Si la API deniega el borrado (por ejemplo, porque la solicitud ya está aprobada o procesada)
-      mensajeErrorFlotante.value = 'No se pudo eliminar la solicitud. Verifique el estado actual del registro.'
+
+mensajeErrorFlotante.value = 'No se pudo eliminar la solicitud.'
       
-      // La notificación se limpia sola automáticamente tras 5 segundos
       setTimeout(() => {
         mensajeErrorFlotante.value = ''
       }, 5000)
@@ -537,13 +532,13 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Herencia de Tipografía Limpia */
+
 .solicitudes-container-page,
 .solicitudes-container-page * {
   font-family: inherit !important;
 }
 
-/* Header de la página */
+
 .section-header-mockup {
   margin-bottom: 26px;
 }
@@ -561,7 +556,7 @@ onMounted(() => {
   margin-top: 6px;
 }
 
-/* Filtros */
+
 .filters-bar-mockup {
   display: flex;
   gap: 16px;
@@ -628,7 +623,7 @@ onMounted(() => {
   border-color: #9ca3af;
 }
 
-/* Botones */
+
 .btn-filter-action,
 .btn-new-solicitud-trigger,
 .btn-submit-mockup {
@@ -663,7 +658,7 @@ onMounted(() => {
   font-weight: 700;
 }
 
-/* Tabla */
+
 .card-panel-mockup {
   background: white;
   border-radius: 18px;
@@ -698,7 +693,7 @@ onMounted(() => {
   vertical-align: middle;
 }
 
-/* Estados */
+
 .status-pill-mockup {
   padding: 5px 11px;
   border-radius: 999px;
@@ -714,7 +709,7 @@ onMounted(() => {
 .cancelada { background: #e5e7eb; color: #374151; }
 .finalizada { background: #dbeafe; color: #1e40af; }
 
-/* Acciones */
+
 .actions-cell-fixed {
   text-align: center;
 }
@@ -751,7 +746,7 @@ onMounted(() => {
 .icon-edit { background-image: url('../assets/icons/editar-negro.png'); }
 .icon-delete { background-image: url('../assets/icons/eliminar.png'); }
 
-/* Modal General */
+
 .modal-overlay-mockup {
   position: fixed;
   inset: 0;
@@ -795,13 +790,11 @@ onMounted(() => {
   cursor: pointer;
 }
 
-/* ====================================================
-   MÓDULO DE FORMULARIO COMPACTO (ARREGLO DE TAMAÑO)
-   ==================================================== */
+
 .form-solicitud-mockup {
   display: flex;
   flex-direction: column;
-  gap: 12px; /* Espaciado vertical recortado */
+  gap: 12px;
 }
 
 .form-group-mockup {
@@ -817,11 +810,11 @@ onMounted(() => {
   margin-bottom: 2px;
 }
 
-/* Fuerza el tamaño estandarizado para inputs normales, selects y datetime-local */
+
 .form-group-mockup input,
 .form-group-mockup select,
 .form-solicitud-mockup .mockup-select {
-  height: 40px !important; /* Altura idéntica y limpia */
+  height: 40px !important;
   box-sizing: border-box;
   padding: 8px 12px;
   border: 1px solid #e5e7eb;
@@ -842,7 +835,7 @@ onMounted(() => {
   border-radius: 10px;
   font-size: 0.9rem;
   outline: none;
-  resize: none; /* Bloquea distorsiones manuales */
+  resize: none; 
 }
 
 .form-group-mockup textarea:focus {
@@ -862,7 +855,7 @@ onMounted(() => {
   margin-top: 6px;
 }
 
-/* Detalle */
+
 .detalle-solicitud-wrapper {
   display: flex;
   flex-direction: column;
@@ -890,13 +883,13 @@ onMounted(() => {
   border: 1px solid #e5e7eb;
 }
 
-/* Toast Error */
+
 .toast-error-moderno {
   position: fixed;
   top: 20px;
   right: 20px;
   background: white;
-  border-left: 4px solid #dc2626;
+  border-left: 4px solid #10b981; 
   padding: 16px;
   border-radius: 10px;
   box-shadow: 0 10px 20px rgba(0,0,0,.1);
