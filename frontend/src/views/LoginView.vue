@@ -47,6 +47,12 @@
             <input type="password" id="password" v-model="password" placeholder="••••••••••••" required />
           </div>
 
+          <div class="forgot-password">
+            <RouterLink to="/forgot-password">
+              ¿Olvidaste tu contraseña?
+            </RouterLink>
+          </div>
+
           <div v-if="errorMensaje" class="alerta-error">
             {{ errorMensaje }}
           </div>
@@ -391,5 +397,17 @@ if (data.rol === 'Operador') {
 button:disabled {
   background-color: #9ca3af;
   cursor: not-allowed;
+}
+
+.forgot-password {
+  text-align: left;
+  margin-top: -12px;
+}
+
+.forgot-password a {
+  color: #111827;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
 }
 </style>
