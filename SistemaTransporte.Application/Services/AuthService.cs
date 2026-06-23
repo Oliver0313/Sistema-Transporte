@@ -95,6 +95,62 @@ namespace SistemaTransporte.Application.Services
             };
         }
 
+        public async Task<object> ForgotPasswordAsync(ForgotPasswordDto dto)
+        {
+            var usuarios = await _usuarioRepository.GetAllAsync();
+
+            var usuario = usuarios.FirstOrDefault(u => u.Correo == dto.Correo);
+
+            if (usuario == null)
+            {
+                return new
+                {
+                    mensaje = "Si el correo existe, se generará un enlace de recuperación."
+                };
+            }
+
+            var token = Guid.NewGuid().ToString();
+
+            usuario.ResetPasswordToken = token;
+            usuario.ResetPasswordTokenExpira = DateTime.Now.AddMinutes(30);
+
+            _usuarioRepository.Update(usuario);
+            await _usuarioRepository.SaveChangesAsync();
+
+            var resetLink = $"http://localhost:5173/reset-password?token={token}";
+
+            return new
+            {
+                mensaje = "Token generado correctamente.",
+                resetLink
+            };
+        }
+
+        public async Task<object?> ResetPasswordAsync(ResetPasswordDto dto)
+        {
+            var usuarios = await _usuarioRepository.GetAllAsync();
+
+            var usuario = usuarios.FirstOrDefault(u =>
+                u.ResetPasswordToken == dto.Token &&
+                u.ResetPasswordTokenExpira > DateTime.Now
+            );
+
+            if (usuario == null)
+                return null;
+
+            usuario.ContrasenaHash = BCrypt.Net.BCrypt.HashPassword(dto.NuevaContrasena);
+            usuario.ResetPasswordToken = null;
+            usuario.ResetPasswordTokenExpira = null;
+
+            _usuarioRepository.Update(usuario);
+            await _usuarioRepository.SaveChangesAsync();
+
+            return new
+            {
+                mensaje = "Contraseña actualizada correctamente."
+            };
+        }
+
         private string GenerarToken(Usuario usuario, string rol)
         {
             var claims = new[]

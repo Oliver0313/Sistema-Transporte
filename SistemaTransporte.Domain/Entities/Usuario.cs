@@ -18,5 +18,7 @@ namespace SistemaTransporte.Domain.Entities
         public Rol Rol { get; set; }
         public int RolId { get; set; }
         public DateTime? UltimoAcceso { get; set; }
+        public string? ResetPasswordToken { get; set; }
+        public DateTime? ResetPasswordTokenExpira { get; set; }
     }
 }
