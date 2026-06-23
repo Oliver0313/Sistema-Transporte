@@ -7,7 +7,9 @@
 
     <div class="stats-grid">
       <div class="stat-card">
-        <div class="stat-icon">✅</div>
+        <div class="stat-icon">
+          <img src="../assets/icons/vehiculo-negro.png" class="stat-icon-img" alt="Viajes activos" />
+        </div>
         <div>
           <span>Viajes activos</span>
           <strong>{{ viajesEnCurso }}</strong>
@@ -15,7 +17,9 @@
       </div>
 
       <div class="stat-card">
-        <div class="stat-icon">🚐</div>
+        <div class="stat-icon">
+          <img src="../assets/icons/ruta.png" class="stat-icon-img" alt="Vehículos en ruta" />
+        </div>
         <div>
           <span>Vehículos en ruta</span>
           <strong>{{ viajesEnCurso }}</strong>
@@ -23,7 +27,9 @@
       </div>
 
       <div class="stat-card">
-        <div class="stat-icon">⏱️</div>
+        <div class="stat-icon">
+          <img src="../assets/icons/disponible-negro.png" class="stat-icon-img" alt="Finalizados" />
+        </div>
         <div>
           <span>Finalizados</span>
           <strong>{{ viajesFinalizados }}</strong>
@@ -31,7 +37,9 @@
       </div>
 
       <div class="stat-card">
-        <div class="stat-icon">📍</div>
+        <div class="stat-icon">
+          <img src="../assets/icons/total.png" class="stat-icon-img" alt="Total viajes" />
+        </div>
         <div>
           <span>Total viajes</span>
           <strong>{{ totalViajes }}</strong>
@@ -509,5 +517,22 @@ onMounted(() => {
   border: 1px solid #d1d5db;
   border-radius: 12px;
   background: #f9fafb;
+}
+
+.stat-icon {
+  width: 45px;   
+  height: 45px;        
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;   
+  background: #f3f4f6; 
+  flex-shrink: 0;      
+}
+
+.stat-icon-img {
+  width: 24px;         
+  height: 24px;    
+  object-fit: contain; 
 }
 </style>
