@@ -402,9 +402,6 @@ onMounted(() => {
 </script>
 
 <style>
-@import '/src/assets/styles/variables.css';
-@import '/src/assets/styles/reset.css';
-
 .section-header-mockup {
   margin-bottom: 20px;
 }

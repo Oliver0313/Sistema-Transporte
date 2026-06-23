@@ -1,4 +1,8 @@
+import './assets/styles/variables.css'
+import './assets/styles/reset.css'
 import './style.css'
+import './assets/styles/app-ui.css'
+import 'mapbox-gl/dist/mapbox-gl.css'
 
 import { createApp } from 'vue'
 import App from './App.vue'

@@ -35,6 +35,11 @@ const router = createRouter({
           component: () => import('../views/SolicitudesView.vue')
         },
         {
+          path: 'calendario',
+          name: 'Calendario',
+          component: () => import('../views/CalendarioView.vue')
+        },
+        {
           path: 'vehiculos',
           name: 'Vehiculos',
           component: () => import('../views/VehiculosView.vue')
@@ -43,6 +48,36 @@ const router = createRouter({
           path: 'conductores',
           name: 'Conductores',
           component: () => import('../views/ConductoresView.vue')
+        },
+        {
+          path: 'asignaciones',
+          name: 'Asignaciones',
+          component: () => import('../views/AsignacionesView.vue')
+        },
+        {
+          path: 'mantenimiento',
+          name: 'Mantenimiento',
+          component: () => import('../views/MantenimientoView.vue')
+        },
+        {
+          path: 'viajes',
+          name: 'Viajes',
+          component: () => import('../views/ViajesView.vue')
+        },
+        {
+          path: 'usuarios',
+          name: 'Usuarios',
+          component: () => import('../views/UsuariosView.vue')
+        },
+        {
+          path: 'combustible',
+          name: 'Combustible',
+          component: () => import('../views/CombustibleView.vue')
+        },
+        {
+          path: 'reportes',
+          name: 'Reportes',
+          component: () => import('../views/ReportesView.vue')
         }
       ]
     }
