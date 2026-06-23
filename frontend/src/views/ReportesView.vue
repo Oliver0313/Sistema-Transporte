@@ -55,12 +55,10 @@
       <div v-else class="badge-read-only">👁️ Vista de lectura</div>
 
       <div class="rep-export-group">
-        <button class="btn-export pdf" @click="exportarExcel" :disabled="isLoading" title="Exportar Excel">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+        <button class="btn-export-mockup-file btn-excel-variant" @click="exportarExcel" :disabled="isLoading" title="Exportar Excel">
           Excel
         </button>
-        <button class="btn-export excel" @click="exportarPDF" :disabled="isLoading" title="Imprimir / PDF">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+        <button class="btn-export-mockup-file btn-pdf-variant" @click="exportarPDF" :disabled="isLoading" title="Imprimir / PDF">
           PDF
         </button>
       </div>
@@ -299,43 +297,85 @@
 
     <div class="tabla-impresion-pdf">
       <div class="print-header">
-        <h1>SISTEMA DE GESTIÓN DE TRANSPORTE</h1>
-        <h2>Reporte Consolidado de Flota - Año {{ filtroAnio }} (Mes: {{ filtroPeriodo }})</h2>
-        <p>Área: {{ filtroArea.toUpperCase() }} | Fecha de generación: {{ new Date().toLocaleDateString() }}</p>
+        <div class="print-header-left">
+          <h1>SISTEMA DE GESTIÓN DE TRANSPORTE</h1>
+          <h2>Reporte Consolidado de Flota — {{ filtroAnio }}</h2>
+          <p class="print-meta">Área: <strong>{{ filtroArea.toUpperCase() }}</strong> | Filtro: <strong>{{ filtroModulo.toUpperCase() }}</strong></p>
+        </div>
+        <div class="print-header-right">
+          <p>Fecha emisión: {{ new Date().toLocaleDateString('es-DO') }}</p>
+          <p>Estatus: Consolidado Oficial</p>
+        </div>
       </div>
 
+      <div class="print-kpi-row">
+        <div class="print-kpi-box">
+          <span class="print-kpi-box-label">Viajes Completados</span>
+          <strong class="print-kpi-box-val">{{ kpis.viajes.totalViajes }}</strong>
+        </div>
+        <div class="print-kpi-box">
+          <span class="print-kpi-box-label">Consumo Combustible</span>
+          <strong class="print-kpi-box-val">{{ kpis.combustible.totalGalones }} L</strong>
+        </div>
+        <div class="print-kpi-box">
+          <span class="print-kpi-box-label">Kilómetros Totales</span>
+          <strong class="print-kpi-box-val">{{ kpis.combustible.totalKilometros.toLocaleString() }} km</strong>
+        </div>
+        <div class="print-kpi-box">
+          <span class="print-kpi-box-label">Inversión Total</span>
+          <strong class="print-kpi-box-val">{{ formatearCosto(kpis.combustible.totalGastado) }}</strong>
+        </div>
+      </div>
+
+      <h3 class="print-section-title">Desglose de Indicadores del Periodo</h3>
       <table class="reporte-print-table">
         <thead>
           <tr>
-            <th>Métrica / Indicador</th>
-            <th>Valor Registrado</th>
+            <th>Dimensión / Indicador Operativo</th>
+            <th class="text-right">Métrica Registrada</th>
           </tr>
         </thead>
         <tbody>
-          <tr><td>Viajes Realizados</td><td><strong>{{ kpis.viajes.totalViajes }}</strong></td></tr>
-          <tr><td>Consumo Total de Combustible</td><td><strong>{{ kpis.combustible.totalGalones }} L</strong></td></tr>
-          <tr><td>Solicitudes Procesadas</td><td><strong>{{ kpis.solicitudes.totalSolicitudes }}</strong></td></tr>
-          <tr><td>Conductores Activos</td><td><strong>{{ kpis.conductores.totalConductores }}</strong></td></tr>
-          <tr><td>Gasto / Inversión de Combustible</td><td><strong>{{ formatearCosto(kpis.combustible.totalGastado) }}</strong></td></tr>
-          <tr><td>Kilómetros Totales Recorridos</td><td><strong>{{ kpis.combustible.totalKilometros.toLocaleString() }} km</strong></td></tr>
-          <tr><td>Rendimiento Promedio de Flota</td><td><strong>{{ kpis.combustible.rendimientoKmPorGalon.toFixed(2) }} km/gal</strong></td></tr>
+          <tr><td>Solicitudes Totales Procesadas</td><td class="text-right"><strong>{{ kpis.solicitudes.totalSolicitudes }}</strong></td></tr>
+          <tr><td>Conductores Activos en Ruta</td><td class="text-right"><strong>{{ kpis.conductores.totalConductores }}</strong></td></tr>
+          <tr><td>Rendimiento General de Combustible</td><td class="text-right"><strong>{{ kpis.combustible.rendimientoKmPorGalon.toFixed(2) }} km/gal</strong></td></tr>
+          <tr><td>Costo Promedio Estimado por Galón</td><td class="text-right"><strong>{{ formatearCosto(kpis.combustible.costoPromedioPorGalon) }}</strong></td></tr>
+          <tr class="print-divider-row"><td colspan="2">Estados del Transporte</td></tr>
+          <tr><td>• Viajes Programados</td><td class="text-right">{{ kpis.viajes.programados }} ({{ obtenerPorcentaje(kpis.viajes.programados, kpis.viajes.totalViajes) }})</td></tr>
+          <tr><td>• Viajes Activos / En Curso</td><td class="text-right">{{ kpis.viajes.enCurso }} ({{ obtenerPorcentaje(kpis.viajes.enCurso, kpis.viajes.totalViajes) }})</td></tr>
+          <tr><td>• Viajes Finalizados</td><td class="text-right">{{ kpis.viajes.finalizados }} ({{ obtenerPorcentaje(kpis.viajes.finalizados, kpis.viajes.totalViajes) }})</td></tr>
+          <tr><td>• Viajes Cancelados</td><td class="text-right">{{ kpis.viajes.cancelados }} ({{ obtenerPorcentaje(kpis.viajes.cancelados, kpis.viajes.totalViajes) }})</td></tr>
         </tbody>
       </table>
+
+      <div class="print-footer-signatures">
+        <div class="signature-block">
+          <div class="signature-line"></div>
+          <p>Firma Gestor de Operaciones</p>
+        </div>
+        <div class="signature-block">
+          <div class="signature-line"></div>
+          <p>Sello Auditoría Interna</p>
+        </div>
+      </div>
     </div>
 
   </div>
 </template>
 
 <script setup>
+
 import { ref, computed, onMounted } from 'vue'
 
 const API_BASE = 'https://localhost:7221/api/Reportes'
-
 const rolUsuario = ref(localStorage.getItem('usuario_rol') || 'Operador')
+
 const puedeModificarFiltros = computed(() => {
   const r = rolUsuario.value.toLowerCase()
   return r === 'superadmin' || r === 'administrador' || r === 'admin'
 })
+
+
 
 const isLoading       = ref(false)
 const mensajeFlotante = ref('')
@@ -361,11 +401,15 @@ const kpis = ref({
   vehiculos:   { totalVehiculos: 0, disponibles: 0, enViaje: 0, enMantenimiento: 0, fueraDeServicio: 0 }
 })
 
+
+
 const viajesPorMes         = ref([])
 const combustiblePorMes    = ref([])
 const solicitudesPorArea   = ref([])
 const vehiculosMasUsados   = ref([])
 const conductoresMasViajes = ref([])
+
+
 
 const limpiarFiltros = () => {
   filtroPeriodo.value = String(new Date().getMonth() + 1)
@@ -374,12 +418,18 @@ const limpiarFiltros = () => {
   cargarReportes()
 }
 
+
+
 const cargarReportes = async () => {
+
   isLoading.value = true
   const token   = localStorage.getItem('token_transporte')
   const headers = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }
 
+
+
   try {
+
     const [resViajes, resCombustible, resSolicitudes, resConductores, resVehiculos] = await Promise.all([
       fetch(`${API_BASE}/viajes?mes=${filtroPeriodo.value}&anio=${filtroAnio.value}`, { headers }),
       fetch(`${API_BASE}/combustible?mes=${filtroPeriodo.value}&anio=${filtroAnio.value}`, { headers }),
@@ -388,11 +438,15 @@ const cargarReportes = async () => {
       fetch(`${API_BASE}/vehiculos`, { headers })
     ])
 
+
+
     if (resViajes.ok)      kpis.value.viajes      = await resViajes.json()
     if (resCombustible.ok) kpis.value.combustible = await resCombustible.json()
     if (resSolicitudes.ok) kpis.value.solicitudes = await resSolicitudes.json()
     if (resConductores.ok) kpis.value.conductores = await resConductores.json()
     if (resVehiculos.ok)   kpis.value.vehiculos   = await resVehiculos.json()
+
+
 
     const resGraficos = await Promise.allSettled([
       fetch(`${API_BASE}/viajes-por-mes?anio=${filtroAnio.value}`, { headers }),
@@ -400,14 +454,19 @@ const cargarReportes = async () => {
       fetch(`${API_BASE}/solicitudes-por-area`, { headers }),
       fetch(`${API_BASE}/vehiculos-mas-usados`, { headers }),
       fetch(`${API_BASE}/conductores-mas-viajes`, { headers }),
+
     ])
 
+
     const [rVxM, rCxM, rSxA, rVMU, rCMV] = resGraficos
+
     if (rVxM.status === 'fulfilled' && rVxM.value.ok)  viajesPorMes.value         = await rVxM.value.json()
     if (rCxM.status === 'fulfilled' && rCxM.value.ok)  combustiblePorMes.value    = await rCxM.value.json()
     if (rSxA.status === 'fulfilled' && rSxA.value.ok)  solicitudesPorArea.value   = await rSxA.value.json()
     if (rVMU.status === 'fulfilled' && rVMU.value.ok)  vehiculosMasUsados.value   = await rVMU.value.json()
     if (rCMV.status === 'fulfilled' && rCMV.value.ok)  conductoresMasViajes.value = await rCMV.value.json()
+
+
 
   } catch (e) {
     console.error('Error sincronizando datos:', e)
@@ -415,11 +474,13 @@ const cargarReportes = async () => {
   } finally {
     isLoading.value = false
   }
+
 }
+
+
 
 const maxViajesMes      = computed(() => viajesPorMes.value.length ? Math.max(...viajesPorMes.value.map(m => m.cantidad), 1) : 1)
 const maxCombustibleMes = computed(() => combustiblePorMes.value.length ? Math.max(...combustiblePorMes.value.map(m => m.galones), 1) : 1)
-
 const obtenerAlturaBarra = (valor, max) => `${Math.max((valor / max) * 100, 5)}%`
 
 const obtenerPorcentaje = (valor, total) => {
@@ -427,76 +488,122 @@ const obtenerPorcentaje = (valor, total) => {
   return `${Math.round((valor * 100) / total)}%`
 }
 
+
+
 const formatearCosto = (c) =>
+
   new Intl.NumberFormat('es-DO', { style: 'currency', currency: 'DOP' }).format(c || 0)
 
 
 const exportarExcel = () => {
+
   const nombreMes = mesesNombres[parseInt(filtroPeriodo.value) - 1].toUpperCase()
-  
+
   const filas = [
+
     ['SISTEMA DE GESTIÓN DE TRANSPORTE - INFORME CONSOLIDADO GENERAL'],
+
     [`Periodo Evaluado: ${nombreMes} ${filtroAnio.value}`],
+
     [`Área de Filtro: ${filtroArea.value.toUpperCase()}`],
+
     [],
+
     ['1. INDICADORES CLAVE DE RENDIMIENTO (KPIs)'],
+
     ['Métrica', 'Valor Registrado'],
+
     ['Viajes Realizados', kpis.value.viajes.totalViajes],
+
     ['Consumo Total de Combustible (L)', kpis.value.combustible.totalGalones],
+
     ['Solicitudes Procesadas', kpis.value.solicitudes.totalSolicitudes],
+
     ['Conductores Activos en el Sistema', kpis.value.conductores.totalConductores],
+
     [],
+
     ['2. DISTRIBUCIÓN DE VIAJES POR ESTADO'],
+
     ['Estado del Viaje', 'Cantidad', 'Porcentaje'],
+
     ['Programados', kpis.value.viajes.programados, obtenerPorcentaje(kpis.value.viajes.programados, kpis.value.viajes.totalViajes)],
+
     ['En Curso', kpis.value.viajes.enCurso, obtenerPorcentaje(kpis.value.viajes.enCurso, kpis.value.viajes.totalViajes)],
+
     ['Finalizados', kpis.value.viajes.finalizados, obtenerPorcentaje(kpis.value.viajes.finalizados, kpis.value.viajes.totalViajes)],
+
     ['Cancelados', kpis.value.viajes.cancelados, obtenerPorcentaje(kpis.value.viajes.cancelados, kpis.value.viajes.totalViajes)],
+
     [],
+
     ['3. RENDIMIENTO Y MÉTRICAS DE COMBUSTIBLE'],
+
     ['Indicador de Eficiencia', 'Valor Computado'],
+
     ['Inversión / Gasto Total', formatearCosto(kpis.value.combustible.totalGastado)],
+
     ['Kilómetros Totales Recorridos', `${kpis.value.combustible.totalKilometros.toLocaleString()} km`],
+
     ['Costo Promedio por Galón', formatearCosto(kpis.value.combustible.costoPromedioPorGalon)],
+
     ['Rendimiento Promedio de Flota', `${kpis.value.combustible.rendimientoKmPorGalon.toFixed(2)} km/gal`],
+
     [],
+
     ['4. SOLICITUDES DE TRANSPORTE POR ÁREA DE LA EMPRESA'],
+
     ['Área Solicitante', 'Cantidad Solicitudes'],
+
     ...solicitudesPorArea.value.map(s => [s.area, s.cantidad]),
+
     [],
+
     ['5. TOP 5 - VEHÍCULOS MÁS UTILIZADOS'],
+
     ['Identificación del Vehículo', 'Cantidad de Viajes'],
+
     ...vehiculosMasUsados.value.map(v => [v.vehiculo, v.viajes]),
+
     [],
+
     ['6. RANKING - CONDUCTORES DESTACADOS'],
+
     ['Nombre Completo del Conductor', 'Viajes Completados'],
+
     ...conductoresMasViajes.value.map(c => [c.conductor, c.viajes]),
+
     [],
+
     ['7. DISPONIBILIDAD ACTUAL DE LA FLOTA AUTOMOTRIZ'],
     ['Condición / Estado de Operación', 'Unidades'],
     ['Disponibles para Asignación', kpis.value.vehiculos.disponibles],
     ['En Ruta / Viaje Activo', kpis.value.vehiculos.enViaje],
     ['En Taller / Mantenimiento', kpis.value.vehiculos.enMantenimiento],
     ['Fuera de Servicio', kpis.value.vehiculos.fueraDeServicio],
+
   ]
 
   const csv  = filas.map(f => f.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n')
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
   const url  = URL.createObjectURL(blob)
   const a    = document.createElement('a')
+
   a.href     = url
   a.download = `Reporte_Consolidado_Flota_${filtroAnio.value}_${filtroPeriodo.value}.csv`
   a.click()
   URL.revokeObjectURL(url)
+
 }
 
-const exportarPDF = () => { window.print() }
 
+
+const exportarPDF = () => { window.print() }
 onMounted(() => cargarReportes())
+
 </script>
 
 <style scoped>
-/* 1. Forzamos a que todo el contenedor y elementos hereden la fuente base limpia */
 .rep-page,
 .rep-page * {
   font-family: inherit !important;
@@ -506,15 +613,17 @@ onMounted(() => cargarReportes())
   display: flex;
   flex-direction: column;
   gap: 20px;
+
 }
 
-/* 2. Tu cabecera original */
 .section-header { margin-bottom: 20px; }
 .section-header h2 { margin: 0; font-size: 1.5rem; font-weight: 700; color: #111827; }
 .section-header p { margin-top: 6px; color: #6b7280; font-size: 0.9rem; }
 
-/* 3. APLICAR LA MISMA FORMA DE TU <p> A TODOS LOS TEXTOS SECUNDARIOS Y LEYENDAS */
-/* Esto quita cualquier "otra forma" extraña en los textos de abajo */
+
+
+
+
 .rep-kpi-label,
 .rep-chart-subtitle,
 .rep-metrica-label,
@@ -522,13 +631,17 @@ onMounted(() => cargarReportes())
 .rep-rank-count,
 .rep-empty,
 .custom-table-mockup td {
+
   color: #6b7280 !important;
+
   font-size: 0.9rem !important;
-  font-weight: 500 !important; /* Peso limpio y normal como el de tu <p> */
-  text-transform: none !important; /* Quita mayúsculas automáticas si las había */
+
+  font-weight: 500 !important;
+
+  text-transform: none !important;
+
 }
 
-/* 4. Filtros superiores unificados */
 .rep-filters-bar {
   display: flex;
   align-items: center;
@@ -554,7 +667,6 @@ onMounted(() => cargarReportes())
 .rep-pill-select { border: none; background: transparent; font-size: 0.88rem; font-weight: 700; color: #111827; outline: none; cursor: pointer; padding: 0 2px; }
 .rep-pill-select:disabled { cursor: not-allowed; color: #9ca3af; }
 
-/* Botones */
 .rep-btn-generar {
   background: #111827;
   color: #fff;
@@ -569,6 +681,7 @@ onMounted(() => cargarReportes())
   height: 40px;
   box-sizing: border-box;
 }
+
 .rep-btn-generar:hover:not(:disabled) { opacity: 0.85; }
 
 .rep-btn-limpiar {
@@ -584,16 +697,76 @@ onMounted(() => cargarReportes())
   height: 40px;
   box-sizing: border-box;
 }
+
 .rep-btn-limpiar:hover:not(:disabled) { background: #e5e7eb; }
 
+
+
 .badge-read-only { font-size: 0.8rem; font-weight: 700; background-color: #f3f4f6; color: #4b5563; padding: 6px 14px; border-radius: 20px; border: 1px solid #e5e7eb; margin-left: 4px; }
-.rep-export-group { display: flex; gap: 8px; margin-left: auto; }
+
+.rep-export-group {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.btn-export-mockup-file {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  height: 40px;
+  box-sizing: border-box;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-excel-variant {
+  background-color: #f0fdf4;
+  color: #16a34a;
+  border-color: #86efac;
+}
+
+.btn-excel-variant:hover:not(:disabled) {
+  background-color: #dcfce7;
+}
+
+.btn-pdf-variant {
+  background-color: #fef2f2;
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+.btn-pdf-variant:hover:not(:disabled) {
+  background-color: #fee2e2;
+}
+
+.btn-export-mockup-file:disabled {
+  background-color: #f3f4f6 !important;
+  color: #9ca3af !important;
+  border-color: #e5e7eb !important;
+  cursor: not-allowed;
+}
+
+.rep-export-icon-img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+
 
 .btn-export { display: flex; align-items: center; gap: 5px; padding: 6px 14px; border-radius: 20px; border: 1.5px solid; font-size: 0.8rem; font-weight: 700; cursor: pointer; height: 40px; box-sizing: border-box; }
 .btn-export.pdf   { background: #f0fdf4; color: #16a34a; border-color: #86efac; }
 .btn-export.excel { background: #fff7ed; color: #ea580c; border-color: #fdba74; }
 
-/* Contenedores de Kpis y Gráficos */
+
 .rep-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 .rep-kpi-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 20px; padding: 28px 20px 20px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
 .rep-kpi-icon-wrap { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
@@ -603,22 +776,23 @@ onMounted(() => cargarReportes())
 .rep-icon-purple { background: #f5f3ff; }
 .rep-kpi-img { width: 26px; height: 26px; object-fit: contain; }
 
-/* Los números grandes e importantes mantendrán el color oscuro y peso de tus h2 */
+
 .rep-kpi-valor { font-size: 2.2rem; font-weight: 700; color: #111827; line-height: 1; }
 .rep-metrica-valor { font-size: 1.25rem; font-weight: 700; color: #111827; }
+
 
 .rep-charts-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
 .rep-chart-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 18px; padding: 20px; }
 .rep-chart-title, .rep-metricas-title { font-size: 1.1rem; font-weight: 700; color: #111827; }
 
-/* Barras gráficos */
+
 .rep-bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 100px; }
 .rep-bar-col { display: flex; flex-direction: column; align-items: center; flex: 1; height: 100%; justify-content: flex-end; gap: 4px; }
 .rep-bar-wrapper { width: 100%; height: 80px; display: flex; align-items: flex-end; }
 .rep-bar-fill { width: 100%; border-radius: 3px 3px 0 0; transition: height 0.4s ease; }
 .dark-bar { background: #111827; }
 
-/* Elementos de listas internas */
+
 .rep-vehiculos-card { display: flex; flex-direction: column; }
 .rep-vehiculos-list { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
 .rep-vehiculo-row { display: flex; align-items: center; gap: 10px; }
@@ -626,18 +800,22 @@ onMounted(() => cargarReportes())
 .rep-vehiculo-bar-track { flex: 1; height: 7px; background: #f3f4f6; border-radius: 4px; overflow: hidden; }
 .rep-vehiculo-bar-fill { height: 100%; background: #111827; border-radius: 4px; transition: width 0.4s ease; }
 
+
 .rep-metricas-panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 18px; padding: 20px 24px; }
 .rep-metricas-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .rep-badge-gray { font-size: 0.72rem; font-weight: 700; background: #f3f4f6; color: #6b7280; padding: 4px 12px; border-radius: 10px; border: 1px solid #e5e7eb; }
 .rep-metricas-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
 .rep-metrica-item { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
 
-/* Tablas */
+
 .rep-tabla-panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 18px; overflow: hidden; padding: 20px 24px 0; }
+
 .custom-table-mockup { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
 .custom-table-mockup th { color: #374151; font-weight: 700; padding: 10px 14px; text-align: left; border-bottom: 2px solid #f3f4f6; }
 .rep-tend-track { width: 160px; height: 7px; background: #f3f4f6; border-radius: 4px; overflow: hidden; }
 .rep-tend-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+
+
 
 .rep-lists-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .rep-list-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 18px; padding: 20px; }
@@ -646,22 +824,28 @@ onMounted(() => cargarReportes())
 .rep-rank-num { width: 18px; height: 18px; background: #111827; color: #fff; border-radius: 50%; font-size: 0.6rem; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .rep-rank-name { font-size: 0.88rem; font-weight: 600; color: #111827; }
 
+
+
 .status-pill-mockup { padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
+
 .pendiente  { background: #fef3c7; color: #92400e; }
 .aprobada   { background: #dcfce7; color: #166534; }
 .rechazada  { background: #fee2e2; color: #991b1b; }
 .finalizada { background: #dbeafe; color: #1e40af; }
 
+
+
 .rep-loading-card { background: #f9fafb; border: 1px dashed #d1d5db; border-radius: 18px; padding: 60px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 14px; color: #6b7280; font-weight: 600; }
 .rep-loading-spinner { width: 34px; height: 34px; border: 3px solid #e5e7eb; border-top-color: #111827; border-radius: 50%; animation: rep-spin 0.7s linear infinite; }
+
 @keyframes rep-spin { to { transform: rotate(360deg); } }
 
+
+
 @media print {
-  /* 1. Ocultar absolutamente TODO el Layout general del sistema */
-  /* (Sidebar, Navbar, buscador, contenedor global del router) */
-  body *, 
+  body *,
   #app *,
-  .sidebar, 
+  .sidebar,
   .navbar,
   .app-sidebar,
   .app-header,
@@ -672,13 +856,11 @@ onMounted(() => cargarReportes())
     display: none !important;
   }
 
-  /* 2. Forzar a que solo la tabla de impresión y sus padres directos sean visibles */
   html, body, #app, .rep-page, .tabla-impresion-pdf, .tabla-impresion-pdf * {
     display: block !important;
     visibility: visible !important;
   }
 
-  /* 3. Limpiar márgenes de la página de impresión para que no salgan bordes raros */
   @page {
     margin: 1.5cm !important;
   }
@@ -693,12 +875,12 @@ onMounted(() => cargarReportes())
     background: #ffffff !important;
   }
 
-  /* 4. Estructura del Encabezado del Reporte */
   .print-header {
     text-align: center !important;
     margin-bottom: 25px !important;
     border-bottom: 2px solid #111827 !important;
     padding-bottom: 12px !important;
+
   }
 
   .print-header h1 {
@@ -722,7 +904,7 @@ onMounted(() => cargarReportes())
     margin: 0 !important;
   }
 
-  /* 5. Diseño formal de la Tabla de Datos */
+
   .reporte-print-table {
     width: 100% !important;
     border-collapse: collapse !important;
@@ -747,18 +929,21 @@ onMounted(() => cargarReportes())
     color: #111827 !important;
     font-size: 0.9rem !important;
   }
-  
+
   .reporte-print-table tr:nth-child(even) {
     background-color: #f9fafb !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+
 }
 
-/* Evitar que se renderice en pantalla durante la navegación estándar */
 @media screen {
+
   .tabla-impresion-pdf {
     display: none !important;
   }
 }
-</style>
+
+</style> 
+
