@@ -316,7 +316,7 @@ const esSupervisor = computed(() => {
 
 const puedeCrear = computed(() => {
   const rol = userRole.value.toLowerCase()
-  return rol === 'operador' || rol === 'admin' || rol === 'superadmin'
+  return rol === 'operador' || rol === 'admin' || rol === 'superadmin' || rol === 'administrador'
 })
 
 
@@ -540,20 +540,18 @@ onMounted(() => {
 
 
 .section-header-mockup {
-  margin-bottom: 26px;
+  margin-bottom: 20px;
 }
 
 .section-header-mockup h2 {
-  font-size: 1.8rem;
-  font-weight: 800;
+  font-size: 1.5rem;
+  font-weight: 700;
   color: #111827;
-  margin: 0;
 }
 
 .section-header-mockup p {
   color: #6b7280;
-  font-size: 0.95rem;
-  margin-top: 6px;
+  font-size: 0.9rem;
 }
 
 

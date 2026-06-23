@@ -1,207 +1,278 @@
 <template>
   <div>
-        <div class="section-header">
-          <h2>Conductores</h2>
-          <p>Gestión y consulta de conductores registrados</p>
+    <div class="section-header-mockup">
+      <h2>Conductores</h2>
+      <p>Gestión y consulta de conductores registrados</p>
+    </div>
+
+    <div class="card-panel">
+      <div class="table-responsive">
+        <div class="toolbar">
+          <input
+            v-model="filtroBusqueda"
+            type="text"
+            placeholder="Buscar conductor..."
+            class="search-box"
+          />
+
+          <button
+            class="btn-new-solicitud-trigger"
+            :class="{ 'btn-disabled-main': !puedeModificarConductores }"
+            :disabled="!puedeModificarConductores"
+            :title="puedeModificarConductores ? 'Registrar nuevo conductor' : 'No permitido para su rol'"
+            @click="abrirFormularioNuevo"
+          >
+            Nuevo conductor
+          </button>
         </div>
+        
+        <table class="conductores-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Cédula</th>
+              <th>Email</th>
+              <th>Licencia</th>
+              <th>Tipo licencia</th>
+              <th>Vencimiento</th>
+              <th>Teléfono</th>
+              <th>Dirección</th>
+              <th>Estado</th>
+              <th class="text-center" style="width: 120px;">Acciones</th>
+            </tr>
+          </thead>
 
-        <div class="card-panel">
-          <div class="table-responsive">
-          <div class="toolbar">
-            <input
-              v-model="filtroBusqueda"
-              type="text"
-              placeholder="Buscar conductor..."
-              class="search-box"
-            />
+          <tbody>
+            <tr v-for="conductor in conductoresFiltrados" :key="conductor.id">
+              <td>{{ conductor.nombre }} {{ conductor.apellido }}</td>
+              <td>{{ conductor.cedula }}</td>
+              <td>{{ conductor.email }}</td>
+              <td>{{ conductor.licencia }}</td>
+              <td>{{ formatearTipoLicencia(conductor.tipoLicencia) }}</td>
+              <td>{{ formatearFecha(conductor.fechaVencimientoLicencia) }}</td>
+              <td>{{ conductor.telefono }}</td>
+              <td>{{ conductor.direccion }}</td>
+              <td>
+                <span
+                  class="estado-badge"
+                  :class="conductor.estado === 1 ? 'activo' : 'inactivo'"
+                >
+                  {{ conductor.estado === 1 ? 'Disponible' : 'No disponible' }}
+                </span>
+              </td>
+              <td class="actions-cell-fixed">
+                <div class="actions-wrapper">
+                  <button class="action-btn-mockup icon-view" title="Ver detalle" @click="verDetalleConductor(conductor)"></button>
+                  <button 
+                    class="action-btn-mockup icon-edit" 
+                    :class="{ 'btn-disabled': !puedeModificarConductores }" 
+                    :disabled="!puedeModificarConductores" 
+                    title="Editar Conductor" 
+                    @click="abrirFormularioEdicion(conductor)">
+                  </button>
+                  <button 
+                    class="action-btn-mockup icon-delete" 
+                    :class="{ 'btn-disabled': !puedeEliminarConductores }" 
+                    :disabled="!puedeEliminarConductores" 
+                    title="Eliminar Conductor" 
+                    @click="eliminarConductorApi(conductor.id)">
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr v-if="conductoresFiltrados.length === 0">
+              <td colspan="10" class="text-center text-muted" style="padding: 30px;">
+                No se encontraron conductores registrados con ese criterio.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
 
-            <button
-              class="btn-primary"
-              @click="mostrarModal = true">
-              Nuevo conductor
+    <div class="dashboard-widgets-row">
+      
+      <div class="widget-card-panel">
+        <h4>Viajes o Estados Clave</h4>
+        <div class="feed-list">
+          <div 
+            v-for="c in conductores.slice(0, 3)" 
+            :key="'viaje-' + c.id" 
+            class="feed-item-row feed-clickable"
+            @click="verDetalleConductor(c)"
+            title="Ver ficha completa"
+          >
+            <span class="feed-status-dot" :class="c.estado === 1 ? 'dot-dispo' : 'dot-nodispo'"></span>
+            <div class="feed-item-info">
+              <h5>{{ c.nombre }} {{ c.apellido }}</h5>
+              <p>Licencia: {{ c.licencia }} • {{ c.direccion || 'Sin dirección' }}</p>
+            </div>
+            <span class="feed-time-text">Activo</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="widget-card-panel">
+        <h4>Historial de eventos recientes</h4>
+        <div class="feed-list">
+          <div 
+            v-for="(log, index) in ultimosEventosConductores" 
+            :key="'log-' + index" 
+            class="feed-item-row-complex feed-clickable"
+            @click="verDetalleConductor(conductores[index])"
+            title="Ver ficha completa"
+          >
+            <div class="feed-icon-wrapper" :class="log.claseIcono">
+              <span class="icon-placeholder-text">{{ log.inicial }}</span>
+            </div>
+            <div class="feed-item-info">
+              <h5>{{ log.titulo }}</h5>
+              <p>{{ log.descripcion }}</p>
+            </div>
+          </div>
+
+          <div v-if="conductores.length === 0" class="text-center text-muted" style="padding: 10px;">
+            No hay actividades recientes para procesar.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div> <div v-if="mostrarModal" class="modal-overlay" @click.self="cerrarFormulario">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>{{ modoEdicion ? 'Modificar Registro de Conductor' : 'Nuevo Conductor' }}</h3>
+        <button class="btn-close" @click="cerrarFormulario">×</button>
+      </div>
+
+      <div class="modal-body">
+        <form @submit.prevent="guardarConductor" class="form-grid">
+          <input v-model="formConductor.nombre" placeholder="Nombre" required />
+          <input v-model="formConductor.apellido" placeholder="Apellido" required />
+          <input v-model="formConductor.cedula" placeholder="Cédula" required />
+          <input v-model="formConductor.email" type="email" placeholder="Correo electrónico" required />
+          <input v-model="formConductor.licencia" placeholder="Licencia" required />
+
+          <select v-model.number="formConductor.tipoLicencia" required>
+            <option :value="1">Categoría 1</option>
+            <option :value="2">Categoría 2</option>
+            <option :value="3">Categoría 3</option>
+            <option :value="4">Categoría 4</option>
+          </select>
+
+          <input type="date" v-model="formConductor.fechaVencimientoLicencia" required />
+          <input v-model="formConductor.telefono" placeholder="Teléfono" required />
+          <input v-model="formConductor.direccion" placeholder="Dirección" class="full-width" required />
+
+          <div v-if="modoEdicion" class="form-group-full-select full-width">
+            <label style="font-size: 0.85rem; font-weight:700; color:#374151; display:block; margin-bottom:4px;">Estado del Chofer</label>
+            <select v-model.number="formConductor.estado" style="width: 100%;">
+              <option :value="1">Disponible</option>
+              <option :value="2">No disponible / En Viaje</option>
+            </select>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="btn-cancel" @click="cerrarFormulario">Cancelar</button>
+            <button type="submit" class="btn-primary" :disabled="guardando">
+              {{ guardando ? 'Guardando en la API...' : 'Guardar Conductor' }}
             </button>
           </div>
-      <table class="conductores-table">
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Cédula</th>
-            <th>Email</th>
-            <th>Licencia</th>
-            <th>Tipo licencia</th>
-            <th>Vencimiento</th>
-            <th>Teléfono</th>
-            <th>Dirección</th>
-            <th>Estado</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          <tr
-            v-for="conductor in conductoresFiltrados"
-            :key="conductor.id"
-          >
-            <td>
-              {{ conductor.nombre }} {{ conductor.apellido }}
-            </td>
-
-            <td>
-              {{ conductor.cedula }}
-            </td>
-
-            <td>
-              {{ conductor.email }}
-            </td>
-
-            <td>
-              {{ conductor.licencia }}
-            </td>
-
-            <td>
-              {{ formatearTipoLicencia(conductor.tipoLicencia) }}
-            </td>
-
-            <td>
-              {{ formatearFecha(conductor.fechaVencimientoLicencia) }}
-            </td>
-
-            <td>
-              {{ conductor.telefono }}
-            </td>
-
-            <td>
-              {{ conductor.direccion }}
-            </td>
-
-            <td>
-              <span
-                class="estado-badge"
-                :class="conductor.estado === 1 ? 'activo' : 'inactivo'"
-              >
-                {{ conductor.estado === 1 ? 'Disponible' : 'No disponible' }}
-              </span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+        </form>
+      </div>
     </div>
   </div>
-  <div
-  v-if="mostrarModal"
-  class="modal-overlay"
->
-  <div class="modal-container">
 
-    <div class="modal-header">
-      <h3>Nuevo conductor</h3>
-
-      <button
-        class="btn-close"
-        @click="mostrarModal = false"
-      >
-        ✕
-      </button>
-    </div>
-
-    <div class="modal-body">
-      <p>Aquí irá el formulario de conductores.</p>
-    </div>
-
-  </div>
-</div>
-
-<div v-if="mostrarModal" class="modal-overlay">
-  <div class="modal-container">
-    <div class="modal-header">
-      <h3>Nuevo conductor</h3>
-
-      <button class="btn-close" @click="mostrarModal = false">
-        ×
-      </button>
-    </div>
-
-<div class="modal-body">
-  <form class="form-grid">
-
-    <input
-      v-model="formConductor.nombre"
-      placeholder="Nombre"
-    />
-
-    <input
-      v-model="formConductor.apellido"
-      placeholder="Apellido"
-    />
-
-    <input
-      v-model="formConductor.cedula"
-      placeholder="Cédula"
-    />
-
-    <input
-      v-model="formConductor.email"
-      placeholder="Correo electrónico"
-    />
-
-    <input
-      v-model="formConductor.licencia"
-      placeholder="Licencia"
-    />
-
-    <select v-model.number="formConductor.tipoLicencia">
-      <option :value="1">Categoría 1</option>
-      <option :value="2">Categoría 2</option>
-      <option :value="3">Categoría 3</option>
-      <option :value="4">Categoría 4</option>
-    </select>
-
-    <input
-      type="date"
-      v-model="formConductor.fechaVencimientoLicencia"
-    />
-
-    <input
-      v-model="formConductor.telefono"
-      placeholder="Teléfono"
-    />
-
-    <input
-      v-model="formConductor.direccion"
-      placeholder="Dirección"
-      class="full-width"
-    />
-
-        <div class="modal-actions">
-          <button
-            type="button"
-            class="btn-cancel"
-            @click="mostrarModal = false"
-          >
-            Cancelar
-          </button>
-
-          <button
-            type="button"
-            class="btn-primary"
-            @click="guardarConductor"
-          >
-            Guardar conductor
-          </button>
+  <div v-if="mostrarDetalle" class="modal-overlay" @click.self="mostrarDetalle = false">
+    <div class="modal-container" style="width: 500px;">
+      <div class="modal-header">
+        <h3>Ficha del Conductor</h3>
+        <button class="btn-close" @click="mostrarDetalle = false">×</button>
+      </div>
+      <div class="detalle-solicitud-wrapper" style="margin-top: 15px; display: flex; flex-direction: column; gap: 12px;">
+        <div><strong>Nombre Completo:</strong><p>{{ conductorSeleccionado.nombre }} {{ conductorSeleccionado.apellido }}</p></div>
+        <div><strong>Documento Identidad (Cédula):</strong><p>{{ conductorSeleccionado.cedula }}</p></div>
+        <div><strong>Correo Electrónico:</strong><p>{{ conductorSeleccionado.email }}</p></div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div><strong>Núm. Licencia:</strong><p>{{ conductorSeleccionado.licencia }}</p></div>
+          <div><strong>Categoría:</strong><p>{{ formatearTipoLicencia(conductorSeleccionado.tipoLicencia) }}</p></div>
         </div>
-
-      </form>
+        <div><strong>Vencimiento de Licencia:</strong><p>{{ formatearFecha(conductorSeleccionado.fechaVencimientoLicencia) }}</p></div>
+        <div><strong>Teléfono Contacto:</strong><p>{{ conductorSeleccionado.telefono }}</p></div>
+        <div><strong>Dirección Residencial:</strong><p>{{ conductorSeleccionado.direccion }}</p></div>
+      </div>
+      <div class="modal-actions" style="margin-top: 20px;">
+        <button type="button" class="btn-primary" @click="mostrarDetalle = false">Cerrar Ficha</button>
+      </div>
     </div>
   </div>
-</div>
+
+  <div v-if="mensajeNotificacion" class="toast-error-moderno">
+    <div class="toast-content">
+      <span class="toast-title">Notificación</span>
+      <p class="toast-text">{{ mensajeNotificacion }}</p>
+    </div>
+    <button class="btn-close-toast" @click="mensajeNotificacion = ''">×</button>
+  </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 
 const conductores = ref([])
-
 const filtroBusqueda = ref('')
+const userRole = ref('Operador')
+
+const mostrarModal = ref(false)
+const mostrarDetalle = ref(false)
+const modoEdicion = ref(false)
+const guardando = ref(false)
+
+const mensajeNotificacion = ref('')
+const conductorSeleccionado = ref({})
+
+const formConductor = ref({
+  nombre: '', apellido: '', cedula: '', email: '', licencia: '',
+  tipoLicencia: 1, fechaVencimientoLicencia: '', telefono: '', direccion: '',
+  supervisorId: 0, estado: 1
+})
+
+
+const obtenerRolDesdeToken = () => {
+  const token = localStorage.getItem('token_transporte')
+  if (!token) return
+  try {
+    const base64Url = token.split('.')[1]
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+    const decoded = JSON.parse(atob(base64))
+    userRole.value = decoded.role || decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || 'Operador'
+  } catch (e) {
+    console.error("Error descifrando credenciales:", e)
+  }
+}
+
+const esRolAdministrativo = computed(() => {
+  const r = userRole.value.toLowerCase()
+  return r === 'administrador' || r === 'admin' || r === 'superadmin'
+})
+
+const puedeModificarConductores = computed(() => esRolAdministrativo.value)
+const puedeEliminarConductores = computed(() => esRolAdministrativo.value)
+
+const cargarConductores = async () => {
+  const token = localStorage.getItem('token_transporte')
+  try {
+    const response = await fetch('https://localhost:7221/api/Conductores', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    if (response.ok) {
+      conductores.value = await response.json()
+    }
+  } catch (err) {
+    console.error("Error de conexión al cargar la lista:", err)
+  }
+}
 
 const conductoresFiltrados = computed(() => {
   return conductores.value.filter(c =>
@@ -212,116 +283,157 @@ const conductoresFiltrados = computed(() => {
   )
 })
 
-const mostrarModal = ref(false)
 
-const formConductor = ref({
-  nombre: '',
-  apellido: '',
-  cedula: '',
-  email: '',
-  licencia: '',
-  tipoLicencia: 1,
-  fechaVencimientoLicencia: '',
-  telefono: '',
-  direccion: '',
-  supervisorId: 0,
-  estado: 1
-})
-
-const cargarConductores = async () => {
-  const token = localStorage.getItem('token_transporte')
-
-  const response = await fetch('https://localhost:7221/api/Conductores', {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  })
-
-  if (response.ok) {
-    conductores.value = await response.json()
+const abrirFormularioNuevo = () => {
+  modoEdicion.value = false
+  formConductor.value = {
+    nombre: '', apellido: '', cedula: '', email: '', licencia: '',
+    tipoLicencia: 1, fechaVencimientoLicencia: '', telefono: '', direccion: '',
+    supervisorId: 0, estado: 1
   }
+  mostrarModal.value = true
 }
 
-const formatearTipoLicencia = (tipo) => {
-  const tipos = {
-    1: 'Categoría 1',
-    2: 'Categoría 2',
-    3: 'Categoría 3',
-    4: 'Categoría 4'
+const abrirFormularioEdicion = (conductor) => {
+  modoEdicion.value = true
+  let fechaInput = ''
+  if (conductor.fechaVencimientoLicencia) {
+    fechaInput = conductor.fechaVencimientoLicencia.substring(0, 10)
   }
-
-  return tipos[tipo] || 'No definida'
+  formConductor.value = { ...conductor, fechaVencimientoLicencia: fechaInput }
+  mostrarModal.value = true
 }
 
-const formatearFecha = (fecha) => {
-  if (!fecha) return '---'
+const cerrarFormulario = () => {
+  mostrarModal.value = false
+  modoEdicion.value = false
+}
 
-  return new Date(fecha).toLocaleDateString('es-DO')
+const verDetalleConductor = (conductor) => {
+  conductorSeleccionado.value = { ...conductor }
+  mostrarDetalle.value = true
 }
 
 const guardarConductor = async () => {
+  guardando.value = true
   const token = localStorage.getItem('token_transporte')
 
   const payload = {
     ...formConductor.value,
+    id: modoEdicion.value ? parseInt(formConductor.value.id) : 0,
+    tipoLicencia: parseInt(formConductor.value.tipoLicencia),
+    estado: parseInt(formConductor.value.estado),
     fechaVencimientoLicencia: formConductor.value.fechaVencimientoLicencia
       ? new Date(formConductor.value.fechaVencimientoLicencia).toISOString()
       : null
   }
 
-  const response = await fetch('https://localhost:7221/api/Conductores', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify(payload)
-  })
+  const url = modoEdicion.value 
+    ? `https://localhost:7221/api/Conductores/${formConductor.value.id}`
+    : 'https://localhost:7221/api/Conductores'
 
-  if (response.ok) {
-    mostrarModal.value = false
+  try {
+    const response = await fetch(url, {
+      method: modoEdicion.value ? 'PUT' : 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(payload)
+    })
 
-    formConductor.value = {
-      nombre: '',
-      apellido: '',
-      cedula: '',
-      email: '',
-      licencia: '',
-      tipoLicencia: 1,
-      fechaVencimientoLicencia: '',
-      telefono: '',
-      direccion: '',
-      supervisorId: 0,
-      estado: 1
+    if (response.ok) {
+      cerrarFormulario()
+      await cargarConductores()
+    } else {
+      mensajeNotificacion.value = 'Ocurrió un error de validación en la API.'
     }
-
-    await cargarConductores()
-  } else {
-    const error = await response.json()
-    console.error('Error creando conductor:', error)
-    alert('No se pudo crear el conductor.')
+  } catch {
+    mensajeNotificacion.value = 'Fallo crítico de red con el servidor.'
+  } finally {
+    guardando.value = false
   }
 }
 
+const eliminarConductorApi = async (id) => {
+  if (!confirm(`¿Está seguro de eliminar permanentemente al conductor #${id}?`)) return
+  const token = localStorage.getItem('token_transporte')
+  try {
+    const response = await fetch(`https://localhost:7221/api/Conductores/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    if (response.ok) {
+      await cargarConductores()
+    } else {
+
+      mensajeNotificacion.value = 'No se pudo eliminar la solicitud.'
+      setTimeout(() => { mensajeNotificacion.value = '' }, 5000)
+    }
+  } catch {
+    mensajeNotificacion.value = 'El servidor remoto no responde.'
+    setTimeout(() => { mensajeNotificacion.value = '' }, 5000)
+  }
+}
+
+const formatearTipoLicencia = (tipo) => {
+  return { 1: 'Categoría 1', 2: 'Categoría 2', 3: 'Categoría 3', 4: 'Categoría 4' }[tipo] || 'No definida'
+}
+
+const formatearFecha = (fecha) => {
+  if (!fecha) return '---'
+  return new Date(fecha).toLocaleDateString('es-DO')
+}
+
+
+const ultimosEventosConductores = computed(() => {
+  if (!conductores.value || conductores.value.length === 0) return []
+
+
+  return conductores.value.slice(0, 4).map((c, index) => {
+
+    if (index % 2 === 0) {
+      return {
+        titulo: 'Conductor Registrado',
+        descripcion: `${c.nombre} ${c.apellido} • Cédula: ${c.cedula}`,
+        claseIcono: 'icon-bg-purple',
+        inicial: '➕'
+      }
+    } else {
+      const hoy = new Date()
+      const vencimiento = new Date(c.fechaVencimientoLicencia)
+      const esVencida = vencimiento < hoy
+
+      return {
+        titulo: esVencida ? 'Licencia Vencida / Alerta' : 'Verificación de Licencia',
+        descripcion: `${c.nombre} - Cat: ${c.tipoLicencia} Vence: ${new Date(c.fechaVencimientoLicencia).toLocaleDateString('es-DO')}`,
+        claseIcono: esVencida ? 'icon-bg-red' : 'icon-bg-yellow',
+        inicial: esVencida ? '⚠️' : '🪪'
+      }
+    }
+  })
+})
+
 onMounted(() => {
+  obtenerRolDesdeToken()
   cargarConductores()
 })
 </script>
 
 <style scoped>
-.section-header {
-  margin-bottom: 26px;
+.section-header-mockup {
+  margin-bottom: 20px;
 }
 
-.section-header h2 {
+.section-header-mockup h2 {
   font-size: 1.5rem;
   font-weight: 700;
   color: #111827;
 }
 
-.section-header p {
-  font-size: .9rem;
+.section-header-mockup p {
   color: #6b7280;
+  font-size: 0.9rem;
 }
 
 .card-panel {
@@ -343,53 +455,143 @@ onMounted(() => {
 .conductores-table th {
   background: #f9fafb;
   padding: 14px;
+  text-align: left;
   font-size: .85rem;
+  font-weight: 700;
+  color: #374151;
+  white-space: nowrap;
 }
 
 .conductores-table td {
   padding: 14px;
+  border-top: 1px solid #e5e7eb;
+  font-size: 0.9rem;
+  color: #374151;
+  vertical-align: middle;
 }
 
 .estado-badge {
-  padding: 5px 10px;
+  padding: 5px 11px;
   border-radius: 999px;
   font-size: 0.75rem;
   font-weight: 700;
+  display: inline-block;
+  white-space: nowrap;
 }
 
-.activo {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.inactivo {
-  background: #fee2e2;
-  color: #991b1b;
-}
+.activo { background: #dcfce7; color: #166534; }
+.inactivo { background: #fee2e2; color: #991b1b; }
 
 .toolbar {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 16px;
   margin-bottom: 20px;
+  position: sticky;
+  left: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .search-box {
-  width: 320px;
-  padding: 10px 14px;
+  width: 420px; 
+  max-width: 60%; 
+  padding: 10px 16px;
   border: 1px solid #e5e7eb;
   border-radius: 20px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.btn-primary {
+.search-box:focus {
+  border-color: #9ca3af;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.btn-submit-mockup {
   background: #111827;
   color: white;
   border: none;
   padding: 10px 18px;
   border-radius: 10px;
-  font-weight: 700;
   cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 700;
+  flex-shrink: 0; 
+  white-space: nowrap; 
 }
+
+.btn-filter-action,
+.btn-new-solicitud-trigger,
+.btn-submit-mockup {
+  background: #111827;
+  color: white;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.btn-filter-action:hover,
+.btn-new-solicitud-trigger:hover,
+.btn-submit-mockup:hover {
+  opacity: 0.92;
+}
+
+.btn-new-solicitud-trigger {
+  margin-left: auto;
+}
+
+.btn-new-solicitud-trigger:disabled,
+.btn-submit-mockup:disabled {
+  background-color: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+.actions-cell-fixed { 
+  text-align: center; 
+}
+
+.actions-wrapper {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+.action-btn-mockup {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: white;
+  cursor: pointer;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 14px;
+  transition: background-color 0.15s ease;
+}
+
+.action-btn-mockup:hover:not(:disabled) { 
+  background-color: #f3f4f6; 
+}
+
+.btn-disabled { 
+  opacity: 0.25; 
+  cursor: not-allowed; 
+}
+
+.icon-view { background-image: url('../assets/icons/ver.png'); }
+.icon-edit { background-image: url('../assets/icons/editar-negro.png'); }
+.icon-delete { background-image: url('../assets/icons/eliminar.png'); }
 
 .modal-overlay {
   position: fixed;
@@ -398,52 +600,55 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 999;
 }
 
 .modal-container {
-  width: 700px;
+  width: 650px;
   max-width: 95%;
   background: white;
   border-radius: 18px;
   padding: 24px;
+  box-shadow: 0 15px 35px rgba(0,0,0,.12);
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 12px;
 }
 
-.btn-close {
-  border: none;
-  background: transparent;
-  font-size: 20px;
-  cursor: pointer;
-}
+.modal-header h3 { margin: 0; font-size: 1.1rem; font-weight: 800; color: #111827; }
+.btn-close { border: none; background: transparent; font-size: 22px; color: #6b7280; cursor: pointer; }
 
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-top: 20px;
+  gap: 12px;
+  margin-top: 14px;
 }
 
 .form-grid input,
 .form-grid select {
-  padding: 10px 12px;
+  height: 40px;
+  padding: 8px 12px;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
+  font-size: 0.9rem;
+  outline: none;
+  box-sizing: border-box;
 }
+.form-grid input:focus, .form-grid select:focus { border-color: #9ca3af; }
 
-.full-width {
-  grid-column: 1 / -1;
-}
-
+.full-width { grid-column: 1 / -1; }
 .modal-actions {
   grid-column: 1 / -1;
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+  margin-top: 8px;
 }
 
 .btn-cancel {
@@ -451,14 +656,147 @@ onMounted(() => {
   border: none;
   border-radius: 10px;
   background: #e5e7eb;
+  color: #374151;
+  font-weight: 700;
   cursor: pointer;
+  font-size: 0.9rem;
 }
 
-.stat-card {
+.detalle-solicitud-wrapper strong { display: block; font-size: 0.8rem; color: #6b7280; text-transform: uppercase; margin-bottom: 2px; }
+.detalle-solicitud-wrapper p { color: #111827; font-size: 0.95rem; font-weight: 500; margin: 0; }
+
+.toast-error-moderno {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: white;
+  border-left: 4px solid #166534;
+  padding: 16px;
+  border-radius: 10px;
+  box-shadow: 0 10px 20px rgba(0,0,0,.1);
+  z-index: 1000;
+  min-width: 320px;
+}
+.toast-title { font-weight: 800; color: #111827; font-size: 0.85rem; }
+.toast-text { color: #6b7280; font-size: 0.85rem; margin-top: 4px; }
+.btn-close-toast { background: transparent; border: none; font-size: 1.2rem; color: #6b7280; cursor: pointer; position: absolute; top: 10px; right: 12px; }
+
+.dashboard-widgets-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.widget-card-panel {
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  padding: 16px;
-  box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.widget-card-panel h4 {
+  margin: 0 0 16px 0;
+  font-size: 1.05rem;
+  font-weight: 700; 
+  color: #111827;
+  font-family: inherit; 
+}
+
+.feed-item-info h5 {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 600; 
+  color: #111827;
+  font-family: inherit;
+}
+
+.feed-item-info p {
+  margin: 2px 0 0 0;
+  font-size: 0.82rem;
+  color: #6b7280;
+  font-family: inherit;
+  line-height: 1.4; 
+}
+
+.feed-time-text {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.feed-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.feed-item-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.feed-item-row:last-child,
+.feed-item-row-complex:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.feed-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot-dispo { background-color: #22c55e; }
+.dot-nodispo { background-color: #3b82f6; }
+
+.feed-item-info {
+  flex: 1;
+}
+
+.feed-item-row-complex {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.feed-icon-wrapper {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.icon-bg-purple { background-color: #eedffc; }
+.icon-bg-yellow { background-color: #fef08a; }
+.icon-bg-red { background-color: #fee2e2; }
+
+.icon-placeholder-text {
+  font-size: 1.1rem;
+}
+
+.feed-clickable {
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  padding: 8px 12px; 
+  border-radius: 8px;
+}
+
+.feed-clickable:hover {
+  background-color: #f9fafb; 
+}
+
+.feed-clickable:active {
+  transform: scale(0.99); 
 }
 </style>
