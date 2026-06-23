@@ -34,14 +34,14 @@
         <p>Actualmente activos</p>
       </div>
 
-      <div class="stat-card">
+      <div v-if="puedeVerTodo" class="stat-card">
         <div class="stat-icon">🔧</div>
         <strong>{{ resumen.vehiculosEnMantenimiento ?? 0 }}</strong>
         <span>En mantenimiento</span>
         <p>Fuera de servicio</p>
       </div>
 
-      <div class="stat-card">
+      <div v-if="puedeVerTodo" class="stat-card">
         <div class="stat-icon">⛽</div>
         <strong>{{ resumen.consumosPendientes ?? 0 }}</strong>
         <span>Consumos pendientes</span>
@@ -55,7 +55,7 @@
           <h3>Viajes activos en tiempo real</h3>
           <span class="dashboard-link" @click="router.push('/viajes')">
             Ver todos
-        </span>
+          </span>
         </div>
 
         <div class="dashboard-map">
@@ -118,10 +118,7 @@
           </div>
         </div>
 
-        <p
-          v-if="viajesProximos.length === 0"
-          class="empty-text"
-        >
+        <p v-if="viajesProximos.length === 0" class="empty-text">
           No hay viajes programados.
         </p>
       </section>
@@ -130,8 +127,8 @@
         <div class="panel-header">
           <h3>Estado de vehículos</h3>
           <span class="dashboard-link" @click="router.push('/vehiculos')">
-          Ver todos
-        </span>
+            Ver todos
+          </span>
         </div>
 
         <div class="vehicle-status">
@@ -311,7 +308,7 @@ onMounted(() => {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 18px;
+  gap: 16px;
 }
 
 .stat-card {
