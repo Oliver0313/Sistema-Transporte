@@ -5,7 +5,7 @@
         ☰
       </button>
 
-      <span class="navbar-title">Inicio</span>
+      <span class="navbar-title">{{ tituloHeader }}</span>
     </div>
 
     <div class="header-center">
@@ -28,10 +28,30 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
 
 const nombreUsuario = ref('Usuario')
 const rolUsuario = ref('Operador')
+
+const tituloHeader = computed(() => {
+  const titulos = {
+    '/dashboard': 'Dashboard',
+    '/solicitudes': 'Solicitudes',
+    '/vehiculos': 'Vehículos',
+    '/conductores': 'Conductores',
+    '/asignaciones': 'Asignaciones',
+    '/viajes': 'Viajes',
+    '/reportes': 'Reportes',
+    '/mantenimiento': 'Mantenimiento',
+    '/combustible': 'Combustible',
+    '/usuarios': 'Usuarios'
+  }
+
+  return titulos[route.path] || 'Inicio'
+})
 
 onMounted(() => {
   nombreUsuario.value = localStorage.getItem('usuario_nombre') || 'Usuario'

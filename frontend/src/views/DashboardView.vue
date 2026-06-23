@@ -34,14 +34,14 @@
         <p>Actualmente activos</p>
       </div>
 
-      <div class="stat-card">
+      <div v-if="puedeVerTodo" class="stat-card">
         <div class="stat-icon">🔧</div>
         <strong>{{ resumen.vehiculosEnMantenimiento ?? 0 }}</strong>
         <span>En mantenimiento</span>
         <p>Fuera de servicio</p>
       </div>
 
-      <div class="stat-card">
+      <div v-if="puedeVerTodo" class="stat-card">
         <div class="stat-icon">⛽</div>
         <strong>{{ resumen.consumosPendientes ?? 0 }}</strong>
         <span>Consumos pendientes</span>
@@ -53,18 +53,22 @@
       <section class="panel panel-map">
         <div class="panel-header">
           <h3>Viajes activos en tiempo real</h3>
-          <span>Ver todos</span>
+          <span class="dashboard-link" @click="router.push('/viajes')">
+            Ver todos
+          </span>
         </div>
 
-        <div class="map-placeholder">
-          Mapa próximamente
+        <div class="dashboard-map">
+          <MapaViaje />
         </div>
       </section>
 
       <section class="panel">
         <div class="panel-header">
           <h3>Solicitudes recientes</h3>
-          <span>Ver todas</span>
+          <span class="dashboard-link" @click="router.push('/solicitudes')">
+            Ver todas
+          </span>
         </div>
 
         <div
@@ -92,7 +96,9 @@
       <section class="panel">
         <div class="panel-header">
           <h3>Próximos viajes programados</h3>
-          <span>Ver agenda</span>
+          <span class="dashboard-link" @click="router.push('/calendario')">
+            Ver agenda
+          </span>
         </div>
 
         <div
@@ -112,10 +118,7 @@
           </div>
         </div>
 
-        <p
-          v-if="viajesProximos.length === 0"
-          class="empty-text"
-        >
+        <p v-if="viajesProximos.length === 0" class="empty-text">
           No hay viajes programados.
         </p>
       </section>
@@ -123,7 +126,9 @@
       <section class="panel">
         <div class="panel-header">
           <h3>Estado de vehículos</h3>
-          <span>Ver todos</span>
+          <span class="dashboard-link" @click="router.push('/vehiculos')">
+            Ver todos
+          </span>
         </div>
 
         <div class="vehicle-status">
@@ -134,10 +139,12 @@
         </div>
       </section>
 
-      <section class="panel">
+      <section v-if="puedeVerTodo" class="panel">
         <div class="panel-header">
           <h3>Consumo de combustible</h3>
-          <span>Ver reporte</span>
+          <span class="dashboard-link" @click="router.push('/combustible')">
+            Ver reporte
+          </span>
         </div>
 
         <div class="fuel-box">
@@ -151,7 +158,32 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import MapaViaje from '../components/MapaViaje.vue'
 
+import { useRouter } from 'vue-router'
+
+import { computed } from 'vue'
+
+const rolUsuario = (localStorage.getItem('usuario_rol') || '').trim().toLowerCase()
+
+const esSuperAdmin = computed(() => rolUsuario === 'superadmin')
+const esAdministrador = computed(() => rolUsuario === 'administrador')
+const esSupervisor = computed(() => rolUsuario === 'supervisor')
+const esOperador = computed(() => rolUsuario === 'operador')
+
+const puedeVerTodo = computed(() =>
+  esSuperAdmin.value || esAdministrador.value
+)
+
+const puedeVerGestion = computed(() =>
+  esSuperAdmin.value || esAdministrador.value || esSupervisor.value
+)
+
+const puedeVerOperativo = computed(() =>
+  puedeVerGestion.value || esOperador.value
+)
+
+const router = useRouter()
 const resumen = ref({})
 const solicitudesRecientes = ref([])
 
@@ -262,38 +294,39 @@ onMounted(() => {
 
 .dashboard-header h2 {
   margin: 0;
-  font-size: 1.8rem;
-  font-weight: 800;
+  font-size: 1.5rem;
+  font-weight: 700;
   color: #111827;
 }
 
 .dashboard-header p {
   margin-top: 6px;
   color: #6b7280;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 18px;
+  gap: 16px;
 }
 
 .stat-card {
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 18px;
-  padding: 20px;
-  min-height: 165px;
+  border-radius: 16px;
+  padding: 16px;
+  min-height: 125px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   background: #f3f4f6;
   display: flex;
   align-items: center;
@@ -301,20 +334,20 @@ onMounted(() => {
 }
 
 .stat-card strong {
-  font-size: 2rem;
+  font-size: 1.4rem;
+  font-weight: 700;
   color: #111827;
-  line-height: 1;
 }
 
 .stat-card span {
+  font-size: 0.85rem;
+  font-weight: 600;
   color: #111827;
-  font-weight: 700;
-  font-size: 0.9rem;
 }
 
 .stat-card p {
-  color: #9ca3af;
   font-size: 0.8rem;
+  color: #9ca3af;
   margin: 0;
 }
 
@@ -333,8 +366,9 @@ onMounted(() => {
 .panel {
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 18px;
+  border-radius: 16px;
   padding: 20px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 .panel-header {
@@ -346,9 +380,9 @@ onMounted(() => {
 
 .panel-header h3 {
   margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
   color: #111827;
-  font-size: 1rem;
-  font-weight: 800;
 }
 
 .panel-header span {
@@ -413,6 +447,17 @@ onMounted(() => {
   color: #166534;
 }
 
+.rechazada {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.cancelada {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.finalizada,
 .viaje {
   background: #dbeafe;
   color: #1d4ed8;
@@ -439,7 +484,7 @@ onMounted(() => {
 
 .circle-status strong,
 .fuel-box strong {
-  font-size: 2rem;
+  font-size: 1.7rem;
   color: #111827;
 }
 
@@ -468,10 +513,15 @@ onMounted(() => {
   .dashboard-bottom {
     grid-template-columns: 1fr;
   }
+}
 
-  .empty-text {
-  color: #6b7280;
-  font-size: 0.9rem;
-  }
+.dashboard-link{
+  cursor:pointer;
+  color:#2563eb;
+  font-weight:600;
+}
+
+.dashboard-link:hover{
+  text-decoration:underline;
 }
 </style>

@@ -8,27 +8,60 @@ namespace SistemaTransporte.Application.Services
     public class SolicitudTransporteService : ISolicitudTransporteService
     {
         private readonly IRepository<SolicitudTransporte> _repository;
+        private readonly IRepository<Asignacion> _asignacionRepository;
+        private readonly IRepository<Vehiculo> _vehiculoRepository;
+        private readonly IRepository<Conductor> _conductorRepository;
 
-        public SolicitudTransporteService(IRepository<SolicitudTransporte> repository)
+        public SolicitudTransporteService(
+            IRepository<SolicitudTransporte> repository,
+            IRepository<Asignacion> asignacionRepository,
+            IRepository<Vehiculo> vehiculoRepository,
+            IRepository<Conductor> conductorRepository)
         {
             _repository = repository;
+            _asignacionRepository = asignacionRepository;
+            _vehiculoRepository = vehiculoRepository;
+            _conductorRepository = conductorRepository;
         }
 
         public async Task<IEnumerable<SolicitudTransporteDto>> GetAllAsync()
         {
             var solicitudes = await _repository.GetAllAsync();
+            var asignaciones = await _asignacionRepository.GetAllAsync();
+            var vehiculos = await _vehiculoRepository.GetAllAsync();
+            var conductores = await _conductorRepository.GetAllAsync();
 
-            return solicitudes.Select(s => new SolicitudTransporteDto
+            return solicitudes.Select(s =>
             {
-                Id = s.Id,
-                AreaSolicitante = s.AreaSolicitante,
-                CantidadColaboradores = s.CantidadColaboradores,
-                FechaHoraSalida = s.FechaHoraSalida,
-                FechaHoraRegreso = s.FechaHoraRegreso,
-                Destino = s.Destino,
-                Motivo = s.Motivo,
-                Estado = s.Estado,
-                UsuarioSolicitanteId = s.UsuarioSolicitanteId
+                var asignacion = asignaciones
+                    .FirstOrDefault(a => a.SolicitudTransporteId == s.Id);
+
+                var vehiculo = asignacion == null
+                    ? null
+                    : vehiculos.FirstOrDefault(v => v.Id == asignacion.VehiculoId);
+
+                var conductor = asignacion == null
+                    ? null
+                    : conductores.FirstOrDefault(c => c.Id == asignacion.ConductorId);
+
+                return new SolicitudTransporteDto
+                {
+                    Id = s.Id,
+                    AreaSolicitante = s.AreaSolicitante,
+                    CantidadColaboradores = s.CantidadColaboradores,
+                    FechaHoraSalida = s.FechaHoraSalida,
+                    FechaHoraRegreso = s.FechaHoraRegreso,
+                    Destino = s.Destino,
+                    Motivo = s.Motivo,
+                    Estado = s.Estado,
+                    UsuarioSolicitanteId = s.UsuarioSolicitanteId,
+                    VehiculoAsignado = vehiculo == null
+                        ? null
+                        : $"{vehiculo.Marca} {vehiculo.Modelo} - {vehiculo.Matricula}",
+                    ConductorAsignado = conductor == null
+                        ? null
+                        : $"{conductor.Nombre} {conductor.Apellido}"
+                };
             });
         }
 
