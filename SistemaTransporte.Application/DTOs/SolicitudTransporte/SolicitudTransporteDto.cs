@@ -18,5 +18,7 @@ namespace SistemaTransporte.Application.DTOs.SolicitudTransporte
         public string Motivo { get; set; }
         public EstadoSolicitud Estado { get; set; }
         public int UsuarioSolicitanteId { get; set; }
+        public string? VehiculoAsignado { get; set; }
+        public string? ConductorAsignado { get; set; }
     }
 }

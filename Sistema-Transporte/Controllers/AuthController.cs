@@ -33,5 +33,23 @@ namespace Sistema_Transporte.Controllers
 
             return Ok(response);
         }
+
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordDto dto)
+        {
+            var response = await _authService.ForgotPasswordAsync(dto);
+            return Ok(response);
+        }
+
+        [HttpPost("reset-password")]
+        public async Task<IActionResult> ResetPassword(ResetPasswordDto dto)
+        {
+            var response = await _authService.ResetPasswordAsync(dto);
+
+            if (response == null)
+                return BadRequest(new { mensaje = "Token inválido o expirado." });
+
+            return Ok(response);
+        }
     }
 }

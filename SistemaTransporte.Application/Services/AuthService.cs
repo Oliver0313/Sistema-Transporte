@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SistemaTransporte.Application.DTOs.Auth;
 using SistemaTransporte.Application.Interfaces;

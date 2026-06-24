@@ -6,11 +6,11 @@
     </div>
 
     <nav class="menu">
-      <ul>
-        <li @click="router.push('/dashboard')">
-          <img src="../assets/icons/dashboard.png" class="menu-icon" />
-          Dashboard
-        </li>
+  <ul>
+    <li @click="router.push('/dashboard')">
+      <img src="../assets/icons/dashboard.png" class="menu-icon" />
+      Dashboard
+    </li>
 
         <li v-if="puedeVerOperativo" @click="router.push('/solicitudes')">
           <img src="../assets/icons/solicitudes.png" class="menu-icon" />
@@ -40,6 +40,11 @@
         <li v-if="puedeVerOperativo" @click="router.push('/reportes')">
           <img src="../assets/icons/reportes.png" class="menu-icon" />
           Reportes
+        </li>
+
+         <li v-if="puedeVerOperativo" @click="router.push('/calendario')">
+          <img src="../assets/icons/calendario.png" class="menu-icon" />
+          Calendario
         </li>
 
         <li v-if="puedeVerTodo" @click="router.push('/mantenimiento')">

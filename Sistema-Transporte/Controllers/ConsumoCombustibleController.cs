@@ -55,14 +55,14 @@ namespace Sistema_Transporte.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "SuperAdmin,Administrador")] 
         public async Task<IActionResult> Delete(int id)
         {
-            var eliminado = await _consumoService.DeleteAsync(id);
-
-            if (!eliminado)
-                return NotFound();
-
-            return NoContent();
+            
+            return BadRequest(new
+            {
+                message = "Por políticas de auditoría, las solicitudes de transporte no pueden ser eliminadas permanentemente del sistema."
+            });
         }
     }
 }

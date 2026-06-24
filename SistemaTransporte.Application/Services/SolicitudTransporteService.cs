@@ -8,27 +8,60 @@ namespace SistemaTransporte.Application.Services
     public class SolicitudTransporteService : ISolicitudTransporteService
     {
         private readonly IRepository<SolicitudTransporte> _repository;
+        private readonly IRepository<Asignacion> _asignacionRepository;
+        private readonly IRepository<Vehiculo> _vehiculoRepository;
+        private readonly IRepository<Conductor> _conductorRepository;
 
-        public SolicitudTransporteService(IRepository<SolicitudTransporte> repository)
+        public SolicitudTransporteService(
+            IRepository<SolicitudTransporte> repository,
+            IRepository<Asignacion> asignacionRepository,
+            IRepository<Vehiculo> vehiculoRepository,
+            IRepository<Conductor> conductorRepository)
         {
             _repository = repository;
+            _asignacionRepository = asignacionRepository;
+            _vehiculoRepository = vehiculoRepository;
+            _conductorRepository = conductorRepository;
         }
 
         public async Task<IEnumerable<SolicitudTransporteDto>> GetAllAsync()
         {
             var solicitudes = await _repository.GetAllAsync();
+            var asignaciones = await _asignacionRepository.GetAllAsync();
+            var vehiculos = await _vehiculoRepository.GetAllAsync();
+            var conductores = await _conductorRepository.GetAllAsync();
 
-            return solicitudes.Select(s => new SolicitudTransporteDto
+            return solicitudes.Select(s =>
             {
-                Id = s.Id,
-                AreaSolicitante = s.AreaSolicitante,
-                CantidadColaboradores = s.CantidadColaboradores,
-                FechaHoraSalida = s.FechaHoraSalida,
-                FechaHoraRegreso = s.FechaHoraRegreso,
-                Destino = s.Destino,
-                Motivo = s.Motivo,
-                Estado = s.Estado,
-                UsuarioSolicitanteId = s.UsuarioSolicitanteId
+                var asignacion = asignaciones
+                    .FirstOrDefault(a => a.SolicitudTransporteId == s.Id);
+
+                var vehiculo = asignacion == null
+                    ? null
+                    : vehiculos.FirstOrDefault(v => v.Id == asignacion.VehiculoId);
+
+                var conductor = asignacion == null
+                    ? null
+                    : conductores.FirstOrDefault(c => c.Id == asignacion.ConductorId);
+
+                return new SolicitudTransporteDto
+                {
+                    Id = s.Id,
+                    AreaSolicitante = s.AreaSolicitante,
+                    CantidadColaboradores = s.CantidadColaboradores,
+                    FechaHoraSalida = s.FechaHoraSalida,
+                    FechaHoraRegreso = s.FechaHoraRegreso,
+                    Destino = s.Destino,
+                    Motivo = s.Motivo,
+                    Estado = s.Estado,
+                    UsuarioSolicitanteId = s.UsuarioSolicitanteId,
+                    VehiculoAsignado = vehiculo == null
+                        ? null
+                        : $"{vehiculo.Marca} {vehiculo.Modelo} - {vehiculo.Matricula}",
+                    ConductorAsignado = conductor == null
+                        ? null
+                        : $"{conductor.Nombre} {conductor.Apellido}"
+                };
             });
         }
 
@@ -38,6 +71,23 @@ namespace SistemaTransporte.Application.Services
 
             if (s == null)
                 return null;
+
+            var asignaciones = await _asignacionRepository.GetAllAsync();
+            var asignacion = asignaciones.FirstOrDefault(a => a.SolicitudTransporteId == id);
+
+            string? vehiculoAsignado = null;
+            string? conductorAsignado = null;
+
+            if (asignacion != null)
+            {
+                var vehiculo = await _vehiculoRepository.GetByIdAsync(asignacion.VehiculoId);
+                var conductor = await _conductorRepository.GetByIdAsync(asignacion.ConductorId);
+
+                if (vehiculo != null)
+                    vehiculoAsignado = $"{vehiculo.Marca} {vehiculo.Modelo} - {vehiculo.Matricula}";
+                if (conductor != null)
+                    conductorAsignado = $"{conductor.Nombre} {conductor.Apellido}";
+            }
 
             return new SolicitudTransporteDto
             {
@@ -49,7 +99,9 @@ namespace SistemaTransporte.Application.Services
                 Destino = s.Destino,
                 Motivo = s.Motivo,
                 Estado = s.Estado,
-                UsuarioSolicitanteId = s.UsuarioSolicitanteId
+                UsuarioSolicitanteId = s.UsuarioSolicitanteId,
+                VehiculoAsignado = vehiculoAsignado,
+                ConductorAsignado = conductorAsignado
             };
         }
 
@@ -100,8 +152,12 @@ namespace SistemaTransporte.Application.Services
             if (dto.CantidadColaboradores <= 0)
                 throw new Exception("La cantidad de colaboradores debe ser mayor que cero.");
 
-            if (dto.FechaHoraRegreso <= dto.FechaHoraSalida)
-                throw new Exception("La hora de regreso debe ser mayor que la hora de salida.");
+            // Solo validar fechas si NO es una asignación pura de supervisor
+            if (!dto.ConductorId.HasValue || !dto.VehiculoId.HasValue)
+            {
+                if (dto.FechaHoraRegreso <= dto.FechaHoraSalida)
+                    throw new Exception("La hora de regreso debe ser mayor que la hora de salida.");
+            }
 
             solicitud.AreaSolicitante = dto.AreaSolicitante;
             solicitud.CantidadColaboradores = dto.CantidadColaboradores;
@@ -112,6 +168,36 @@ namespace SistemaTransporte.Application.Services
             solicitud.Estado = dto.Estado;
 
             _repository.Update(solicitud);
+
+            if (dto.ConductorId.HasValue && dto.VehiculoId.HasValue)
+            {
+                var asignaciones = await _asignacionRepository.GetAllAsync();
+                var asignacionExistente = asignaciones.FirstOrDefault(a => a.SolicitudTransporteId == id);
+
+                if (asignacionExistente != null)
+                {
+                    asignacionExistente.ConductorId = dto.ConductorId.Value;
+                    asignacionExistente.VehiculoId = dto.VehiculoId.Value;
+                    asignacionExistente.Estado = (EstadoAsignacion)1;
+                    _asignacionRepository.Update(asignacionExistente);
+                }
+                else
+                {
+                    var nuevaAsignacion = new Asignacion
+                    {
+                        SolicitudTransporteId = id,
+                        ConductorId = dto.ConductorId.Value,
+                        VehiculoId = dto.VehiculoId.Value,
+                        FechaHoraAsignacion = DateTime.Now,
+                        UsuarioAsignadorId = dto.UsuarioSolicitanteId,
+                        Estado = (EstadoAsignacion)1
+                    };
+                    await _asignacionRepository.AddAsync(nuevaAsignacion);
+                }
+
+                await _asignacionRepository.SaveChangesAsync();
+            }
+
             await _repository.SaveChangesAsync();
 
             return true;
