@@ -96,9 +96,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
 app.UseCors("PermitirVue");
+
+app.UseHttpsRedirection();
 
 app.UseAuthentication();
 

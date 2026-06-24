@@ -72,6 +72,23 @@ namespace SistemaTransporte.Application.Services
             if (s == null)
                 return null;
 
+            var asignaciones = await _asignacionRepository.GetAllAsync();
+            var asignacion = asignaciones.FirstOrDefault(a => a.SolicitudTransporteId == id);
+
+            string? vehiculoAsignado = null;
+            string? conductorAsignado = null;
+
+            if (asignacion != null)
+            {
+                var vehiculo = await _vehiculoRepository.GetByIdAsync(asignacion.VehiculoId);
+                var conductor = await _conductorRepository.GetByIdAsync(asignacion.ConductorId);
+
+                if (vehiculo != null)
+                    vehiculoAsignado = $"{vehiculo.Marca} {vehiculo.Modelo} - {vehiculo.Matricula}";
+                if (conductor != null)
+                    conductorAsignado = $"{conductor.Nombre} {conductor.Apellido}";
+            }
+
             return new SolicitudTransporteDto
             {
                 Id = s.Id,
@@ -82,7 +99,9 @@ namespace SistemaTransporte.Application.Services
                 Destino = s.Destino,
                 Motivo = s.Motivo,
                 Estado = s.Estado,
-                UsuarioSolicitanteId = s.UsuarioSolicitanteId
+                UsuarioSolicitanteId = s.UsuarioSolicitanteId,
+                VehiculoAsignado = vehiculoAsignado,
+                ConductorAsignado = conductorAsignado
             };
         }
 
@@ -133,8 +152,12 @@ namespace SistemaTransporte.Application.Services
             if (dto.CantidadColaboradores <= 0)
                 throw new Exception("La cantidad de colaboradores debe ser mayor que cero.");
 
-            if (dto.FechaHoraRegreso <= dto.FechaHoraSalida)
-                throw new Exception("La hora de regreso debe ser mayor que la hora de salida.");
+            // Solo validar fechas si NO es una asignación pura de supervisor
+            if (!dto.ConductorId.HasValue || !dto.VehiculoId.HasValue)
+            {
+                if (dto.FechaHoraRegreso <= dto.FechaHoraSalida)
+                    throw new Exception("La hora de regreso debe ser mayor que la hora de salida.");
+            }
 
             solicitud.AreaSolicitante = dto.AreaSolicitante;
             solicitud.CantidadColaboradores = dto.CantidadColaboradores;
@@ -145,6 +168,36 @@ namespace SistemaTransporte.Application.Services
             solicitud.Estado = dto.Estado;
 
             _repository.Update(solicitud);
+
+            if (dto.ConductorId.HasValue && dto.VehiculoId.HasValue)
+            {
+                var asignaciones = await _asignacionRepository.GetAllAsync();
+                var asignacionExistente = asignaciones.FirstOrDefault(a => a.SolicitudTransporteId == id);
+
+                if (asignacionExistente != null)
+                {
+                    asignacionExistente.ConductorId = dto.ConductorId.Value;
+                    asignacionExistente.VehiculoId = dto.VehiculoId.Value;
+                    asignacionExistente.Estado = (EstadoAsignacion)1;
+                    _asignacionRepository.Update(asignacionExistente);
+                }
+                else
+                {
+                    var nuevaAsignacion = new Asignacion
+                    {
+                        SolicitudTransporteId = id,
+                        ConductorId = dto.ConductorId.Value,
+                        VehiculoId = dto.VehiculoId.Value,
+                        FechaHoraAsignacion = DateTime.Now,
+                        UsuarioAsignadorId = dto.UsuarioSolicitanteId,
+                        Estado = (EstadoAsignacion)1
+                    };
+                    await _asignacionRepository.AddAsync(nuevaAsignacion);
+                }
+
+                await _asignacionRepository.SaveChangesAsync();
+            }
+
             await _repository.SaveChangesAsync();
 
             return true;
