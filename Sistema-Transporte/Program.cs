@@ -17,9 +17,12 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("PermitirVue", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy.WithOrigins(
+                "http://localhost:5173",
+                "http://localhost:5174"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod();
     });
 });
 
@@ -64,8 +67,10 @@ builder.Services.AddScoped<IAsignacionService, AsignacionService>();
 builder.Services.AddScoped<IViajeService, ViajeService>();
 builder.Services.AddScoped<IMantenimientoService, MantenimientoService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IConsumoCombustibleService, ConsumoCombustibleService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -93,9 +98,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
 app.UseCors("PermitirVue");
+
+app.UseHttpsRedirection();
 
 app.UseAuthentication();
 

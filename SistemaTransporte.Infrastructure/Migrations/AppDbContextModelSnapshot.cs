@@ -271,6 +271,12 @@ namespace SistemaTransporte.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ResetPasswordToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ResetPasswordTokenExpira")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("RolId")
                         .HasColumnType("int");
 

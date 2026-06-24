@@ -6,53 +6,58 @@
     </div>
 
     <nav class="menu">
-      <ul>
-        <li @click="router.push('/dashboard')">
-          <img src="../assets/icons/dashboard.png" class="menu-icon" />
-          Dashboard
-        </li>
+  <ul>
+    <li @click="router.push('/dashboard')">
+      <img src="../assets/icons/dashboard.png" class="menu-icon" />
+      Dashboard
+    </li>
 
-        <li @click="router.push('/solicitudes')">
+        <li v-if="puedeVerOperativo" @click="router.push('/solicitudes')">
           <img src="../assets/icons/solicitudes.png" class="menu-icon" />
           Solicitudes
         </li>
 
-        <li @click="router.push('/vehiculos')">
+        <li v-if="puedeVerOperativo" @click="router.push('/vehiculos')">
           <img src="../assets/icons/vehiculos.png" class="menu-icon" />
           Vehículos
         </li>
 
-        <li @click="router.push('/conductores')">
+        <li v-if="puedeVerOperativo" @click="router.push('/conductores')">
           <img src="../assets/icons/conductores.png" class="menu-icon" />
           Conductores
         </li>
 
-        <li @click="router.push('/asignaciones')">
+        <li v-if="puedeVerOperativo" @click="router.push('/asignaciones')">
           <img src="../assets/icons/asignaciones.png" class="menu-icon" />
           Asignaciones
         </li>
 
-        <li @click="router.push('/viajes')">
+        <li v-if="puedeVerOperativo" @click="router.push('/viajes')">
           <img src="../assets/icons/rutas.png" class="menu-icon" />
           Viajes
         </li>
 
-        <li @click="router.push('/mantenimiento')">
-          <img src="../assets/icons/herramientas.png" class="menu-icon" />
-          Mantenimiento
-        </li>
-
-        <li @click="router.push('/combustible')">
-          <img src="../assets/icons/combustible.png" class="menu-icon" />
-          Combustible
-        </li>
-
-        <li @click="router.push('/reportes')">
+        <li v-if="puedeVerOperativo" @click="router.push('/reportes')">
           <img src="../assets/icons/reportes.png" class="menu-icon" />
           Reportes
         </li>
 
-        <li v-if="esSuperAdmin" @click="router.push('/usuarios')">
+         <li v-if="puedeVerOperativo" @click="router.push('/calendario')">
+          <img src="../assets/icons/calendario.png" class="menu-icon" />
+          Calendario
+        </li>
+
+        <li v-if="puedeVerTodo" @click="router.push('/mantenimiento')">
+          <img src="../assets/icons/herramientas.png" class="menu-icon" />
+          Mantenimiento
+        </li>
+
+        <li v-if="puedeVerTodo" @click="router.push('/combustible')">
+          <img src="../assets/icons/combustible.png" class="menu-icon" />
+          Combustible
+        </li>
+
+        <li v-if="puedeVerTodo" @click="router.push('/usuarios')">
           <img src="../assets/icons/conductores.png" class="menu-icon" />
           Usuarios
         </li>
@@ -75,7 +80,23 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const rolUsuario = localStorage.getItem('usuario_rol') || ''
+
 const esSuperAdmin = computed(() => rolUsuario === 'SuperAdmin')
+const esAdministrador = computed(() => rolUsuario === 'Administrador')
+const esSupervisor = computed(() => rolUsuario === 'Supervisor')
+const esOperador = computed(() => rolUsuario === 'Operador')
+
+const puedeVerTodo = computed(() =>
+  esSuperAdmin.value || esAdministrador.value
+)
+
+const puedeVerGestion = computed(() =>
+  esSuperAdmin.value || esAdministrador.value || esSupervisor.value
+)
+
+const puedeVerOperativo = computed(() =>
+  esSuperAdmin.value || esAdministrador.value || esSupervisor.value || esOperador.value
+)
 
 const cerrarSesion = () => {
   localStorage.clear()

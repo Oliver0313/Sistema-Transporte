@@ -7,7 +7,7 @@
   <div class="filters-bar-mockup">
     <div class="search-filter-wrapper">
       <input type="text" placeholder="Buscar solicitudes..." class="filter-search-input" v-model="filtroBusqueda" />
-      <img src="../../assets/icons/search.png" class="filter-search-icon" alt="Buscar" />
+      <img src="../assets/icons/search.png" class="filter-search-icon" alt="Buscar" />
     </div>
 
     <div class="filter-group-item">
@@ -37,7 +37,10 @@
 
     <button class="btn-filter-action" @click="limpiarFiltros">Limpiar Filtros</button>
 
-    <button class="btn-new-solicitud-trigger" @click="mostrarFormulario = true">
+    <button 
+      v-if="puedeCrear" 
+      class="btn-new-solicitud-trigger" 
+      @click="mostrarFormulario = true">
       Nueva solicitud
     </button>
   </div>
@@ -81,8 +84,22 @@
               <td class="actions-cell-fixed">
                 <div class="actions-wrapper">
                   <button class="action-btn-mockup icon-view" title="Ver detalle" @click="verDetalleSolicitud(solicitud)"></button>
-                  <button class="action-btn-mockup icon-edit btn-disabled" disabled title="No permitido para operador"></button>
-                  <button class="action-btn-mockup icon-delete btn-disabled" disabled title="No permitido para operador"></button>
+                  
+                  <button 
+                    class="action-btn-mockup icon-edit" 
+                    :class="{ 'btn-disabled': !puedeEditarOAsignar }"
+                    :disabled="!puedeEditarOAsignar" 
+                    :title="puedeEditarOAsignar ? (esSupervisor ? 'Asignar Unidad' : 'Editar Solicitud') : 'No permitido para operador'"
+                    @click="abrirModificarSolicitud(solicitud)">
+                  </button>
+                  
+                  <button 
+                    class="action-btn-mockup icon-delete" 
+                    :class="{ 'btn-disabled': !puedeEliminar }"
+                    :disabled="!puedeEliminar" 
+                    :title="puedeEliminar ? 'Eliminar solicitud' : 'No permitido para su rol'"
+                    @click="eliminarSolicitud(solicitud.id)">
+                  </button>
                 </div>
               </td>
             </tr>
@@ -98,50 +115,83 @@
     </section>
   </div>
 
-  <div v-if="mostrarFormulario" class="modal-overlay-mockup" @click.self="mostrarFormulario = false">
+  <div v-if="mostrarFormulario" class="modal-overlay-mockup" @click.self="cerrarFormulario">
     <div class="modal-container-central">
       <div class="form-panel-header-central">
-        <h3>Registrar Nueva Solicitud</h3>
-        <button class="btn-close-modal" @click="mostrarFormulario = false">×</button>
+        <h3>{{ formModel.id ? (esSupervisor ? 'Asignar Transporte #' + formModel.id : 'Modificar Solicitud #' + formModel.id) : 'Registrar Nueva Solicitud' }}</h3>
+        <button class="btn-close-modal" @click="cerrarFormulario">×</button>
       </div>
 
-      <form @submit.prevent="crearSolicitud" class="form-solicitud-mockup">
-        <div class="form-group-mockup">
-          <label>Área Solicitante</label>
-          <input type="text" v-model="formModel.areaSolicitante" placeholder="Ej. RRHH" required />
-        </div>
-
-        <div class="form-group-mockup">
-          <label>Cantidad de Colaboradores</label>
-          <input type="number" v-model.number="formModel.cantidadColaboradores" min="1" required />
+      <form @submit.prevent="guardarSolicitud" class="form-solicitud-mockup">
+        
+        <div class="form-row-mockup">
+          <div class="form-group-mockup">
+            <label>Área Solicitante</label>
+            <input type="text" v-model="formModel.areaSolicitante" :disabled="esSupervisor" placeholder="Ej. RRHH" required />
+          </div>
+          <div class="form-group-mockup">
+            <label>Cantidad de Colaboradores</label>
+            <input type="number" v-model.number="formModel.cantidadColaboradores" :disabled="esSupervisor" min="1" required />
+          </div>
         </div>
 
         <div class="form-row-mockup">
           <div class="form-group-mockup">
             <label>Fecha y Hora Salida</label>
-            <input type="datetime-local" v-model="formModel.fechaHoraSalida" required />
+            <input type="datetime-local" v-model="formModel.fechaHoraSalida" :disabled="esSupervisor" required />
           </div>
-
           <div class="form-group-mockup">
             <label>Fecha y Hora Regreso</label>
-            <input type="datetime-local" v-model="formModel.fechaHoraRegreso" required />
+            <input type="datetime-local" v-model="formModel.fechaHoraRegreso" :disabled="esSupervisor" required />
           </div>
         </div>
 
-        <div class="form-group-mockup">
-          <label>Destino</label>
-          <input type="text" v-model="formModel.destino" placeholder="Ej. Bonao" required />
+        <div class="form-row-mockup">
+          <div class="form-group-mockup">
+            <label>Destino</label>
+            <input type="text" v-model="formModel.destino" :disabled="esSupervisor" placeholder="Ej. Bonao" required />
+          </div>
+          <div v-if="formModel.id" class="form-group-mockup">
+            <label>Estado Proceso</label>
+            <select class="mockup-select" v-model="formModel.estado">
+              <option value="1">Pendiente</option>
+              <option value="2">Aprobada</option>
+              <option value="3">Rechazada</option>
+              <option value="4">Cancelada</option>
+              <option value="5">Finalizada</option>
+            </select>
+          </div>
         </div>
 
         <div class="form-group-mockup">
           <label>Motivo del Viaje</label>
-          <textarea v-model="formModel.motivo" placeholder="Ej. Capacitacion" rows="3" required></textarea>
+          <textarea v-model="formModel.motivo" :disabled="esSupervisor" placeholder="Ej. Capacitacion" rows="2" required></textarea>
         </div>
 
-        <div class="form-actions-central">
-          <button type="button" class="btn-cancel-mockup" @click="mostrarFormulario = false">Cancelar</button>
+        <div class="form-group-mockup">
+            <label>Conductor Asignado</label>
+            <select v-model="formModel.conductorId" class="mockup-select-modern" required>
+              <option value="" disabled selected>Seleccione un conductor</option>
+              <option v-for="c in conductores" :key="c.id" :value="c.id">
+                {{ c.nombre }} {{ c.apellido }}
+              </option>
+            </select>
+          </div>
+
+          <div class="form-group-mockup">
+            <label>Vehículo Asignado</label>
+            <select v-model="formModel.vehiculoId" class="mockup-select-modern" required>
+              <option value="" disabled selected>Seleccione un vehículo</option>
+              <option v-for="v in vehiculos" :key="v.id" :value="v.id">
+                {{ v.marca }} {{ v.modelo }} - {{ v.matricula }}
+              </option>
+            </select>
+          </div>
+
+        <div class="form-actions-central" style="margin-top: 10px;">
+          <button type="button" class="btn-cancel-mockup" @click="cerrarFormulario">Cancelar</button>
           <button type="submit" class="btn-submit-mockup" :disabled="guardando">
-            {{ guardando ? 'Enviando a la API...' : 'Registrar Solicitud' }}
+            {{ guardando ? 'Enviando a la API...' : (formModel.id ? 'Confirmar Cambios' : 'Registrar Solicitud') }}
           </button>
         </div>
       </form>
@@ -209,7 +259,7 @@
 
   <div v-if="mensajeErrorFlotante" class="toast-error-moderno">
     <div class="toast-content">
-      <span class="toast-title">Error en la solicitud</span>
+      <span class="toast-title">Notificación</span>
       <p class="toast-text">{{ mensajeErrorFlotante }}</p>
     </div>
     <button class="btn-close-toast" @click="mensajeErrorFlotante = ''">×</button>
@@ -227,41 +277,93 @@ const filtroFecha = ref('')
 const mostrarFormulario = ref(false)
 const guardando = ref(false)
 const solicitudes = ref([])
+const userRole = ref('')
+
+
+const vehiculos = ref([])
+const conductores = ref([])
 
 const mensajeErrorFlotante = ref('')
 
 const formModel = ref({
+  id: null,
   areaSolicitante: '',
   cantidadColaboradores: 1,
   fechaHoraSalida: '',
   fechaHoraRegreso: '',
   destino: '',
-  motivo: ''
+  motivo: '',
+  estado: 1,
+  vehiculoId: '',   
+  conductorId: ''  
 })
 
 const mostrarDetalle = ref(false)
 const solicitudSeleccionada = ref({})
+
+const obtenerRolDesdeToken = () => {
+  const token = localStorage.getItem('token_transporte')
+  if (!token) return
+
+  try {
+    const base64Url = token.split('.')[1]
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    )
+    const decoded = JSON.parse(jsonPayload)
+    userRole.value = decoded.role || decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || ''
+  } catch (e) {
+    console.error("Error decodificando el token de seguridad:", e)
+  }
+}
+
+const esSupervisor = computed(() => {
+  return userRole.value.toLowerCase() === 'supervisor'
+})
+
+const puedeCrear = computed(() => {
+  const rol = userRole.value.toLowerCase()
+  return rol === 'operador' || rol === 'admin' || rol === 'superadmin' || rol === 'administrador'
+})
+
+const puedeEditarOAsignar = computed(() => {
+  const rol = userRole.value.toLowerCase()
+  return rol === 'supervisor' || rol === 'admin' || rol === 'superadmin' || rol === 'administrador'
+})
+
+const puedeEliminar = computed(() => {
+  const rol = userRole.value.toLowerCase()
+  return rol === 'admin' || rol === 'superadmin' || rol === 'administrador'
+})
 
 const verDetalleSolicitud = (solicitud) => {
   solicitudSeleccionada.value = { ...solicitud }
   mostrarDetalle.value = true
 }
 
+
 const fetchSolicitudesDeAPI = async () => {
   const token = localStorage.getItem('token_transporte')
-
+  const headers = { Authorization: `Bearer ${token}` }
+  
   try {
-    const response = await fetch('https://localhost:7221/api/solicitudestransporte', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
+    const [resV, resC, resS] = await Promise.all([
+      fetch('https://localhost:7221/api/Vehiculos', { headers }),
+      fetch('https://localhost:7221/api/Conductores', { headers }),
+      fetch('https://localhost:7221/api/solicitudestransporte', { headers })
+    ])
 
-    if (response.ok) {
-      solicitudes.value = await response.json()
+    if (resV.ok) vehiculos.value = await resV.json()
+    if (resC.ok) conductores.value = await resC.json()
+    if (resS.ok) {
+      solicitudes.value = await resS.json()
     }
   } catch (error) {
-    console.error('Error cargando solicitudes de la base de datos:', error)
+    console.error('Error cargando los datos core de la API:', error)
   }
 }
 
@@ -294,81 +396,137 @@ const limpiarFiltros = () => {
 
 const formatearFechaVista = (fechaIso) => {
   if (!fechaIso) return '---'
-
   const fecha = new Date(fechaIso)
-
   return fecha.toLocaleString('es-DO', {
-    hour12: true,
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
+    hour12: true, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit'
   })
 }
 
-const formatearEstadoVista = (estado) => {
-  const mapeoEstados = {
-    1: 'Pendiente',
-    2: 'Aprobada',
-    3: 'Rechazada',
-    4: 'Cancelada',
-    5: 'Finalizada'
-  }
+const formatearFechaInput = (fechaIso) => {
+  if (!fechaIso) return ''
+  const d = new Date(fechaIso)
+  const pad = (n) => n.toString().padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
 
+const formatearEstadoVista = (estado) => {
+  const mapeoEstados = { 1: 'Pendiente', 2: 'Aprobada', 3: 'Rechazada', 4: 'Cancelada', 5: 'Finalizada' }
   return mapeoEstados[estado] || estado || 'Pendiente'
 }
 
 const obtenerClaseEstado = (estado) => {
-  const clases = {
-    1: 'pendiente',
-    2: 'aprobada',
-    3: 'rechazada',
-    4: 'cancelada',
-    5: 'finalizada'
-  }
-
+  const clases = { 1: 'pendiente', 2: 'aprobada', 3: 'rechazada', 4: 'cancelada', 5: 'finalizada' }
   return clases[estado] || 'pendiente'
 }
 
-onMounted(() => {
-  fetchSolicitudesDeAPI()
-})
 
-const crearSolicitud = async () => {
-  const salida = new Date(formModel.value.fechaHoraSalida)
-  const regreso = new Date(formModel.value.fechaHoraRegreso)
+const abrirModificarSolicitud = (solicitud) => {
 
-  if (salida.getTime() === regreso.getTime()) {
-    mensajeErrorFlotante.value = 'La fecha y hora de salida no puede ser igual a la de regreso.'
-    setTimeout(() => { mensajeErrorFlotante.value = '' }, 4000)
-    return
+  let vId = ''
+  let cId = ''
+
+  
+  if (solicitud.vehiculoAsignado) {
+    const vEncontrado = vehiculos.value.find(v => 
+      solicitud.vehiculoAsignado.includes(v.matricula) || 
+      solicitud.vehiculoAsignado.includes(v.modelo)
+    )
+    if (vEncontrado) vId = vEncontrado.id
   }
 
-  if (regreso < salida) {
-    mensajeErrorFlotante.value = 'La fecha de regreso no puede ser anterior a la fecha de salida.'
-    setTimeout(() => { mensajeErrorFlotante.value = '' }, 4000)
-    return
+
+  if (solicitud.conductorAsignado) {
+    const cEncontrado = conductores.value.find(c => 
+      solicitud.conductorAsignado.includes(c.nombre)
+    )
+    if (cEncontrado) cId = cEncontrado.id
+  }
+
+
+  formModel.value = { 
+    id: solicitud.id,
+    areaSolicitante: solicitud.areaSolicitante,
+    cantidadColaboradores: solicitud.cantidadColaboradores,
+    fechaHoraSalida: formatearFechaInput(solicitud.fechaHoraSalida),
+    fechaHoraRegreso: formatearFechaInput(solicitud.fechaHoraRegreso),
+    destino: solicitud.destino,
+    motivo: solicitud.motivo,
+    estado: solicitud.estado || 1,
+    
+
+    vehiculoId: vId, 
+    conductorId: cId 
+  }
+
+  if (esSupervisor.value && formModel.value.estado === 1) {
+    formModel.value.estado = 2
+  }
+  mostrarFormulario.value = true
+}
+
+
+const cerrarFormulario = () => {
+  mostrarFormulario.value = false
+  formModel.value = {
+    id: null, areaSolicitante: '', cantidadColaboradores: 1, fechaHoraSalida: '',
+    fechaHoraRegreso: '', destino: '', motivo: '', estado: 1, vehiculoId: '', conductorId: ''
+  }
+}
+
+
+const guardarSolicitud = async () => {
+  console.log('=== GUARDANDO ===')
+  console.log('esSupervisor:', esSupervisor.value)
+  console.log('formModel:', JSON.stringify(formModel.value))
+
+  const salida = new Date(formModel.value.fechaHoraSalida)
+  const regreso = new Date(formModel.value.fechaHoraRegreso)
+  console.log('salida:', salida)
+  console.log('regreso:', regreso)
+
+  if (!esSupervisor.value) {
+    if (salida.getTime() === regreso.getTime()) {
+      mensajeErrorFlotante.value = 'La fecha y hora de salida no puede ser igual a la de regreso.'
+      return
+    }
+    if (regreso < salida) {
+      mensajeErrorFlotante.value = 'La fecha de regreso no puede ser anterior a la fecha de salida.'
+      return
+    }
   }
 
   guardando.value = true
-
   const token = localStorage.getItem('token_transporte')
   const idUsuarioLogueado = parseInt(localStorage.getItem('usuario_id')) || 1
 
+
   const payload = {
+    id: formModel.value.id || 0,
     areaSolicitante: formModel.value.areaSolicitante,
     cantidadColaboradores: parseInt(formModel.value.cantidadColaboradores),
-    fechaHoraSalida: formModel.value.fechaHoraSalida ? salida.toISOString() : null,
-    fechaHoraRegreso: formModel.value.fechaHoraRegreso ? regreso.toISOString() : null,
+    fechaHoraSalida: salida.toISOString(),
+    fechaHoraRegreso: regreso.toISOString(),
     destino: formModel.value.destino,
     motivo: formModel.value.motivo,
-    usuarioSolicitanteId: idUsuarioLogueado
+    estado: parseInt(formModel.value.estado),
+    usuarioSolicitanteId: idUsuarioLogueado,
+    conductorId: formModel.value.conductorId ? parseInt(formModel.value.conductorId) : null,  // ← CLAVE
+    vehiculoId: formModel.value.vehiculoId ? parseInt(formModel.value.vehiculoId) : null      // ← CLAVE
   }
 
+  const url = formModel.value.id
+    ? `https://localhost:7221/api/solicitudestransporte/${formModel.value.id}`
+    : 'https://localhost:7221/api/solicitudestransporte'
+
+  const method = formModel.value.id ? 'PUT' : 'POST'
+
+  console.log('URL:', url)
+  console.log('method:', method)
+  console.log('payload:', JSON.stringify(payload))
+
   try {
-    const response = await fetch('https://localhost:7221/api/solicitudestransporte', {
-      method: 'POST',
+    const response = await fetch(url, {
+      method: method,
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`
@@ -376,52 +534,76 @@ const crearSolicitud = async () => {
       body: JSON.stringify(payload)
     })
 
+    console.log('response status:', response.status)
+
     if (response.ok) {
       await fetchSolicitudesDeAPI()
-
-      formModel.value = {
-        areaSolicitante: '',
-        cantidadColaboradores: 1,
-        fechaHoraSalida: '',
-        fechaHoraRegreso: '',
-        destino: '',
-        motivo: ''
-      }
-
-      mostrarFormulario.value = false
+      cerrarFormulario()
     } else {
       const errorResponse = await response.json()
-      console.error('Error del Servidor:', errorResponse)
-      alert('Error en validación de datos: ' + JSON.stringify(errorResponse.errors || errorResponse))
+      console.error('Error del servidor:', errorResponse)
+      alert('Error devuelto por el servidor: ' + JSON.stringify(errorResponse.errors || errorResponse))
     }
   } catch (error) {
-    console.error('Error al conectar con la API:', error)
+    console.error('ERROR EN FETCH:', error)
+    alert('Error de red: ' + error.message)
   } finally {
     guardando.value = false
   }
 }
-</script>
 
-<style>
-/* Header de la página */
+const eliminarSolicitud = async (id) => {
+  if (!confirm(`¿Está completamente seguro de eliminar permanentemente la solicitud #${id}?`)) return
+  
+  const token = localStorage.getItem('token_transporte')
+  try {
+    const response = await fetch(`https://localhost:7221/api/solicitudestransporte/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    
+    if (response.ok) {
+      await fetchSolicitudesDeAPI()
+    } else {
+      mensajeErrorFlotante.value = 'No se pudo eliminar la solicitud.'
+      setTimeout(() => { mensajeErrorFlotante.value = '' }, 5000)
+    }
+  } catch (error) {
+    console.error('Error al realizar la petición DELETE:', error)
+    mensajeErrorFlotante.value = 'Ocurrió un error de red o el servidor no responde.'
+    setTimeout(() => { mensajeErrorFlotante.value = '' }, 5000)
+  }
+}
+
+onMounted(() => {
+  obtenerRolDesdeToken()
+  fetchSolicitudesDeAPI() 
+})
+</script>
+<style scoped>
+
+.solicitudes-container-page,
+.solicitudes-container-page * {
+  font-family: inherit !important;
+}
+
+
 .section-header-mockup {
-  margin-bottom: 26px;
+  margin-bottom: 20px;
 }
 
 .section-header-mockup h2 {
-  font-size: 1.8rem;
-  font-weight: 800;
+  font-size: 1.5rem;
+  font-weight: 700;
   color: #111827;
-  margin: 0;
 }
 
 .section-header-mockup p {
   color: #6b7280;
-  font-size: 0.95rem;
-  margin-top: 6px;
+  font-size: 0.9rem;
 }
 
-/* Filtros */
+
 .filters-bar-mockup {
   display: flex;
   gap: 16px;
@@ -488,7 +670,7 @@ const crearSolicitud = async () => {
   border-color: #9ca3af;
 }
 
-/* Botones */
+
 .btn-filter-action,
 .btn-new-solicitud-trigger,
 .btn-submit-mockup {
@@ -523,7 +705,7 @@ const crearSolicitud = async () => {
   font-weight: 700;
 }
 
-/* Tabla */
+
 .card-panel-mockup {
   background: white;
   border-radius: 18px;
@@ -558,7 +740,7 @@ const crearSolicitud = async () => {
   vertical-align: middle;
 }
 
-/* Estados */
+
 .status-pill-mockup {
   padding: 5px 11px;
   border-radius: 999px;
@@ -568,32 +750,13 @@ const crearSolicitud = async () => {
   white-space: nowrap;
 }
 
-.pendiente {
-  background: #fef3c7;
-  color: #92400e;
-}
+.pendiente { background: #fef3c7; color: #92400e; }
+.aprobada { background: #dcfce7; color: #166534; }
+.rechazada { background: #fee2e2; color: #991b1b; }
+.cancelada { background: #e5e7eb; color: #374151; }
+.finalizada { background: #dbeafe; color: #1e40af; }
 
-.aprobada {
-  background: #dcfce7;
-  color: #166534;
-}
 
-.rechazada {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.cancelada {
-  background: #e5e7eb;
-  color: #374151;
-}
-
-.finalizada {
-  background: #dbeafe;
-  color: #1e40af;
-}
-
-/* Acciones */
 .actions-cell-fixed {
   text-align: center;
 }
@@ -626,19 +789,11 @@ const crearSolicitud = async () => {
   cursor: not-allowed;
 }
 
-.icon-view {
-  background-image: url('../assets/icons/ver.png');
-}
+.icon-view { background-image: url('../assets/icons/ver.png'); }
+.icon-edit { background-image: url('../assets/icons/editar-negro.png'); }
+.icon-delete { background-image: url('../assets/icons/eliminar.png'); }
 
-.icon-edit {
-  background-image: url('../assets/icons/editar-negro.png');
-}
 
-.icon-delete {
-  background-image: url('../assets/icons/eliminar.png');
-}
-
-/* Modal */
 .modal-overlay-mockup {
   position: fixed;
   inset: 0;
@@ -651,10 +806,10 @@ const crearSolicitud = async () => {
 
 .modal-container-central {
   background: white;
-  width: 650px;
+  width: 600px;
   max-width: 95%;
   border-radius: 18px;
-  padding: 24px;
+  padding: 22px;
   box-shadow: 0 15px 35px rgba(0,0,0,.12);
 }
 
@@ -662,8 +817,8 @@ const crearSolicitud = async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 18px;
-  padding-bottom: 12px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
   border-bottom: 1px solid #e5e7eb;
 }
 
@@ -682,34 +837,54 @@ const crearSolicitud = async () => {
   cursor: pointer;
 }
 
+
 .form-solicitud-mockup {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .form-group-mockup {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .form-group-mockup label {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: #374151;
+  margin-bottom: 2px;
 }
 
+
 .form-group-mockup input,
+.form-group-mockup select,
+.form-solicitud-mockup .mockup-select {
+  height: 40px !important;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  outline: none;
+  background: #ffffff;
+}
+
+.form-group-mockup input:focus,
+.form-group-mockup select:focus {
+  border-color: #9ca3af;
+}
+
 .form-group-mockup textarea {
   padding: 10px;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   font-size: 0.9rem;
   outline: none;
+  resize: none; 
 }
 
-.form-group-mockup input:focus,
 .form-group-mockup textarea:focus {
   border-color: #9ca3af;
 }
@@ -724,9 +899,10 @@ const crearSolicitud = async () => {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+  margin-top: 6px;
 }
 
-/* Detalle */
+
 .detalle-solicitud-wrapper {
   display: flex;
   flex-direction: column;
@@ -754,13 +930,13 @@ const crearSolicitud = async () => {
   border: 1px solid #e5e7eb;
 }
 
-/* Toast */
+
 .toast-error-moderno {
   position: fixed;
   top: 20px;
   right: 20px;
   background: white;
-  border-left: 4px solid #dc2626;
+  border-left: 4px solid #10b981; 
   padding: 16px;
   border-radius: 10px;
   box-shadow: 0 10px 20px rgba(0,0,0,.1);

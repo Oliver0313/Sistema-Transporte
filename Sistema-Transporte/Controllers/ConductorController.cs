@@ -5,7 +5,7 @@ using SistemaTransporte.Application.Interfaces;
 
 namespace Sistema_Transporte.Controllers
 {
-    [Authorize(Roles = "SuperAdmin,Administrador")]
+    [Authorize] 
     [ApiController]
     [Route("api/[controller]")]
     public class ConductoresController : ControllerBase
@@ -17,14 +17,14 @@ namespace Sistema_Transporte.Controllers
             _conductorService = conductorService;
         }
 
-        [HttpGet]
+        [HttpGet] 
         public async Task<IActionResult> GetAll()
         {
             var conductores = await _conductorService.GetAllAsync();
             return Ok(conductores);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}")] 
         public async Task<IActionResult> GetById(int id)
         {
             var conductor = await _conductorService.GetByIdAsync(id);
@@ -35,14 +35,16 @@ namespace Sistema_Transporte.Controllers
             return Ok(conductor);
         }
 
-        [HttpPost]
+        [HttpPost] 
+        [Authorize(Roles = "SuperAdmin,Administrador")]
         public async Task<IActionResult> Create(CrearConductorDto dto)
         {
             var conductor = await _conductorService.CreateAsync(dto);
             return CreatedAtAction(nameof(GetById), new { id = conductor.Id }, conductor);
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id}")] 
+        [Authorize(Roles = "SuperAdmin,Administrador")]
         public async Task<IActionResult> Update(int id, ActualizarConductorDto dto)
         {
             var actualizado = await _conductorService.UpdateAsync(id, dto);
@@ -53,15 +55,14 @@ namespace Sistema_Transporte.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}")] 
+        [Authorize(Roles = "SuperAdmin,Administrador")]
         public async Task<IActionResult> Delete(int id)
         {
-            var eliminado = await _conductorService.DeleteAsync(id);
-
-            if (!eliminado)
-                return NotFound();
-
-            return NoContent();
+            return BadRequest(new
+            {
+                message = "Por políticas de auditoría, los conductores no pueden ser eliminados permanentemente del sistema."
+            });
         }
     }
 }
