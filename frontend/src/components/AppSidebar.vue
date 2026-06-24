@@ -42,6 +42,11 @@
           Reportes
         </li>
 
+         <li v-if="puedeVerOperativo" @click="router.push('/calendario')">
+          <img src="../assets/icons/calendario.png" class="menu-icon" />
+          Calendario
+        </li>
+
         <li v-if="puedeVerTodo" @click="router.push('/mantenimiento')">
           <img src="../assets/icons/herramientas.png" class="menu-icon" />
           Mantenimiento

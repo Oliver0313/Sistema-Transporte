@@ -168,16 +168,25 @@
           <textarea v-model="formModel.motivo" :disabled="esSupervisor" placeholder="Ej. Capacitacion" rows="2" required></textarea>
         </div>
 
-        <div v-if="formModel.id" class="form-row-mockup" style="border-top: 1px dashed #e5e7eb; padding-top: 12px; margin-top: 4px;">
+        <div class="form-group-mockup">
+            <label>Conductor Asignado</label>
+            <select v-model="formModel.conductorId" class="mockup-select-modern" required>
+              <option value="" disabled selected>Seleccione un conductor</option>
+              <option v-for="c in conductores" :key="c.id" :value="c.id">
+                {{ c.nombre }} {{ c.apellido }}
+              </option>
+            </select>
+          </div>
+
           <div class="form-group-mockup">
             <label>Vehículo Asignado</label>
-            <input type="text" v-model="formModel.vehiculoAsignado" placeholder="Placa / Unidad" required />
+            <select v-model="formModel.vehiculoId" class="mockup-select-modern" required>
+              <option value="" disabled selected>Seleccione un vehículo</option>
+              <option v-for="v in vehiculos" :key="v.id" :value="v.id">
+                {{ v.marca }} {{ v.modelo }} - {{ v.matricula }}
+              </option>
+            </select>
           </div>
-          <div class="form-group-mockup">
-            <label>Conductor Asignado</label>
-            <input type="text" v-model="formModel.conductorAsignado" placeholder="Nombre Chofer" required />
-          </div>
-        </div>
 
         <div class="form-actions-central" style="margin-top: 10px;">
           <button type="button" class="btn-cancel-mockup" @click="cerrarFormulario">Cancelar</button>
@@ -270,6 +279,10 @@ const guardando = ref(false)
 const solicitudes = ref([])
 const userRole = ref('')
 
+
+const vehiculos = ref([])
+const conductores = ref([])
+
 const mensajeErrorFlotante = ref('')
 
 const formModel = ref({
@@ -281,13 +294,12 @@ const formModel = ref({
   destino: '',
   motivo: '',
   estado: 1,
-  vehiculoAsignado: '',
-  conductorAsignado: ''
+  vehiculoId: '',   
+  conductorId: ''  
 })
 
 const mostrarDetalle = ref(false)
 const solicitudSeleccionada = ref({})
-
 
 const obtenerRolDesdeToken = () => {
   const token = localStorage.getItem('token_transporte')
@@ -309,7 +321,6 @@ const obtenerRolDesdeToken = () => {
   }
 }
 
-
 const esSupervisor = computed(() => {
   return userRole.value.toLowerCase() === 'supervisor'
 })
@@ -318,7 +329,6 @@ const puedeCrear = computed(() => {
   const rol = userRole.value.toLowerCase()
   return rol === 'operador' || rol === 'admin' || rol === 'superadmin' || rol === 'administrador'
 })
-
 
 const puedeEditarOAsignar = computed(() => {
   const rol = userRole.value.toLowerCase()
@@ -330,23 +340,30 @@ const puedeEliminar = computed(() => {
   return rol === 'admin' || rol === 'superadmin' || rol === 'administrador'
 })
 
-
 const verDetalleSolicitud = (solicitud) => {
   solicitudSeleccionada.value = { ...solicitud }
   mostrarDetalle.value = true
 }
 
+
 const fetchSolicitudesDeAPI = async () => {
   const token = localStorage.getItem('token_transporte')
+  const headers = { Authorization: `Bearer ${token}` }
+  
   try {
-    const response = await fetch('https://localhost:7221/api/solicitudestransporte', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    if (response.ok) {
-      solicitudes.value = await response.json()
+    const [resV, resC, resS] = await Promise.all([
+      fetch('https://localhost:7221/api/Vehiculos', { headers }),
+      fetch('https://localhost:7221/api/Conductores', { headers }),
+      fetch('https://localhost:7221/api/solicitudestransporte', { headers })
+    ])
+
+    if (resV.ok) vehiculos.value = await resV.json()
+    if (resC.ok) conductores.value = await resC.json()
+    if (resS.ok) {
+      solicitudes.value = await resS.json()
     }
   } catch (error) {
-    console.error('Error cargando solicitudes de la base de datos:', error)
+    console.error('Error cargando los datos core de la API:', error)
   }
 }
 
@@ -385,7 +402,6 @@ const formatearFechaVista = (fechaIso) => {
   })
 }
 
-
 const formatearFechaInput = (fechaIso) => {
   if (!fechaIso) return ''
   const d = new Date(fechaIso)
@@ -403,7 +419,30 @@ const obtenerClaseEstado = (estado) => {
   return clases[estado] || 'pendiente'
 }
 
+
 const abrirModificarSolicitud = (solicitud) => {
+
+  let vId = ''
+  let cId = ''
+
+  
+  if (solicitud.vehiculoAsignado) {
+    const vEncontrado = vehiculos.value.find(v => 
+      solicitud.vehiculoAsignado.includes(v.matricula) || 
+      solicitud.vehiculoAsignado.includes(v.modelo)
+    )
+    if (vEncontrado) vId = vEncontrado.id
+  }
+
+
+  if (solicitud.conductorAsignado) {
+    const cEncontrado = conductores.value.find(c => 
+      solicitud.conductorAsignado.includes(c.nombre)
+    )
+    if (cEncontrado) cId = cEncontrado.id
+  }
+
+
   formModel.value = { 
     id: solicitud.id,
     areaSolicitante: solicitud.areaSolicitante,
@@ -413,8 +452,10 @@ const abrirModificarSolicitud = (solicitud) => {
     destino: solicitud.destino,
     motivo: solicitud.motivo,
     estado: solicitud.estado || 1,
-    vehiculoAsignado: solicitud.vehiculoAsignado || '',
-    conductorAsignado: solicitud.conductorAsignado || ''
+    
+
+    vehiculoId: vId, 
+    conductorId: cId 
   }
 
   if (esSupervisor.value && formModel.value.estado === 1) {
@@ -423,18 +464,25 @@ const abrirModificarSolicitud = (solicitud) => {
   mostrarFormulario.value = true
 }
 
+
 const cerrarFormulario = () => {
   mostrarFormulario.value = false
   formModel.value = {
     id: null, areaSolicitante: '', cantidadColaboradores: 1, fechaHoraSalida: '',
-    fechaHoraRegreso: '', destino: '', motivo: '', estado: 1, vehiculoAsignado: '', conductorAsignado: ''
+    fechaHoraRegreso: '', destino: '', motivo: '', estado: 1, vehiculoId: '', conductorId: ''
   }
 }
 
+
 const guardarSolicitud = async () => {
+  console.log('=== GUARDANDO ===')
+  console.log('esSupervisor:', esSupervisor.value)
+  console.log('formModel:', JSON.stringify(formModel.value))
+
   const salida = new Date(formModel.value.fechaHoraSalida)
   const regreso = new Date(formModel.value.fechaHoraRegreso)
-
+  console.log('salida:', salida)
+  console.log('regreso:', regreso)
 
   if (!esSupervisor.value) {
     if (salida.getTime() === regreso.getTime()) {
@@ -451,6 +499,7 @@ const guardarSolicitud = async () => {
   const token = localStorage.getItem('token_transporte')
   const idUsuarioLogueado = parseInt(localStorage.getItem('usuario_id')) || 1
 
+
   const payload = {
     id: formModel.value.id || 0,
     areaSolicitante: formModel.value.areaSolicitante,
@@ -460,16 +509,20 @@ const guardarSolicitud = async () => {
     destino: formModel.value.destino,
     motivo: formModel.value.motivo,
     estado: parseInt(formModel.value.estado),
-    vehiculoAsignado: formModel.value.vehiculoAsignado || null,
-    conductorAsignado: formModel.value.conductorAsignado || null,
-    usuarioSolicitanteId: idUsuarioLogueado
+    usuarioSolicitanteId: idUsuarioLogueado,
+    conductorId: formModel.value.conductorId ? parseInt(formModel.value.conductorId) : null,  // ← CLAVE
+    vehiculoId: formModel.value.vehiculoId ? parseInt(formModel.value.vehiculoId) : null      // ← CLAVE
   }
 
-  const url = formModel.value.id 
+  const url = formModel.value.id
     ? `https://localhost:7221/api/solicitudestransporte/${formModel.value.id}`
     : 'https://localhost:7221/api/solicitudestransporte'
 
   const method = formModel.value.id ? 'PUT' : 'POST'
+
+  console.log('URL:', url)
+  console.log('method:', method)
+  console.log('payload:', JSON.stringify(payload))
 
   try {
     const response = await fetch(url, {
@@ -481,15 +534,19 @@ const guardarSolicitud = async () => {
       body: JSON.stringify(payload)
     })
 
+    console.log('response status:', response.status)
+
     if (response.ok) {
       await fetchSolicitudesDeAPI()
       cerrarFormulario()
     } else {
       const errorResponse = await response.json()
+      console.error('Error del servidor:', errorResponse)
       alert('Error devuelto por el servidor: ' + JSON.stringify(errorResponse.errors || errorResponse))
     }
   } catch (error) {
-    console.error('Error enviando la solicitud a la API:', error)
+    console.error('ERROR EN FETCH:', error)
+    alert('Error de red: ' + error.message)
   } finally {
     guardando.value = false
   }
@@ -508,29 +565,21 @@ const eliminarSolicitud = async (id) => {
     if (response.ok) {
       await fetchSolicitudesDeAPI()
     } else {
-
-mensajeErrorFlotante.value = 'No se pudo eliminar la solicitud.'
-      
-      setTimeout(() => {
-        mensajeErrorFlotante.value = ''
-      }, 5000)
+      mensajeErrorFlotante.value = 'No se pudo eliminar la solicitud.'
+      setTimeout(() => { mensajeErrorFlotante.value = '' }, 5000)
     }
   } catch (error) {
     console.error('Error al realizar la petición DELETE:', error)
     mensajeErrorFlotante.value = 'Ocurrió un error de red o el servidor no responde.'
-    
-    setTimeout(() => {
-      mensajeErrorFlotante.value = ''
-    }, 5000)
+    setTimeout(() => { mensajeErrorFlotante.value = '' }, 5000)
   }
 }
 
 onMounted(() => {
   obtenerRolDesdeToken()
-  fetchSolicitudesDeAPI()
+  fetchSolicitudesDeAPI() 
 })
 </script>
-
 <style scoped>
 
 .solicitudes-container-page,
