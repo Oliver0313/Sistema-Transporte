@@ -1,40 +1,49 @@
 <template>
-  <div class="section-header-mockup">
-    <h2>Gestión de Vehículos</h2>
-    <p>Administra y gestiona a los vehículos</p>
+  <div class="dashboard-header">
+    <div class="dashboard-header-left">
+      <h2>Gestión de Vehículos</h2>
+      <p>Administra la flota, disponibilidad y estado operativo de cada unidad.</p>
+    </div>
+
+    <div class="dashboard-header-badge">
+      {{ totalVehiculos }} vehículos registrados
+    </div>
   </div>
 
   <div class="cards-kpi-container">
     <div class="card-kpi">
       <div class="card-kpi-icon total-icon">
-        <img src="../assets/icons/vehiculo-negro.png" alt="Total" />
+        <CarFront :size="24" />
       </div>
       <div class="card-kpi-info">
         <span>Total vehículos</span>
         <h3>{{ totalVehiculos }}</h3>
       </div>
     </div>
+
     <div class="card-kpi">
-      <div class="card-kpi-icon disponible-icon">
-        <img src="../assets/icons/disponible-negro.png" alt="Disponibles" />
-      </div>
+    <div class="card-kpi-icon disponible-icon">
+      <CircleCheck :size="24" />
+    </div>
       <div class="card-kpi-info">
         <span>Disponibles</span>
         <h3>{{ disponiblesContador }}</h3>
       </div>
     </div>
+
     <div class="card-kpi">
       <div class="card-kpi-icon mantenimiento-icon">
-        <img src="../assets/icons/herramienta-negra.png" alt="Mantenimiento" />
+        <Wrench :size="24" />
       </div>
       <div class="card-kpi-info">
         <span>En mantenimiento</span>
         <h3>{{ mantenimientoContador }}</h3>
       </div>
     </div>
+    
     <div class="card-kpi">
       <div class="card-kpi-icon no-disponible-icon">
-        <img src="../assets/icons/cancelar.png" alt="No disponibles" />
+        <CircleX :size="24" />
       </div>
       <div class="card-kpi-info">
         <span>No disponibles</span>
@@ -46,17 +55,42 @@
   <div class="quick-actions-bar">
     <h4>Acciones rápidas</h4>
     <div class="actions-wrapper-quick">
-      <button class="btn-quick-action" :class="{ 'btn-disabled': !puedeModificarVehiculos }" :disabled="!puedeModificarVehiculos" @click="abrirFormularioModal">
-        <img src="../assets/icons/registrar-negro.png" alt="Registrar" /> Registrar vehículo
+    <button
+      class="btn-quick-action"
+      :class="{ 'btn-disabled': !puedeModificarVehiculos }"
+      :disabled="!puedeModificarVehiculos"
+      @click="abrirFormularioModal"
+    >
+      <Plus :size="18" />
+      <span>Registrar vehículo</span>
+    </button>
+
+      <button
+        class="btn-quick-action"
+        :class="{ 'btn-disabled': !puedeGestionarMantenimiento }"
+        :disabled="!puedeGestionarMantenimiento"
+        @click="abrirMantenimientoNuevo"
+      >
+        <Wrench :size="18" />
+        <span>Registrar mantenimiento</span>
       </button>
-      <button class="btn-quick-action" :class="{ 'btn-disabled': !puedeGestionarMantenimiento }" :disabled="!puedeGestionarMantenimiento" @click="abrirMantenimientoNuevo">
-        <img src="../assets/icons/herramienta-negra.png" alt="Mantenimiento" /> Registrar mantenimiento
+
+      <button
+        class="btn-quick-action"
+        :class="{ 'btn-disabled': !puedeModificarVehiculos }"
+        :disabled="!puedeModificarVehiculos"
+        @click="abrirConsumoNuevo"
+      >
+        <Fuel :size="18" />
+        <span>Registrar consumo</span>
       </button>
-      <button class="btn-quick-action" :class="{ 'btn-disabled': !puedeModificarVehiculos }" :disabled="!puedeModificarVehiculos" @click="abrirConsumoNuevo">
-        <img src="../assets/icons/gasolina-negro.png" alt="Consumo" /> Registrar consumo
-      </button>
-      <button class="btn-quick-action" @click="consultarDisponibilidadCalendario">
-        <img src="../assets/icons/calendario-negro.png" alt="Consultar" /> Consultar disponibilidad
+
+      <button
+        class="btn-quick-action"
+        @click="consultarDisponibilidadCalendario"
+      >
+        <CalendarDays :size="18" />
+        <span>Consultar disponibilidad</span>
       </button>
     </div>
   </div>
@@ -121,10 +155,34 @@
               </td>
               <td class="actions-cell-fixed">
                 <div class="actions-wrapper">
-                  <button class="action-btn-mockup icon-view" title="Ver detalle" @click="verDetalleVehiculo(vehiculo)"></button>
-                  <button class="action-btn-mockup icon-edit" :class="{ 'btn-disabled': !puedeModificarVehiculos }" :disabled="!puedeModificarVehiculos" title="Editar Vehículo" @click="abrirEditarModal(vehiculo)"></button>
-                  <button class="action-btn-mockup icon-delete" :class="{ 'btn-disabled': !puedeEliminarVehiculos }" :disabled="!puedeEliminarVehiculos" title="Eliminar Vehículo" @click="eliminarVehiculoApi(vehiculo.matricula)"></button>
-                </div>
+              <button
+                class="action-btn-mockup"
+                title="Ver detalle"
+                @click="verDetalleVehiculo(vehiculo)"
+              >
+                <Eye :size="15" />
+              </button>
+
+              <button
+                class="action-btn-mockup"
+                :class="{ 'btn-disabled': !puedeModificarVehiculos }"
+                :disabled="!puedeModificarVehiculos"
+                title="Editar vehículo"
+                @click="abrirEditarModal(vehiculo)"
+              >
+                <Pencil :size="15" />
+              </button>
+
+              <button
+                class="action-btn-mockup"
+                :class="{ 'btn-disabled': !puedeEliminarVehiculos }"
+                :disabled="!puedeEliminarVehiculos"
+                title="Eliminar vehículo"
+                @click="eliminarVehiculoApi(vehiculo.matricula)"
+              >
+                <Trash2 :size="15" />
+              </button>
+            </div>
               </td>
             </tr>
             <tr v-if="vehiculosFiltrados.length === 0">
@@ -384,6 +442,20 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
+
+
+import {
+  CarFront,
+  CircleCheck,
+  Wrench,
+  CircleX,
+  Plus,
+  Fuel,
+  CalendarDays,
+  Eye,
+  Pencil,
+  Trash2
+} from 'lucide-vue-next'
 
 const router = useRouter()
 const rolUsuario = ref('Operador')
@@ -721,21 +793,39 @@ onMounted(() => {
 .card-kpi {
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  padding: 16px;
+  border-radius: 18px;
+  padding: 18px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 14px;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
 }
 
 .card-kpi-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 14px;
+  background-color: #f3f4f6 !important;
+  color: #111827;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+}
+
+.cards-kpi-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+
+
+.card-kpi-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke-width: 2;
 }
 
 .card-kpi-icon img { width: 20px; height: 20px; }
@@ -766,31 +856,38 @@ onMounted(() => {
 }
 
 .action-btn-mockup:hover:not(:disabled) {
-  background-color: #f9fafb;
-  border-color: #d1d5db;
+  background: #111827;
+  color: white;
+  border-color: #111827;
+  transform: scale(1.05);
 }
 
 .btn-quick-action {
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 10px 16px;
-  font-size: 0.88rem;
-  font-weight: 500;
-  color: #111827;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
+  gap: 10px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 12px 18px;
+  font-size: .9rem;
+  font-weight: 600;
+  color: #111827;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all .2s ease;
 }
 
 .btn-quick-action img { width: 18px; height: 18px; object-fit: contain; flex-shrink: 0; }
 
 .btn-quick-action:hover:not(:disabled) {
-  background-color: #f9fafb;
-  border-color: #d1d5db;
+  background: #111827;
+  color: white;
+  border-color: #111827;
+  transform: translateY(-2px);
+}
+
+.btn-quick-action svg {
+  flex-shrink: 0;
 }
 
 .dispo-indicator { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
@@ -802,11 +899,9 @@ onMounted(() => {
 .icon-delete { background-image: url('../assets/icons/eliminar.png'); background-size: 14px; background-repeat: no-repeat; background-position: center; }
 
 .btn-disabled {
-  opacity: 0.35;
+  opacity: .35;
   cursor: not-allowed;
-  background-color: #f3f4f6;
 }
-
 
 .filters-bar-mockup {
   display: flex;
@@ -903,23 +998,18 @@ onMounted(() => {
 }
 
 .action-btn-mockup {
-  width: 32px;  
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border: 1px solid #e5e7eb;
-  border-radius: 10px; 
-  background-color: #ffffff;
-  cursor: pointer;
-  display: flex;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #374151;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  
- 
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 16px 16px; 
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  cursor: pointer;
+  transition: all .2s ease;
 }
-
 
 .modal-overlay-mockup {
   position: fixed;
@@ -1026,4 +1116,26 @@ onMounted(() => {
 
 .text-center { text-align: center; }
 .text-muted { color: #9ca3af; }
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.dashboard-header-left {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-header-badge {
+  background: #f3f4f6;
+  color: #111827;
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: .82rem;
+  font-weight: 700;
+  border: 1px solid #e5e7eb;
+}
 </style>
