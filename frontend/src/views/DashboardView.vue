@@ -6,7 +6,10 @@
     </div>
 
     <div class="stats-grid">
-      <div class="stat-card">
+      <div
+        class="stat-card clickable-card"
+        @click="router.push('/vehiculos')"
+      >
       <div class="stat-icon">
         <CarFront :size="24" />
       </div>
@@ -15,7 +18,10 @@
         <p>Listos para asignación</p>
       </div>
 
-      <div class="stat-card">
+      <div
+        class="stat-card clickable-card"
+        @click="router.push('/conductores')"
+      >
       <div class="stat-icon">
         <UserRound :size="24" />
       </div>
@@ -24,7 +30,10 @@
         <p>Disponibles para viajes</p>
       </div>
 
-      <div class="stat-card">
+      <div
+        class="stat-card clickable-card"
+        @click="router.push('/solicitudes')"
+      >
       <div class="stat-icon">
         <ClipboardList :size="24" />
       </div>
@@ -33,7 +42,10 @@
         <p>Esperando aprobación</p>
       </div>
 
-      <div class="stat-card">
+      <div
+        class="stat-card clickable-card"
+        @click="router.push('/viajes')"
+      >
       <div class="stat-icon">
         <Route :size="24" />
       </div>
@@ -42,19 +54,29 @@
         <p>Actualmente activos</p>
       </div>
 
-      <div class="stat-card">
-      <div v-if="puedeVerTodo" class="stat-icon">
-        <Wrench :size="24" />
-      </div>
+      <div
+        v-if="puedeVerTodo"
+        class="stat-card clickable-card"
+        @click="router.push('/mantenimiento')"
+      >
+        <div class="stat-icon">
+          <Wrench :size="24" />
+        </div>
+
         <strong>{{ resumen.vehiculosEnMantenimiento ?? 0 }}</strong>
         <span>En mantenimiento</span>
         <p>Fuera de servicio</p>
       </div>
 
-      <div class="stat-card">
-      <div v-if="puedeVerTodo" class="stat-icon">
-        <Fuel :size="24" />
-      </div>
+      <div
+        v-if="puedeVerTodo"
+        class="stat-card clickable-card"
+        @click="router.push('/combustible')"
+      >
+        <div class="stat-icon">
+          <Fuel :size="24" />
+        </div>
+
         <strong>{{ resumen.consumosPendientes ?? 0 }}</strong>
         <span>Consumos pendientes</span>
         <p>Esperando validación</p>
@@ -65,18 +87,28 @@
       <section class="panel panel-map">
         <div class="panel-header">
           <h3>Viajes activos en tiempo real</h3>
-          <span>Ver todos</span>
+            <span
+            class="dashboard-link"
+            @click="router.push('/Viajes')"
+          >
+            Ver todos
+          </span>
         </div>
 
-        <div class="map-placeholder">
-          Mapa próximamente
+        <div class="dashboard-map">
+          <MapaViaje :viaje="viajeSeleccionado" />
         </div>
       </section>
 
       <section class="panel">
         <div class="panel-header">
           <h3>Solicitudes recientes</h3>
-          <span>Ver todas</span>
+          <span
+            class="dashboard-link"
+            @click="router.push('/solicitudes')"
+          >
+            Ver todos
+          </span>
         </div>
 
         <div
@@ -104,7 +136,12 @@
       <section class="panel">
         <div class="panel-header">
           <h3>Próximos viajes programados</h3>
-          <span>Ver agenda</span>
+          <span
+            class="dashboard-link"
+            @click="router.push('/calendario')"
+          >
+            Ver todos
+          </span>
         </div>
 
         <div
@@ -135,7 +172,12 @@
       <section class="panel">
         <div class="panel-header">
           <h3>Estado de vehículos</h3>
-          <span>Ver todos</span>
+          <span
+            class="dashboard-link"
+            @click="router.push('/vehiculos')"
+          >
+            Gestionar
+          </span>
         </div>
 
        <div class="vehicle-status-list">
@@ -159,7 +201,12 @@
       <section class="panel">
         <div class="panel-header">
           <h3>Consumo de combustible</h3>
-          <span>Ver reporte</span>
+          <span
+            class="dashboard-link"
+            @click="router.push('/combustible')"
+          >
+            Ver reporte
+          </span>
         </div>
 
                 <div class="fuel-box">
@@ -173,10 +220,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-
-const resumen = ref({})
-const solicitudesRecientes = ref([])
+import { ref, onMounted, computed } from 'vue'
+import MapaViaje from '../components/MapaViaje.vue'
+import { useRouter } from 'vue-router'
 
 import {
   CarFront,
@@ -187,6 +233,26 @@ import {
   Fuel,
   ArrowRight
 } from 'lucide-vue-next'
+
+const router = useRouter()
+
+const rolUsuario = (localStorage.getItem('usuario_rol') || '').trim().toLowerCase()
+
+const esSuperAdmin = computed(() => rolUsuario === 'superadmin')
+const esAdministrador = computed(() => rolUsuario === 'administrador')
+const esSupervisor = computed(() => rolUsuario === 'supervisor')
+const esOperador = computed(() => rolUsuario === 'operador')
+
+const puedeVerTodo = computed(() =>
+  esSuperAdmin.value || esAdministrador.value || esSupervisor.value
+)
+
+const puedeVerOperativo = computed(() =>
+  puedeVerTodo.value || esOperador.value
+)
+
+const resumen = ref({})
+const solicitudesRecientes = ref([])
 
 const cargarDashboard = async () => {
   const token = localStorage.getItem('token_transporte')
@@ -427,6 +493,7 @@ onMounted(() => {
   color: #374151;
   font-size: 0.85rem;
   font-weight: 700;
+  transition: all .2s ease;
 }
 
 .dashboard-link:hover {
