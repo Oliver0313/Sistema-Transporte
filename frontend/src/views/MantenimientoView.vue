@@ -791,23 +791,23 @@ onMounted(() => {
 
 .mant-card-info { display: flex; flex-direction: column; gap: 2px; }
 
-/* Contenedor de información de la tarjeta */
+
 .mant-card-info {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-/* Texto superior de la métrica (Igual a vehículos) */
+
 .mant-card-info span {
   font-size: 0.82rem;
   color: #6b7280;
   font-weight: 500;
-  text-transform: none; /* Quita las mayúsculas toscas */
+  text-transform: none; 
   letter-spacing: normal;
 }
 
-/* Valor de la métrica en h3 (Igual a vehículos) */
+
 .mant-card-info h3 {
   font-size: 1.3rem;
   font-weight: 700;
@@ -816,7 +816,7 @@ onMounted(() => {
   line-height: 1.2;
 }
 
-/* Evita que las imágenes de los iconos se deformen */
+
 .menu-icon {
   width: 20px;
   height: 20px;
