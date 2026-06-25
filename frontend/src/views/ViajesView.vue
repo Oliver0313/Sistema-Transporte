@@ -47,124 +47,102 @@
       </div>
     </div>
 
-<div class="filters-bar">
-  <input
-    v-model="filtroBusqueda"
-    type="text"
-    placeholder="Buscar viaje..."
-    class="search-box"
-  />
-
-  <select v-model="filtroEstado" class="filter-select">
-    <option value="todos">Todos</option>
-    <option value="1">Programados</option>
-    <option value="2">En curso</option>
-    <option value="3">Finalizados</option>
-    <option value="4">Cancelados</option>
-  </select>
-</div>
+    <div class="filters-bar">
+      <input
+        v-model="filtroBusqueda"
+        type="text"
+        placeholder="Buscar viaje..."
+        class="search-box"
+      />
+      <select v-model="filtroEstado" class="filter-select">
+        <option value="todos">Todos</option>
+        <option value="1">Programados</option>
+        <option value="2">En curso</option>
+        <option value="3">Finalizados</option>
+        <option value="4">Cancelados</option>
+      </select>
+    </div>
 
     <div class="viajes-layout">
       <section class="viajes-list">
         <div
-            v-for="viaje in viajesFiltrados"
-            :key="viaje.id"
-            class="viaje-card"
-            :class="{ selected: viajeSeleccionado?.id === viaje.id }"
-            @click="seleccionarViaje(viaje)"
+          v-for="viaje in viajesFiltrados"
+          :key="viaje.id"
+          class="viaje-card"
+          :class="{ selected: viajeSeleccionado?.id === viaje.id }"
+          @click="seleccionarViaje(viaje)"
         >
-            <div class="viaje-card-header">
+          <div class="viaje-card-header">
             <span :class="['estado-pill', obtenerClaseEstado(viaje.estado)]">
-                {{ formatearEstado(viaje.estado) }}
+              {{ formatearEstado(viaje.estado) }}
             </span>
-            </div>
-
-            <h4>{{ viaje.origen }} → {{ viaje.destino }}</h4>
-
-            <p>{{ viaje.cantidadPasajeros }} pasajeros</p>
-
-            <small>
-            {{ formatearFecha(viaje.fechaHoraSalida) }}
-            </small>
+          </div>
+          <h4>{{ viaje.origen }} → {{ viaje.destino }}</h4>
+          <p>{{ viaje.cantidadPasajeros }} pasajeros</p>
+          <small>{{ formatearFecha(viaje.fechaHoraSalida) }}</small>
         </div>
 
         <p v-if="viajesFiltrados.length === 0" class="empty-text">
-            No se encontraron viajes.
+          No se encontraron viajes.
         </p>
-        </section>
+      </section>
 
       <section class="map-panel">
         <MapaViaje :viaje="viajeSeleccionado" />
       </section>
 
-            <aside class="detalle-panel">
+      <aside class="detalle-panel">
         <h3>Información detallada</h3>
 
-        <div
-            v-if="viajeSeleccionado"
-            :key="viajeSeleccionado.id"
-            class="detalle-content"
-            >
-
-        <span :class="['estado-pill', obtenerClaseEstado(viajeSeleccionado.estado)]">
+        <div v-if="viajeSeleccionado" class="detalle-content">
+          <span :class="['estado-pill', obtenerClaseEstado(viajeSeleccionado.estado)]">
             {{ formatearEstado(viajeSeleccionado.estado) }}
-        </span>
+          </span>
 
-        <div class="detail-item">
+          <div class="detail-item">
             <span>Ruta</span>
-            <strong>
-            {{ viajeSeleccionado.origen }} → {{ viajeSeleccionado.destino }}
-            </strong>
-        </div>
+            <strong>{{ viajeSeleccionado.origen }} → {{ viajeSeleccionado.destino }}</strong>
+          </div>
 
-        <div class="detail-item">
+          <div class="detail-item">
             <span>Pasajeros</span>
-            <strong>
-            {{ viajeSeleccionado.cantidadPasajeros }}
-            </strong>
-        </div>
+            <strong>{{ viajeSeleccionado.cantidadPasajeros }}</strong>
+          </div>
 
-        <div class="detail-item">
+          <div class="detail-item">
             <span>Salida</span>
-            <strong>
-            {{ formatearFecha(viajeSeleccionado.fechaHoraSalida) }}
-            </strong>
-        </div>
+            <strong>{{ formatearFecha(viajeSeleccionado.fechaHoraSalida) }}</strong>
+          </div>
 
-        <div class="detail-item">
+          <div class="detail-item">
             <span>Llegada</span>
-            <strong>
-            {{ formatearFecha(viajeSeleccionado.fechaHoraLlegada) }}
-            </strong>
-        </div>
+            <strong>{{ formatearFecha(viajeSeleccionado.fechaHoraLlegada) }}</strong>
+          </div>
 
-        <div class="detail-item">
+          <div class="detail-item">
             <span>Distancia</span>
-            <strong>
-            {{ viajeSeleccionado.distanciaRecorrida }} km
-            </strong>
-        </div>
+            <strong>{{ viajeSeleccionado.distanciaRecorrida }} km</strong>
+          </div>
 
-        <div class="detail-item">
+          <div class="detail-item">
             <span>Observaciones</span>
-            <strong>
-            {{ viajeSeleccionado.observaciones || 'Sin observaciones' }}
-            </strong>
-        </div>
-
+            <strong>{{ viajeSeleccionado.observaciones || 'Sin observaciones' }}</strong>
+          </div>
         </div>
 
         <p v-else class="empty-text">
-            Selecciona un viaje para ver el detalle.
+          Selecciona un viaje para ver el detalle.
         </p>
-        </aside>
+      </aside>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, nextTick } from 'vue'
 import MapaViaje from '../components/MapaViaje.vue'
+
+
 
 const viajes = ref([])
 const viajeSeleccionado = ref(null)
@@ -172,12 +150,11 @@ const filtroBusqueda = ref('')
 const filtroEstado = ref('todos')
 
 const seleccionarViaje = (viaje) => {
-  viajeSeleccionado.value = viaje
+  viajeSeleccionado.value = { ...viaje }
 }
 
 const viajesFiltrados = computed(() => {
   const texto = filtroBusqueda.value.toLowerCase().trim()
-
   let resultado = viajes.value
 
   if (texto) {
@@ -196,22 +173,22 @@ const viajesFiltrados = computed(() => {
   return resultado
 })
 
-watch(
-  viajesFiltrados,
-  (lista) => {
-    if (!lista.length) {
-      viajeSeleccionado.value = null
-      return
-    }
+watch(viajesFiltrados, (nuevaLista) => {
+  if (!nuevaLista || nuevaLista.length === 0) {
+    viajeSeleccionado.value = null
+    return
+  }
 
-    const sigueVisible = lista.some(v => v.id === viajeSeleccionado.value?.id)
+  const sigueVisible = viajeSeleccionado.value
+    ? nuevaLista.some(v => v.id === viajeSeleccionado.value.id)
+    : false
 
-    if (!viajeSeleccionado.value || !sigueVisible) {
-      viajeSeleccionado.value = lista[0]
-    }
-  },
-  { immediate: true }
-)
+  if (!sigueVisible) {
+    nextTick(() => {
+      viajeSeleccionado.value = { ...nuevaLista[0] }
+    })
+  }
+}, { immediate: true })
 
 const totalViajes = computed(() => viajes.value.length)
 
@@ -234,7 +211,6 @@ const formatearEstado = (estado) => {
     3: 'Finalizado',
     4: 'Cancelado'
   }
-
   return estados[estado] || 'Sin estado'
 }
 
@@ -245,13 +221,11 @@ const obtenerClaseEstado = (estado) => {
     3: 'finalizado',
     4: 'cancelado'
   }
-
   return clases[estado] || 'programado'
 }
 
 const formatearFecha = (fecha) => {
   if (!fecha) return '---'
-
   return new Date(fecha).toLocaleString('es-DO', {
     day: '2-digit',
     month: '2-digit',
@@ -272,20 +246,15 @@ const cargarViajes = async () => {
 
   if (response.ok) {
     const data = await response.json()
-
     viajes.value = data
-
-    if (data.length > 0) {
-      viajeSeleccionado.value = data[0]
-    }
   }
 }
 
 onMounted(() => {
   cargarViajes()
 })
-
 </script>
+
 <style scoped>
 .section-header {
   margin-bottom: 20px;
@@ -322,14 +291,20 @@ onMounted(() => {
 }
 
 .stat-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: #f3f4f6;
+  width: 45px;
+  height: 45px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: 50%;
+  background: #f3f4f6;
   flex-shrink: 0;
+}
+
+.stat-icon-img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
 .stat-card span {
@@ -346,12 +321,17 @@ onMounted(() => {
   color: #111827;
 }
 
+.filters-bar {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
 .search-box {
-  width: 100%;
+  flex: 1;
   padding: 12px 14px;
   border: 1px solid #d1d5db;
   border-radius: 12px;
-  margin-bottom: 14px;
   outline: none;
   background: #f9fafb;
   color: #111827;
@@ -361,6 +341,14 @@ onMounted(() => {
 .search-box:focus {
   border-color: #111827;
   background: white;
+}
+
+.filter-select {
+  width: 180px;
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 12px;
+  background: #f9fafb;
 }
 
 .viajes-layout {
@@ -498,41 +486,5 @@ onMounted(() => {
   .viajes-layout {
     grid-template-columns: 1fr;
   }
-}
-
-.filters-bar {
-  display: flex;
-  gap: 14px;
-  margin-bottom: 16px;
-}
-
-.search-box {
-  flex: 1;
-  margin-bottom: 0;
-}
-
-.filter-select {
-  width: 180px;
-  padding: 12px 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 12px;
-  background: #f9fafb;
-}
-
-.stat-icon {
-  width: 45px;   
-  height: 45px;        
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;   
-  background: #f3f4f6; 
-  flex-shrink: 0;      
-}
-
-.stat-icon-img {
-  width: 24px;         
-  height: 24px;    
-  object-fit: contain; 
 }
 </style>
