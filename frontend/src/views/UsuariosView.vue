@@ -1,8 +1,8 @@
 <template>
   <div>
     <div class="section-header">
-    <h2>Gestión de Usuarios</h2>
-    <p>Gestiona y administra los usuarios</p>
+      <h2>Gestión de Usuarios</h2>
+      <p>Gestiona y administra los usuarios</p>
     </div>
 
     <div v-if="mensajeExito" class="success-alert">
@@ -67,7 +67,7 @@
           <select v-model="filtroEstado" class="filter-select">
             <option value="todos">Todos los estados</option>
             <option value="1">Activos</option>
-            <option value="0">Inactivos</option>
+            <option value="3">Inactivos</option>
           </select>
         </div>
 
@@ -82,31 +82,31 @@
             </tr>
           </thead>
 
-            <tbody>
+          <tbody>
             <tr v-for="usuario in usuariosFiltrados" :key="usuario.id">
                 <td>
-                <strong>{{ usuario.nombre }} {{ usuario.apellido }}</strong>
-                <small>{{ usuario.correo }}</small>
+                  <strong>{{ usuario.nombre }} {{ usuario.apellido }}</strong>
+                  <small>{{ usuario.correo }}</small>
                 </td>
 
                 <td>
-                <span class="role-pill">
-                    {{ usuario.rolNombre }}
-                </span>
+                  <span class="role-pill">
+                      {{ usuario.rolNombre }}
+                  </span>
                 </td>
 
                 <td>{{ formatearFecha(usuario.ultimoAcceso) }}</td>
 
                 <td>
-                <span :class="['estado-pill', usuario.estadoUsuario === 1 ? 'activo' : 'inactivo']">
-                    {{ usuario.estadoUsuario === 1 ? 'Activo' : 'Inactivo' }}
-                </span>
+                  <span :class="['estado-pill', usuario.estadoUsuario === 1 ? 'activo' : 'inactivo']">
+                      {{ usuario.estadoUsuario === 1 ? 'Activo' : 'Inactivo' }}
+                  </span>
                 </td>
 
                 <td>
-                <button class="btn-action" @click="abrirModal(usuario)">
-                    ✏️
-                </button>
+                  <button class="btn-action" @click="abrirModal(usuario)">
+                      ✏️
+                  </button>
                 </td>
             </tr>
 
@@ -115,7 +115,7 @@
                 No se encontraron usuarios.
                 </td>
             </tr>
-            </tbody>
+          </tbody>
         </table>
       </section>
 
@@ -177,7 +177,7 @@
           <label>Estado</label>
           <select v-model.number="formUsuario.estadoUsuario">
             <option value="1">Activo</option>
-            <option value="0">Inactivo</option>
+            <option value="3">Inactivo</option>
           </select>
 
           <div class="modal-actions">
@@ -226,6 +226,7 @@ const cargarUsuarios = async () => {
   }
 }
 
+
 const usuariosFiltrados = computed(() => {
   const texto = filtroBusqueda.value.toLowerCase().trim()
   let resultado = usuarios.value
@@ -256,8 +257,9 @@ const usuariosActivos = computed(() =>
   usuarios.value.filter(u => u.estadoUsuario === 1).length
 )
 
+
 const usuariosInactivos = computed(() =>
-  usuarios.value.filter(u => u.estadoUsuario !== 1).length
+  usuarios.value.filter(u => u.estadoUsuario === 3).length
 )
 
 const administradores = computed(() =>
