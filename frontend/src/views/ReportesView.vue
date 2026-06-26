@@ -1,5 +1,6 @@
 <template>
   <div class="rep-page">
+
     <div class="dashboard-header">
       <div class="dashboard-header-left">
         <h2>Reportes</h2>
@@ -10,6 +11,7 @@
         Reportes inteligentes
       </div>
     </div>
+
     <div class="rep-filters-bar">
       <div class="rep-filter-pill-group">
         <span class="rep-filter-label">Periodo:</span>
@@ -886,6 +888,7 @@ onMounted(() => cargarReportes())
   color: #9ca3af !important;
   border-color: #e5e7eb !important;
   cursor: not-allowed;
+
 }
 
 .status-pill-mockup { padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; display: inline-block; }
