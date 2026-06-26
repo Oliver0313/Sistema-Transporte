@@ -1046,7 +1046,7 @@ onMounted(() => {
 .btn-disabled-main {
   color: #9ca3af !important;
   cursor: not-allowed !important;
-  border-radius: 10px !important; /* Mantenemos tus 10px de asignaciones */
+  border-radius: 10px !important; 
   font-weight: 700 !important;
   box-shadow: none !important;
    opacity: 0.35;

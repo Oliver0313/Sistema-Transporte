@@ -830,7 +830,7 @@ onMounted(() => {
 
 .card-kpi-icon img { width: 20px; height: 20px; }
 
-.total-icon { background-color: #f3e8ff; }
+.total-icon { background-color: #f3e8ff; } 
 .disponible-icon { background-color: #e8f5e9; }
 .mantenimiento-icon { background-color: #e3f2fd; }
 .no-disponible-icon { background-color: #ffeade; }

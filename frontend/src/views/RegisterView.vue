@@ -156,25 +156,74 @@ const manejarRegistro = async () => {
       headers: {
         'Content-Type': 'application/json'
       },
-     body: JSON.stringify({
-  nombre: nombre.value,
-  apellido: apellido.value,
-  correo: email.value,
-  contrasena: password.value,
-  rolId: 3 
-})
+      body: JSON.stringify({
+        nombre: nombre.value,
+        apellido: apellido.value,
+        correo: email.value,
+        contrasena: password.value,
+        rolId: 3
+      })
     })
 
     if (!respuesta.ok) {
-      if (respuesta.status === 400) {
-        const datosError = await respuesta.json().catch(() => null)
-        throw new Error(datosError?.mensaje || 'Los datos proporcionados no son válidos o el correo ya existe.')
+      const datosError = await respuesta.json().catch(() => null)
+
+      // El backend lanza 500 cuando el correo ya existe
+      if (respuesta.status === 500) {
+        const mensajeServidor = (
+          datosError?.message ||
+          datosError?.mensaje ||
+          datosError?.title ||
+          ''
+        ).toLowerCase()
+
+        if (
+          mensajeServidor.includes('correo') ||
+          mensajeServidor.includes('email') ||
+          mensajeServidor.includes('duplicate') ||
+          mensajeServidor.includes('unique') ||
+          mensajeServidor.includes('exist') ||
+          mensajeServidor.includes('registrado') ||
+          mensajeServidor.includes('ix_') ||
+          mensajeServidor === ''
+        ) {
+          throw new Error('Este correo ya está en uso. Intenta con otro o inicia sesión.')
+        }
+
+        throw new Error('Ocurrió un error en el servidor. Intenta de nuevo.')
       }
+
+      if (respuesta.status === 400 || respuesta.status === 409) {
+        const mensajeBackend =
+          datosError?.mensaje ||
+          datosError?.message ||
+          datosError?.title ||
+          datosError?.errors?.correo?.[0] ||
+          datosError?.errors?.Correo?.[0] ||
+          ''
+
+        const mensajeLower = mensajeBackend.toLowerCase()
+
+        if (
+          mensajeLower.includes('correo') ||
+          mensajeLower.includes('email') ||
+          mensajeLower.includes('existe') ||
+          mensajeLower.includes('registrado') ||
+          mensajeLower.includes('use') ||
+          mensajeLower.includes('taken') ||
+          respuesta.status === 409
+        ) {
+          throw new Error('Este correo ya está registrado. Intenta con otro o inicia sesión.')
+        }
+
+        throw new Error(mensajeBackend || 'Los datos proporcionados no son válidos.')
+      }
+
       throw new Error('No se pudo conectar con el servidor de registro.')
     }
 
-    exitoMensaje.value = '¡Cuenta creada con éxito! Redirigiendo al inicio de sesión...'
-    
+    exitoMensaje.value = '¡Cuenta creada con éxito! Redirigiendo...'
+
     nombre.value = ''
     apellido.value = ''
     email.value = ''
@@ -249,9 +298,7 @@ const manejarRegistro = async () => {
   transition: opacity 0.2s;
 }
 
-.arrow-btn:hover {
-  opacity: 1;
-}
+.arrow-btn:hover { opacity: 1; }
 
 .carrusel-indicadores {
   position: absolute;
@@ -277,91 +324,129 @@ const manejarRegistro = async () => {
   border-radius: 4px;
 }
 
-.login-form-side { 
-  background-color: #ffffff; 
-  display: flex; align-items: center; 
+.login-form-side {
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
   justify-content: center;
-   padding: 20px 60px; 
-   overflow-y: auto; }
+  padding: 20px 60px;
+  overflow-y: auto;
+}
 
 .form-wrapper {
-   width: 100%; 
-   max-width: 360px; }
+  width: 100%;
+  max-width: 360px;
+}
 
 .form-header {
-   text-align: center; margin-bottom: 16px; }
+  text-align: center;
+  margin-bottom: 16px;
+}
 
-.form-header h2 { 
-  font-size: 1.6rem; 
+.form-header h2 {
+  font-size: 1.6rem;
   font-weight: 700;
-   color: #1a1a1a; margin-bottom: 4px;
-   }
+  color: #1a1a1a;
+  margin-bottom: 4px;
+}
 
-.form-header p { 
+.form-header p {
   font-size: 0.85rem;
-   color: #9ca3af;
-   }
+  color: #9ca3af;
+}
 
-.custom-form { 
+.custom-form {
   display: flex;
-   flex-direction: column; 
-   gap: 12px; }
+  flex-direction: column;
+  gap: 12px;
+}
 
-.input-group { display: flex;
-   flex-direction: column; 
-   gap: 4px; }
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
 
-.input-group label { 
+.input-group label {
   font-size: 0.8rem;
-   font-weight: 600; 
-   color: #4b5563; }
+  font-weight: 600;
+  color: #4b5563;
+}
 
 .input-group input {
-   width: 100%; 
-   padding: 8px 12px; 
-   border: 1px solid #e5e7eb; border-radius: 12px; 
-   font-size: 0.85rem; color: #1f2937; outline: none; 
-  }
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  color: #1f2937;
+  outline: none;
+}
 
-.btn-login { 
-  width: 100%; 
-  background-color: #222222; color: #ffffff; 
-  padding: 12px; border-radius: 12px;
-   font-size: 0.9rem;
-    font-weight: 600;
-     border: none; 
-     cursor: pointer; 
-     margin-top: 6px; }
+.input-group input:focus {
+  border-color: #111827;
+}
 
-.form-footer { 
+.btn-login {
+  width: 100%;
+  background-color: #222222;
+  color: #ffffff;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  margin-top: 6px;
+  transition: background-color 0.2s;
+}
+
+.btn-login:hover:not(:disabled) {
+  background-color: #374151;
+}
+
+.form-footer {
   text-align: center;
-   margin-top: 16px; 
-   font-size: 0.8rem; color: #9ca3af; }
-.link-register { color: #111827; 
-  font-weight: 700;
-   text-decoration: none; }
-
-.link-register:hover { 
-  text-decoration: underline; }
-
-.alerta-error { 
-  background-color: #fef2f2; color: #dc2626; 
-  padding: 10px; border-radius: 12px; 
+  margin-top: 16px;
   font-size: 0.8rem;
-   border: 1px solid #fee2e2;
-    text-align: center;
-   }
+  color: #9ca3af;
+}
 
-.alerta-exito { background-color: #f0fdf4;
-   color: #16a34a; padding: 10px; 
-   border-radius: 12px; 
-   font-size: 0.8rem; 
-   border: 1px solid #dcfce7;
-    text-align: center; }
+.link-register {
+  color: #111827;
+  font-weight: 700;
+  text-decoration: none;
+}
 
-button:disabled { 
+.link-register:hover { text-decoration: underline; }
+
+.alerta-error {
+  background-color: #fef2f2;
+  color: #dc2626;
+  padding: 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  border: 1px solid #fee2e2;
+  text-align: center;
+}
+
+.alerta-exito {
+  background-color: #f0fdf4;
+  color: #16a34a;
+  padding: 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  border: 1px solid #dcfce7;
+  text-align: center;
+}
+
+button:disabled {
   background-color: #9ca3af;
-   cursor: not-allowed; }
+  cursor: not-allowed;
+}
 
-@media (max-width: 768px) { .login-layout { grid-template-columns: 1fr; } .login-hero-side { display: none; } }
+@media (max-width: 768px) {
+  .login-layout { grid-template-columns: 1fr; }
+  .login-hero-side { display: none; }
+}
 </style>

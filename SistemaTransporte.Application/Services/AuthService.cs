@@ -4,9 +4,12 @@ using SistemaTransporte.Application.DTOs.Auth;
 using SistemaTransporte.Application.Interfaces;
 using SistemaTransporte.Domain.Entities;
 using SistemaTransporte.Domain.Enums;
+using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace SistemaTransporte.Application.Services
 {
@@ -18,16 +21,16 @@ namespace SistemaTransporte.Application.Services
         private readonly IEmailService _emailService;
 
         public AuthService(
-        IRepository<Usuario> usuarioRepository,
-        IRepository<Rol> rolRepository,
-        IConfiguration configuration,
-        IEmailService emailService)
-    {
-        _usuarioRepository = usuarioRepository;
-        _rolRepository = rolRepository;
-        _configuration = configuration;
-        _emailService = emailService;
-    }
+            IRepository<Usuario> usuarioRepository,
+            IRepository<Rol> rolRepository,
+            IConfiguration configuration,
+            IEmailService emailService)
+        {
+            _usuarioRepository = usuarioRepository;
+            _rolRepository = rolRepository;
+            _configuration = configuration;
+            _emailService = emailService;
+        }
 
         public async Task<AuthResponseDto> RegisterAsync(RegisterDto dto)
         {
@@ -77,6 +80,12 @@ namespace SistemaTransporte.Application.Services
 
             if (!BCrypt.Net.BCrypt.Verify(dto.Contrasena, usuario.ContrasenaHash))
                 return null;
+
+            // === CONTROL DE USUARIO INACTIVO ===
+            if (usuario.EstadoUsuario == EstadoUsuario.Inactivo)
+            {
+                throw new UnauthorizedAccessException("Su cuenta está inactiva. Contacte al administrador.");
+            }
 
             var rol = await _rolRepository.GetByIdAsync(usuario.RolId);
 
