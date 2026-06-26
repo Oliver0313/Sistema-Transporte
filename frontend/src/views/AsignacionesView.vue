@@ -882,13 +882,23 @@ onMounted(() => {
 }
 
 .stat-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: #f3f4f6;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
+  background: #f3f4f6;
+  border-radius: 14px;
+
+  color: #111827;
+}
+
+.stat-icon svg {
+  width: 24px;
+  height: 24px;
 }
 
 .stat-info {
@@ -930,7 +940,7 @@ onMounted(() => {
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: #f9fafb;
+  background: #f3f4f6;
   display: flex;
   align-items: center;
   justify-content: center;
