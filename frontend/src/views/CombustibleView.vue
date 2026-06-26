@@ -764,32 +764,89 @@ onMounted(() => {
 
 <style>
 .mant-cards-row {
-  display: flex;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
   margin-bottom: 24px;
-  flex-wrap: wrap;
-  width: 100%;
 }
 
-.mant-cards-row .mant-card {
-  flex: 1;
-  min-width: 170px;
+.mant-card {
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  padding: 10px 12px;
+  border-radius: 18px;
+  padding: 18px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  box-sizing: border-box;
+  gap: 14px;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+  transition: all 0.2s ease;
 }
 
-.mant-cards-row .mant-card-info {
+.mant-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.mant-card-icon {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 14px;
+  background: #f3f4f6 !important;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mant-card-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.mant-card-info {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 4px;
   min-width: 0;
-  flex: 1;
+}
+
+.mant-card-info span {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.mant-card-info h3 {
+  margin: 0;
+  font-size: 1.65rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #111827;
+  white-space: nowrap;
+}
+
+.mant-card-info small {
+  font-size: 0.78rem;
+  color: #9ca3af;
+}
+
+@media (max-width: 1100px) {
+  .mant-cards-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .mant-cards-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mant-card-info small {
+  font-size: .78rem;
+  color: #9ca3af;
+  margin-top: 2px;
 }
 
 .mant-cards-row .mant-card-label {
