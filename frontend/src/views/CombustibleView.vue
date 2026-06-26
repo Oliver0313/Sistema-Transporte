@@ -1,52 +1,63 @@
-// Guardando el archivo para que vuelva
-
 <template>
-  <div class="section-header-mockup">
-    <h2>Combustible</h2>
-    <p>Administra el combustible utilizado</p>
-  </div>
-
-  <div class="mant-cards-row">
-    <div class="mant-card">
-      <div class="mant-card-icon mant-icon-hoy">
-        <img src="../assets/icons/gasolina-negro.png" alt="Consumo total" />
-      </div>
-      <div class="mant-card-info">
-        <span class="mant-card-label">Consumo total (mes)</span>
-        <span class="mant-card-valor">{{ kpis.consumoTotal }} gal</span>
-      </div>
+    <div class="dashboard-header">
+    <div class="dashboard-header-left">
+      <h2>Combustible</h2>
+      <p>Administra el consumo y los registros de combustible de la flota.</p>
     </div>
 
-    <div class="mant-card">
-      <div class="mant-card-icon mant-icon-pendiente">
-        <img src="../assets/icons/moneda.png" alt="Gasto total" />
-      </div>
-      <div class="mant-card-info">
-        <span class="mant-card-label">Gasto total (mes)</span>
-        <span class="mant-card-valor">{{ formatearCosto(kpis.gastoTotal) }}</span>
-      </div>
-    </div>
-
-    <div class="mant-card">
-      <div class="mant-card-icon mant-icon-aldia">
-        <img src="../assets/icons/vehiculo-negro.png" alt="Rendimiento" />
-      </div>
-      <div class="mant-card-info">
-        <span class="mant-card-label">Rendimiento promedio</span>
-        <span class="mant-card-valor">{{ kpis.rendimientoPromedio }} km/gal</span>
-      </div>
-    </div>
-
-    <div class="mant-card">
-      <div class="mant-card-icon mant-icon-vencido">
-        <img src="../assets/icons/alerta.png" alt="Elevado" />
-      </div>
-      <div class="mant-card-info">
-        <span class="mant-card-label">Con consumo elevado</span>
-        <span class="mant-card-valor">{{ kpis.consumoElevado }}</span>
-      </div>
+    <div class="dashboard-header-badge">
+      {{ kpis.consumoElevado }} consumos elevados
     </div>
   </div>
+<div class="mant-cards-row">
+  <div class="mant-card">
+    <div class="mant-card-icon">
+      <Fuel :size="24" />
+    </div>
+
+    <div class="mant-card-info">
+      <span>Consumo total</span>
+      <h3>{{ kpis.consumoTotal }} gal</h3>
+      <small>Registrado este mes</small>
+    </div>
+  </div>
+
+  <div class="mant-card">
+    <div class="mant-card-icon">
+      <DollarSign :size="24" />
+    </div>
+
+    <div class="mant-card-info">
+      <span>Gasto total</span>
+      <h3>{{ formatearCosto(kpis.gastoTotal) }}</h3>
+      <small>Inversión mensual</small>
+    </div>
+  </div>
+
+  <div class="mant-card">
+    <div class="mant-card-icon">
+      <CarFront :size="24" />
+    </div>
+
+    <div class="mant-card-info">
+      <span>Rendimiento</span>
+      <h3>{{ kpis.rendimientoPromedio }} km/gal</h3>
+      <small>Promedio de la flota</small>
+    </div>
+  </div>
+
+  <div class="mant-card">
+    <div class="mant-card-icon">
+      <TriangleAlert :size="24" />
+    </div>
+
+    <div class="mant-card-info">
+      <span>Consumo elevado</span>
+      <h3>{{ kpis.consumoElevado }}</h3>
+      <small>Requieren revisión</small>
+    </div>
+  </div>
+</div>
 
 
   <div class="comb-panels-row">
@@ -205,28 +216,36 @@
               </span>
             </td>
             <td class="actions-cell-fixed">
-              <div class="actions-wrapper" style="display: flex; gap: 6px; justify-content: center;">
-                <button
-                  class="action-btn-mockup icon-view"
-                  title="Ver detalle"
-                  @click="verDetalleConsumo(consumo)"
-                ></button>
-                <button
-                  class="action-btn-mockup icon-edit"
-                  :class="{ 'btn-disabled': !esAdmin }"
-                  :disabled="!esAdmin"
-                  :title="esAdmin ? 'Editar' : 'No permitido para tu rol'"
-                  @click="esAdmin && abrirFormularioEdicion(consumo)"
-                ></button>
-                <button
-                  class="action-btn-mockup icon-delete"
-                  :class="{ 'btn-disabled': !esAdmin }"
-                  :disabled="!esAdmin"
-                  :title="esAdmin ? 'Eliminar' : 'No permitido para tu rol'"
-                  @click="esAdmin && mostrarAvisoEliminacion()"
-                ></button>
-              </div>
-            </td>
+            <div class="actions-wrapper">
+              <button
+                class="action-btn-mockup"
+                title="Ver detalle"
+                @click="verDetalleConsumo(consumo)"
+              >
+                <Eye :size="15" />
+              </button>
+
+              <button
+                class="action-btn-mockup"
+                :class="{ 'btn-disabled': !esAdmin }"
+                :disabled="!esAdmin"
+                :title="esAdmin ? 'Editar registro' : 'No permitido para tu rol'"
+                @click="esAdmin && abrirFormularioEdicion(consumo)"
+              >
+                <Pencil :size="15" />
+              </button>
+
+              <button
+                class="action-btn-mockup"
+                :class="{ 'btn-disabled': !esAdmin }"
+                :disabled="!esAdmin"
+                :title="esAdmin ? 'Eliminar registro' : 'No permitido para tu rol'"
+                @click="esAdmin && mostrarAvisoEliminacion()"
+              >
+                <Trash2 :size="15" />
+              </button>
+            </div>
+          </td>
           </tr>
           <tr v-if="consumosFiltrados.length === 0">
             <td colspan="8" class="text-center text-muted" style="padding: 30px;">
@@ -448,6 +467,18 @@
 
 <script setup>
 import { ref, onMounted, computed, nextTick } from 'vue'
+
+import {
+  Fuel,
+  DollarSign,
+  CarFront,
+  TriangleAlert,
+  Search,
+  Eye,
+  Pencil,
+  Trash2,
+  Plus
+} from 'lucide-vue-next'
 
 
 const rolUsuario = ref(localStorage.getItem('usuario_rol') || 'Operador')
@@ -733,32 +764,89 @@ onMounted(() => {
 
 <style>
 .mant-cards-row {
-  display: flex;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
   margin-bottom: 24px;
-  flex-wrap: wrap;
-  width: 100%;
 }
 
-.mant-cards-row .mant-card {
-  flex: 1;
-  min-width: 170px;
+.mant-card {
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  padding: 10px 12px;
+  border-radius: 18px;
+  padding: 18px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  box-sizing: border-box;
+  gap: 14px;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+  transition: all 0.2s ease;
 }
 
-.mant-cards-row .mant-card-info {
+.mant-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.mant-card-icon {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 14px;
+  background: #f3f4f6 !important;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mant-card-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.mant-card-info {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 4px;
   min-width: 0;
-  flex: 1;
+}
+
+.mant-card-info span {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.mant-card-info h3 {
+  margin: 0;
+  font-size: 1.65rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #111827;
+  white-space: nowrap;
+}
+
+.mant-card-info small {
+  font-size: 0.78rem;
+  color: #9ca3af;
+}
+
+@media (max-width: 1100px) {
+  .mant-cards-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .mant-cards-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.mant-card-info small {
+  font-size: .78rem;
+  color: #9ca3af;
+  margin-top: 2px;
 }
 
 .mant-cards-row .mant-card-label {
@@ -1092,6 +1180,22 @@ onMounted(() => {
   opacity: 0.4;
 }
 
+.mant-card-icon {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 14px;
+  background: #f3f4f6 !important;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mant-card-icon svg {
+  width: 24px;
+  height: 24px;
+}
 
 .mant-filter-field:nth-of-type(2) {
   display: flex !important;

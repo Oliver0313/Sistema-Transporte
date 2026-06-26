@@ -1,51 +1,64 @@
 <template>
-  <div class="calendar-page-container">
-    <div class="section-header-mockup">
-      <h2>Calendario</h2>
-      <p>Administra y gesiona la Agenda</p>
-    </div>
-
-    <div class="metrics-grid-mockup">
-      <div class="metric-card-item card-blue">
-        <div class="metric-icon-box bg-light-blue">
-          <img src="../assets/icons/calendario-negro.png" alt="Viajes" class="metric-png-icon" />
-        </div>
-        <div class="metric-data-box">
-          <span class="metric-label">Viajes este mes</span>
-          <h3 class="metric-value">{{ totalViajesMes }}</h3>
-        </div>
+    <div class="dashboard-header">
+      <div class="dashboard-header-left">
+        <h2>Calendario</h2>
+        <p>Administra la agenda, viajes programados y disponibilidad de la flota.</p>
       </div>
 
-      <div class="metric-card-item card-green">
-        <div class="metric-icon-box bg-light-green">
-          <img src="../assets/icons/disponible-negro.png" alt="Confirmados" class="metric-png-icon" />
-        </div>
-        <div class="metric-data-box">
-          <span class="metric-label">Confirmados</span>
-          <h3 class="metric-value">{{ totalConfirmados }}</h3>
-        </div>
-      </div>
-
-      <div class="metric-card-item card-purple">
-        <div class="metric-icon-box bg-light-purple">
-          <img src="../assets/icons/pendiente-negro.png" alt="Pendientes" class="metric-png-icon" />
-        </div>
-        <div class="metric-data-box">
-          <span class="metric-label">Pendientes</span>
-          <h3 class="metric-value">{{ totalPendientes }}</h3>
-        </div>
-      </div>
-
-      <div class="metric-card-item card-yellow">
-        <div class="metric-icon-box bg-light-yellow">
-          <img src="../assets/icons/activo-negro.png" alt="Conductores" class="metric-png-icon" />
-        </div>
-        <div class="metric-data-box">
-          <span class="metric-label">Conductores activos</span>
-          <h3 class="metric-value">{{ conductores.length }}</h3>
-        </div>
+      <div class="dashboard-header-badge">
+        {{ solicitudesFiltradas.length }} viajes programados
       </div>
     </div>
+
+    <div class="mant-cards-row">
+  <div class="mant-card">
+    <div class="mant-card-icon">
+      <CalendarDays :size="24" />
+    </div>
+
+    <div class="mant-card-info">
+      <span>Viajes este mes</span>
+      <h3>{{ totalViajesMes }}</h3>
+      <small>Programados en agenda</small>
+    </div>
+  </div>
+
+  <div class="mant-card">
+    <div class="mant-card-icon">
+      <CircleCheck :size="24" />
+    </div>
+
+    <div class="mant-card-info">
+      <span>Confirmados</span>
+      <h3>{{ totalConfirmados }}</h3>
+      <small>Viajes aprobados</small>
+    </div>
+  </div>
+
+  <div class="mant-card">
+    <div class="mant-card-icon">
+      <Clock :size="24" />
+    </div>
+
+    <div class="mant-card-info">
+      <span>Pendientes</span>
+      <h3>{{ totalPendientes }}</h3>
+      <small>Esperando aprobación</small>
+    </div>
+  </div>
+
+  <div class="mant-card">
+    <div class="mant-card-icon">
+      <UserRound :size="24" />
+    </div>
+
+    <div class="mant-card-info">
+      <span>Conductores activos</span>
+      <h3>{{ conductores.length }}</h3>
+      <small>Disponibles en el sistema</small>
+    </div>
+  </div>
+</div>
 
     <div class="calendar-filters-top">
       <select v-model="filtroConductor" class="mockup-select-modern">
@@ -194,16 +207,27 @@
               </div>
             </div>
           </div>
-
         </div>
       </div>
-
     </div>
-  </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+
+import {
+  CalendarDays,
+  CircleCheck,
+  Clock,
+  UserRound,
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
+  Users,
+  IdCard,
+  CarFront,
+  X
+} from 'lucide-vue-next'
 
 const rolUsuario = ref(localStorage.getItem('usuario_rol') || 'Operador')
 

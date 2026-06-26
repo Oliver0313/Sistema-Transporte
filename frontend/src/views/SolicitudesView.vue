@@ -83,23 +83,29 @@
               <td>{{ solicitud.conductorAsignado || '---' }}</td>
               <td class="actions-cell-fixed">
                 <div class="actions-wrapper">
-                  <button class="action-btn-mockup icon-view" title="Ver detalle" @click="verDetalleSolicitud(solicitud)"></button>
+                  <button class="action-btn-mockup" title="Ver detalle" @click="verDetalleSolicitud(solicitud)">
+                <Eye :size="15" />
+              </button>
                   
-                  <button 
-                    class="action-btn-mockup icon-edit" 
-                    :class="{ 'btn-disabled': !puedeEditarOAsignar }"
-                    :disabled="!puedeEditarOAsignar" 
-                    :title="puedeEditarOAsignar ? (esSupervisor ? 'Asignar Unidad' : 'Editar Solicitud') : 'No permitido para operador'"
-                    @click="abrirModificarSolicitud(solicitud)">
-                  </button>
+                <button 
+                  class="action-btn-mockup" 
+                  :class="{ 'btn-disabled': !puedeEditarOAsignar }"
+                  :disabled="!puedeEditarOAsignar" 
+                  :title="puedeEditarOAsignar ? (esSupervisor ? 'Asignar Unidad' : 'Editar Solicitud') : 'No permitido para operador'"
+                  @click="abrirModificarSolicitud(solicitud)"
+                >
+                  <Pencil :size="15" />
+                </button>
                   
-                  <button 
-                    class="action-btn-mockup icon-delete" 
-                    :class="{ 'btn-disabled': !puedeEliminar }"
-                    :disabled="!puedeEliminar" 
-                    :title="puedeEliminar ? 'Eliminar solicitud' : 'No permitido para su rol'"
-                    @click="eliminarSolicitud(solicitud.id)">
-                  </button>
+                <button 
+                  class="action-btn-mockup" 
+                  :class="{ 'btn-disabled': !puedeEliminar }"
+                  :disabled="!puedeEliminar" 
+                  :title="puedeEliminar ? 'Eliminar solicitud' : 'No permitido para su rol'"
+                  @click="eliminarSolicitud(solicitud.id)"
+                >
+                  <Trash2 :size="15" />
+                </button>
                 </div>
               </td>
             </tr>
@@ -268,6 +274,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { Eye, Pencil, Trash2 } from 'lucide-vue-next'
 
 const filtroBusqueda = ref('')
 const filtroEstado = ref('')
@@ -769,15 +776,17 @@ onMounted(() => {
 }
 
 .action-btn-mockup {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: 10px;
   background-color: white;
+  color: #374151;
   cursor: pointer;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
 .action-btn-mockup:hover:not(:disabled) {
