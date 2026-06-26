@@ -251,28 +251,33 @@
         <div class="modal-body">
           <form @submit.prevent="guardarAsignacion" class="form-solicitud-mockup">
             <div class="form-group-mockup">
-              <label>Solicitud de Transporte Pendiente</label>
-              <select v-model.number="formAsignacion.solicitudTransporteId" required class="mockup-select">
-                <option value="">Seleccione una solicitud aprobada...</option>
-                <option
-                  v-for="solicitud in solicitudes.filter(s => s.estado === 2)"
-                  :key="solicitud.id"
-                  :value="solicitud.id"
-                >
-                  #{{ solicitud.id }} — {{ solicitud.areaSolicitante }} con destino a {{ solicitud.destino }}
-                </option>
-              </select>
-            </div>
+  <label>Solicitud de Transporte</label>
+  <select 
+    v-model.number="formAsignacion.solicitudTransporteId" 
+    required 
+    class="mockup-select"
+    :disabled="!!formAsignacion.id"
+  >
+    <option value="">Seleccione una solicitud aprobada...</option>
+    <option
+  v-for="solicitud in solicitudesDisponibles"
+  :key="solicitud.id"
+  :value="solicitud.id"
+>
+      #{{ solicitud.id }} — {{ solicitud.areaSolicitante }} → {{ solicitud.destino }}
+    </option>
+  </select>
+</div>
 
             <div class="form-row-mockup">
               <div class="form-group-mockup">
                 <label>Conductor Disponible</label>
                 <select v-model.number="formAsignacion.conductorId" required class="mockup-select">
-  <option value="">Seleccione un conductor...</option>
-  <option
-    v-for="conductor in conductores.filter(c => c.estado === 1 || c.id === formAsignacion.conductorId)"
-    :key="conductor.id"
-    :value="conductor.id"
+                <option value="">Seleccione un conductor...</option>
+                <option
+                v-for="conductor in conductores.filter(c => c.estado === 1 || c.id === formAsignacion.conductorId)"
+               :key="conductor.id"
+                :value="conductor.id"
   >
     {{ conductor.nombre }} {{ conductor.apellido }} (Cat. {{ conductor.tipoLicencia }}) {{ conductor.id === formAsignacion.conductorId ? '— [Asignado]' : '' }}
   </option>
@@ -292,6 +297,16 @@
   </option>
 </select>
               </div>
+
+              <div class="form-group-mockup" v-if="formAsignacion.id">
+  <label>Estado</label>
+  <select v-model.number="formAsignacion.estado" class="mockup-select">
+    <option :value="1">Activa</option>
+    <option :value="2">Reasignada</option>
+    <option :value="3">Cancelada</option>
+    <option :value="4">Finalizada</option>
+  </select>
+</div>
             </div>
 
             <p v-if="errorModal" class="modal-error" style="color: #dc2626; font-size: 0.85rem; font-weight: 600; margin: 4px 0;">
@@ -371,7 +386,7 @@ const obtenerRolDesdeToken = () => {
 
 const puedeCrearOEditar = computed(() => {
   const r = userRole.value.toLowerCase()
-  return r === 'administrador' || r === 'admin' || r === 'superadmin'
+  return r === 'administrador' || r === 'admin' || r === 'superadmin' || r === 'supervisor'
 })
 
 const totalAsignaciones = computed(() => asignaciones.value.length)
@@ -412,14 +427,14 @@ const abrirModal = () => {
     return
   }
   errorModal.value = ''
-  formAsignacion.value = { id: null, solicitudTransporteId: '', conductorId: '', vehiculoId: '', usuarioAsignadorId: '' }
+  formAsignacion.value = { id: null, solicitudTransporteId: '', conductorId: '', vehiculoId: '', usuarioAsignadorId: '',  estado: null  }
   mostrarModal.value = true
   cargarDatosFormulario()
 }
 
 const guardarAsignacion = async () => {
   errorModal.value = ''
-  
+
   const idUsuarioLogueado = parseInt(localStorage.getItem('usuario_id')) || 1
   formAsignacion.value.usuarioAsignadorId = idUsuarioLogueado
 
@@ -436,26 +451,52 @@ const guardarAsignacion = async () => {
   guardando.value = true
   const token = localStorage.getItem('token_transporte')
 
-  const payload = {
-    solicitudTransporteId: Number(formAsignacion.value.solicitudTransporteId),
-    conductorId: Number(formAsignacion.value.conductorId),
-    vehiculoId: Number(formAsignacion.value.vehiculoId),
-    usuarioAsignadorId: Number(formAsignacion.value.usuarioAsignadorId)
-  }
+ const payload = {
+  solicitudTransporteId: Number(formAsignacion.value.solicitudTransporteId),
+  conductorId: Number(formAsignacion.value.conductorId),
+  vehiculoId: Number(formAsignacion.value.vehiculoId),
+  usuarioAsignadorId: Number(formAsignacion.value.usuarioAsignadorId),
+  ...(formAsignacion.value.id ? { estado: Number(formAsignacion.value.estado) } : {})
+}
 
   try {
-    const url = formAsignacion.value.id 
+
+    if (formAsignacion.value.id) {
+      const asignacionOriginal = asignaciones.value.find(a => a.id === formAsignacion.value.id)
+
+      if (asignacionOriginal) {
+        const conductorCambio = asignacionOriginal.conductorId !== payload.conductorId
+        const vehiculoCambio = asignacionOriginal.vehiculoId !== payload.vehiculoId
+
+  
+        if (conductorCambio) {
+          await fetch(`https://localhost:7221/api/Conductores/${asignacionOriginal.conductorId}/estado`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ estado: 1 }) // 1 = disponible
+          })
+        }
+
+        // Liberar vehículo anterior
+        if (vehiculoCambio) {
+          await fetch(`https://localhost:7221/api/Vehiculos/${asignacionOriginal.vehiculoId}/estado`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ estado: 1 }) // 1 = disponible
+          })
+        }
+      }
+    }
+
+    const url = formAsignacion.value.id
       ? `https://localhost:7221/api/Asignaciones/${formAsignacion.value.id}`
       : 'https://localhost:7221/api/Asignaciones'
-    
+
     const method = formAsignacion.value.id ? 'PUT' : 'POST'
 
     const response = await fetch(url, {
-      method: method,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
+      method,
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify(payload)
     })
 
@@ -463,6 +504,7 @@ const guardarAsignacion = async () => {
       mostrarModal.value = false
       formAsignacion.value = { id: null, solicitudTransporteId: '', conductorId: '', vehiculoId: '', usuarioAsignadorId: '' }
       await cargarAsignaciones()
+      await cargarDatosFormulario() 
     } else {
       const textoError = await response.text()
       errorModal.value = textoError || 'No se pudo procesar la asignación.'
@@ -473,7 +515,6 @@ const guardarAsignacion = async () => {
     guardando.value = false
   }
 }
-
 const asignacionesFiltradas = computed(() => {
   const texto = filtroBusqueda.value.toLowerCase().trim()
   let resultado = asignaciones.value
@@ -496,18 +537,36 @@ const asignacionesFiltradas = computed(() => {
   return resultado
 })
 
+const solicitudesDisponibles = computed(() => {
+
+  const solicitudesYaAsignadas = new Set(
+    asignaciones.value
+      .filter(a => a.estado === 1 || a.estado === 2)
+      .map(a => a.solicitudTransporteId)
+  )
+
+  return solicitudes.value.filter(s => {
+    if (s.estado !== 2) return false // Solo aprobadas
+
+
+    if (formAsignacion.value.id && s.id === formAsignacion.value.solicitudTransporteId) return true
+
+    return !solicitudesYaAsignadas.has(s.id)
+  })
+})
+
 const abrirModificarAsignacion = (asignacion) => {
   formAsignacion.value = {
     id: asignacion.id,
     solicitudTransporteId: asignacion.solicitudTransporteId,
     conductorId: asignacion.conductorId,
     vehiculoId: asignacion.vehiculoId,
-    usuarioAsignadorId: asignacion.usuarioAsignadorId
+    usuarioAsignadorId: asignacion.usuarioAsignadorId,
+    estado: asignacion.estado  // <-- sin esto el select no tiene valor inicial
   }
   mostrarModal.value = true
   cargarDatosFormulario()
 }
-
 const eliminarAsignacionApi = async (id) => {
   if (!confirm(`¿Está completamente seguro de eliminar permanentemente la solicitud #${id}?`)) return
   
