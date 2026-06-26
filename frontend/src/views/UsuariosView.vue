@@ -124,11 +124,7 @@
                     {{ usuario.estadoUsuario === 1 ? 'Activo' : 'Inactivo' }}
                 </span>
                 </td>
-
                 <td>
-                <button class="btn-action" @click="abrirModal(usuario)" title="Editar usuario">
-                  <Pencil :size="15" />
-                </button>
                 </td>
             </tr>
 
@@ -235,6 +231,19 @@ const formUsuario = ref({
   rolId: 0,
   estadoUsuario: 1
 })
+
+const rolUsuario = (localStorage.getItem('usuario_rol') || '').trim().toLowerCase()
+
+const esSuperAdmin = computed(() => rolUsuario === 'superadmin')
+const esAdministrador = computed(() => rolUsuario === 'administrador' || rolUsuario === 'admin')
+
+const puedeVerUsuarios = computed(() =>
+  esSuperAdmin.value || esAdministrador.value
+)
+
+const puedeModificarUsuarios = computed(() =>
+  esSuperAdmin.value
+)
 
 const cargarUsuarios = async () => {
   const token = localStorage.getItem('token_transporte')
