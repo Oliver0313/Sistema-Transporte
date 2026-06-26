@@ -1,13 +1,19 @@
 <template>
-  <div class="section-header-mockup">
-    <h2>Mantenimiento</h2>
-    <p>Administra y gestiona los mantenimientos de los vehículos</p>
+  <div class="dashboard-header">
+    <div class="dashboard-header-left">
+      <h2>Mantenimiento</h2>
+      <p>Administra servicios, revisiones y estado de mantenimiento de la flota.</p>
+    </div>
+
+    <div class="dashboard-header-badge">
+      {{ cardPendientes }} pendientes
+    </div>
   </div>
 
   <div class="mant-cards-row">
     <div class="mant-card">
       <div class="mant-card-icon mant-icon-hoy">
-        <img src="../assets/icons/herramienta-negra.png" class="menu-icon" alt="De hoy" />
+        <Wrench :size="24" />
       </div>
       <div class="mant-card-info">
         <span>De hoy</span>
@@ -17,7 +23,7 @@
 
     <div class="mant-card">
       <div class="mant-card-icon mant-icon-aldia">
-        <img src="../assets/icons/alDia.png" class="menu-icon" alt="Al día" />
+        <CircleCheck :size="24" />
       </div>
       <div class="mant-card-info">
         <span>Al día</span>
@@ -27,7 +33,7 @@
 
     <div class="mant-card">
       <div class="mant-card-icon mant-icon-pendiente">
-        <img src="../assets/icons/alerta.png" class="menu-icon" alt="Pendientes" />
+        <AlertTriangle :size="24" />
       </div>
       <div class="mant-card-info">
         <span>Pendientes</span>
@@ -37,7 +43,7 @@
 
     <div class="mant-card">
       <div class="mant-card-icon mant-icon-vencido">
-        <img src="../assets/icons/calendario-negro.png" class="menu-icon" alt="Vencidos" />
+        <CalendarClock :size="24" />
       </div>
       <div class="mant-card-info">
         <span>Vencidos</span>
@@ -47,7 +53,7 @@
 
     <div class="mant-card">
       <div class="mant-card-icon mant-icon-completado">
-        <img src="../assets/icons/disponible-negro.png" class="menu-icon" alt="Completados" />
+        <CheckCheck :size="24" />
       </div>
       <div class="mant-card-info">
         <span>Completados (mes)</span>
@@ -66,7 +72,7 @@
           placeholder="Buscar..."
           v-model="filtroBusqueda"
         />
-        <img src="../assets/icons/search.png" class="mant-search-inline-icon" alt="Buscar" />
+        <Search :size="16" class="mant-search-inline-icon" />
       </div>
     </div>
 
@@ -127,24 +133,32 @@
               <td class="actions-cell-fixed">
                 <div class="actions-wrapper">
                   <button
-                    class="action-btn-mockup icon-view"
+                    class="action-btn-mockup"
                     title="Ver detalle"
                     @click="verDetalleMantenimiento(mantenimiento)"
-                  ></button>
+                  >
+                    <Eye :size="15" />
+                  </button>
+
                   <button
-                    class="action-btn-mockup icon-edit"
-                    :class="{ 'btn-disabled': !esAdmin }"
-                    :disabled="!esAdmin"
-                    :title="esAdmin ? 'Editar' : 'No permitido para tu rol'"
-                    @click="esAdmin && abrirFormularioEdicion(mantenimiento)"
-                  ></button>
+                    class="action-btn-mockup"
+                    :class="{ 'btn-disabled': !puedeModificarMantenimientos }"
+                    :disabled="!puedeModificarMantenimientos"
+                    title="Editar mantenimiento"
+                    @click="abrirEditarMantenimiento(mantenimiento)"
+                  >
+                    <Pencil :size="15" />
+                  </button>
+
                   <button
-  class="action-btn-mockup icon-delete"
-  :class="{ 'btn-disabled': !esAdmin }"
-  :disabled="!esAdmin"
-  title="Eliminar Mantenimiento"
-@click="esAdmin && mostrarAvisoEliminacion()"
-></button>
+                    class="action-btn-mockup"
+                    :class="{ 'btn-disabled': !puedeEliminarMantenimientos }"
+                    :disabled="!puedeEliminarMantenimientos"
+                    title="Eliminar mantenimiento"
+                    @click="eliminarMantenimiento(mantenimiento.id)"
+                  >
+                    <Trash2 :size="15" />
+                  </button>
                 </div>
               </td>
             </tr>
@@ -384,6 +398,18 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+
+import {
+  Wrench,
+  CircleCheck,
+  AlertTriangle,
+  CalendarClock,
+  CheckCheck,
+  Search,
+  Eye,
+  Pencil,
+  Trash2
+} from 'lucide-vue-next'
 
 
 const rolUsuario = ref(localStorage.getItem('usuario_rol') || 'Operador')
@@ -772,9 +798,11 @@ onMounted(() => {
 }
 
 .mant-card-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: #f3f4f6 !important;
+  color: #111827;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -791,22 +819,19 @@ onMounted(() => {
 
 .mant-card-info { display: flex; flex-direction: column; gap: 2px; }
 
-
 .mant-card-info {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-
 .mant-card-info span {
   font-size: 0.82rem;
   color: #6b7280;
   font-weight: 500;
-  text-transform: none; 
+  text-transform: none; /* Quita las mayúsculas toscas */
   letter-spacing: normal;
 }
-
 
 .mant-card-info h3 {
   font-size: 1.3rem;
@@ -816,13 +841,39 @@ onMounted(() => {
   line-height: 1.2;
 }
 
-
 .menu-icon {
   width: 20px;
   height: 20px;
   object-fit: contain;
 }
 
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.dashboard-header-left h2 {
+  margin: 0;
+}
+
+.dashboard-header-left p {
+  margin: 6px 0 0;
+}
+
+.dashboard-header-badge {
+  flex-shrink: 0;
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
 
 .programado  { background: #e0e7ff; color: #3730a3; }
 .en-progreso { background: #dbeafe; color: #1e40af; }
@@ -853,7 +904,9 @@ onMounted(() => {
 
 .mant-filter-label { font-size: 0.88rem; font-weight: 600; color: #111827; white-space: nowrap; }
 
-.mant-input-search-wrapper { position: relative; display: flex; align-items: center; }
+.mant-input-search-wrapper {
+  position: relative;
+}
 
 .mant-inline-input {
   border: 1px solid #cccccc; border-radius: 20px;
@@ -864,8 +917,12 @@ onMounted(() => {
 .mant-inline-input:focus { border-color: #9ca3af; }
 
 .mant-search-inline-icon {
-  position: absolute; right: 14px;
-  width: 14px; height: 14px; opacity: 0.4; pointer-events: none;
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
 }
 
 .mant-date-range-wrapper {
@@ -899,7 +956,6 @@ onMounted(() => {
 
 .mant-btn-disabled { opacity: 0.35 !important; cursor: not-allowed !important; }
 
-
 .mant-dashboard-row {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -929,6 +985,7 @@ onMounted(() => {
   align-items: center;
   gap: 28px;
 }
+
 
 .mant-donut-chart {
   width: 120px;
@@ -1034,6 +1091,53 @@ onMounted(() => {
 .mant-prox-tag {
   font-size: 0.72rem; font-weight: 700;
   padding: 4px 12px; border-radius: 6px; white-space: nowrap; flex-shrink: 0;
+}
+
+.actions-cell-fixed {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.actions-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.action-btn-mockup {
+  width: 34px;
+  height: 34px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #374151;
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+  line-height: 1;
+  transition: all 0.2s ease;
+}
+
+.action-btn-mockup svg {
+  width: 15px;
+  height: 15px;
+  display: block;
+}
+
+.action-btn-mockup:hover:not(:disabled) {
+  background: #111827;
+  color: #ffffff;
+  border-color: #111827;
+}
+
+.btn-disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 
 .tag-preventivo { background: #dcfce7; color: #166534; }

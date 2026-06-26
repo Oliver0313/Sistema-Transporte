@@ -8,12 +8,17 @@
     <div class="card-panel">
       <div class="table-responsive">
         <div class="toolbar">
-          <input
-            v-model="filtroBusqueda"
-            type="text"
-            placeholder="Buscar conductor..."
-            class="search-box"
-          />
+
+          <div class="search-wrapper">
+            <Search :size="16" class="search-icon" />
+
+            <input
+              v-model="filtroBusqueda"
+              type="text"
+              placeholder="Buscar conductor..."
+              class="search-box"
+            />
+          </div>
 
           <button
             class="btn-new-solicitud-trigger"
@@ -22,7 +27,8 @@
             :title="puedeModificarConductores ? 'Registrar nuevo conductor' : 'No permitido para su rol'"
             @click="abrirFormularioNuevo"
           >
-            Nuevo conductor
+            <Plus :size="17" />
+            <span>Nuevo conductor</span>
           </button>
         </div>
         
@@ -62,27 +68,34 @@
               </td>
               <td class="actions-cell-fixed">
                 <div class="actions-wrapper">
-                  <button class="action-btn-mockup icon-view" title="Ver detalle" @click="verDetalleConductor(conductor)"></button>
-                  <button 
-                    class="action-btn-mockup icon-edit" 
-                    :class="{ 'btn-disabled': !puedeModificarConductores }" 
-                    :disabled="!puedeModificarConductores" 
-                    title="Editar Conductor" 
-                    @click="abrirFormularioEdicion(conductor)">
+                  <button
+                    class="action-btn-mockup"
+                    title="Ver detalle"
+                    @click="verDetalleConductor(conductor)"
+                  >
+                    <Eye :size="15" />
                   </button>
-                  <button 
-                    class="action-btn-mockup icon-delete" 
-                    :class="{ 'btn-disabled': !puedeEliminarConductores }" 
-                    :disabled="!puedeEliminarConductores" 
-                    title="Eliminar Conductor" 
-                    @click="eliminarConductorApi(conductor.id)">
+
+                  <button
+                    class="action-btn-mockup"
+                    :class="{ 'btn-disabled': !puedeModificarConductores }"
+                    :disabled="!puedeModificarConductores"
+                    title="Editar conductor"
+                    @click="abrirFormularioEdicion(conductor)"
+                  >
+                    <Pencil :size="15" />
+                  </button>
+
+                  <button
+                    class="action-btn-mockup"
+                    :class="{ 'btn-disabled': !puedeEliminarConductores }"
+                    :disabled="!puedeEliminarConductores"
+                    title="Eliminar conductor"
+                    @click="eliminarConductorApi(conductor.id)"
+                  >
+                    <Trash2 :size="15" />
                   </button>
                 </div>
-              </td>
-            </tr>
-            <tr v-if="conductoresFiltrados.length === 0">
-              <td colspan="10" class="text-center text-muted" style="padding: 30px;">
-                No se encontraron conductores registrados con ese criterio.
               </td>
             </tr>
           </tbody>
@@ -219,6 +232,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { Eye, Pencil, Trash2, Plus, Search } from 'lucide-vue-next'
 
 const conductores = ref([])
 const filtroBusqueda = ref('')
@@ -603,6 +617,11 @@ onMounted(() => {
   z-index: 999;
 }
 
+.btn-disabled-main {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .modal-container {
   width: 650px;
   max-width: 95%;
@@ -701,6 +720,45 @@ onMounted(() => {
   font-weight: 700; 
   color: #111827;
   font-family: inherit; 
+}
+
+.btn-new-solicitud-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.search-wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 550px;
+  min-width: 320px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.search-box {
+  width: 100%;
+  height: 40px;
+  padding: 0 14px 0 42px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+  font-size: .9rem;
+}
+
+.search-box:focus {
+  outline: none;
+  border-color: #9ca3af;
+  box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.05);
 }
 
 .feed-item-info h5 {
