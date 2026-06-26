@@ -1,14 +1,19 @@
 <template>
-  <div>
-    <div class="section-header">
-      <h2>Asignaciones</h2>
-      <p>Gestión y consulta de asignaciones de transporte</p>
+    <div class="dashboard-header">
+      <div class="dashboard-header-left">
+        <h2>Asignaciones</h2>
+        <p>Gestiona la asignación de vehículos y conductores para cada solicitud.</p>
+      </div>
+
+      <div class="dashboard-header-badge">
+        {{ asignacionesActivas }} activas
+      </div>
     </div>
 
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-icon">
-          <img src="../assets/icons/total.png" class="stat-icon-img" alt="Total" />
+          <CircleCheck :size="24" />
         </div>
         <div class="stat-info">
           <span>Total</span>
@@ -18,7 +23,7 @@
 
       <div class="stat-card">
         <div class="stat-icon">
-          <img src="../assets/icons/activo-negro.png" class="stat-icon-img" alt="Activas" />
+          <CircleCheck :size="24" />
         </div>
         <div class="stat-info">
           <span>Activas</span>
@@ -28,7 +33,7 @@
 
       <div class="stat-card">
         <div class="stat-icon">
-          <img src="../assets/icons/encurso.png" class="stat-icon-img" alt="En curso" />
+          <Truck :size="24" />
         </div>
         <div class="stat-info">
           <span>En curso</span>
@@ -38,7 +43,7 @@
 
       <div class="stat-card">
         <div class="stat-icon">
-          <img src="../assets/icons/disponible-negro.png" class="stat-icon-img" alt="Completas" />
+          <CircleCheck :size="24" />
         </div>
         <div class="stat-info">
           <span>Completas</span>
@@ -48,7 +53,7 @@
 
       <div class="stat-card">
         <div class="stat-icon">
-          <img src="../assets/icons/cancelar.png" class="stat-icon-img" alt="Canceladas" />
+          <Ban :size="24" />
         </div>
         <div class="stat-info">
           <span>Canceladas</span>
@@ -60,12 +65,16 @@
     <div class="content-layout">
       <div class="main-content">
         <div class="toolbar">
-          <input
-            v-model="filtroBusqueda"
-            type="text"
-            placeholder="Buscar asignación..."
-            class="search-box"
-          />
+          <div class="search-wrapper">
+            <input
+              v-model="filtroBusqueda"
+              type="text"
+              placeholder="Buscar asignación..."
+              class="search-box"
+            />
+
+            <Search :size="16" class="search-icon" />
+          </div>
 
           <button
             class="btn-new-solicitud-trigger"
@@ -147,27 +156,31 @@
                 
                 <td class="actions-cell-fixed" @click.stop>
                   <div class="actions-wrapper">
-                    <button 
-                      class="action-btn-mockup icon-view" 
-                      title="Ver detalle" 
+                    <button
+                      class="action-btn-mockup"
+                      title="Ver detalle"
                       @click="asignacionSeleccionada = asignacion"
-                    ></button>
-                    
-                    <button 
-                      class="action-btn-mockup icon-edit" 
+                    >
+                      <Eye :size="15" />
+                    </button>
+
+                    <button
+                      class="action-btn-mockup"
                       :class="{ 'btn-disabled': !puedeCrearOEditar || asignacion.estado === 3 || asignacion.estado === 4 }"
                       :disabled="!puedeCrearOEditar || asignacion.estado === 3 || asignacion.estado === 4"
-                      :title="puedeCrearOEditar ? 'Modificar asignación' : 'No permitido para su rol'" 
                       @click="abrirModificarAsignacion(asignacion)"
-                    ></button>
-                    
-                    <button 
-                      class="action-btn-mockup icon-delete" 
+                    >
+                      <Pencil :size="15" />
+                    </button>
+
+                    <button
+                      class="action-btn-mockup"
                       :class="{ 'btn-disabled': !puedeCrearOEditar }"
                       :disabled="!puedeCrearOEditar"
-                      :title="puedeCrearOEditar ? 'Eliminar asignación' : 'No permitido para su rol'" 
                       @click="eliminarAsignacionApi(asignacion.id)"
-                    ></button>
+                    >
+                      <Trash2 :size="15" />
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -303,11 +316,22 @@
       </div>
       <button class="btn-close-toast" @click="errorModal = ''">×</button>
     </div>
-
-  </div> </template>
+  </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+
+import {
+  ClipboardList,
+  CircleCheck,
+  Truck,
+  Ban,
+  Eye,
+  Pencil,
+  Trash2,
+  Search,
+  Plus
+} from 'lucide-vue-next'
 
 const asignaciones = ref([])
 const solicitudes = ref([])
@@ -763,10 +787,35 @@ onMounted(() => {
 }
 
 .search-box {
-  width: 320px;
-  padding: 12px 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 12px;
+  width: 100%;
+  height: 40px;
+  padding: 0 14px 0 42px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+  font-size: .9rem;
+  box-sizing: border-box;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.search-box:focus {
+  outline: none;
+  border-color: #9ca3af;
+  box-shadow: 0 0 0 3px rgba(17,24,39,.05);
+}
+
+.search-wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 500px;
 }
 
 .tabs {
