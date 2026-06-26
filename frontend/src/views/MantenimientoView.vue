@@ -141,22 +141,30 @@
                   </button>
 
                   <button
-                    class="action-btn-mockup"
-                    :class="{ 'btn-disabled': !puedeModificarMantenimientos }"
-                    :disabled="!puedeModificarMantenimientos"
-                    title="Editar mantenimiento"
-                    @click="abrirEditarMantenimiento(mantenimiento)"
-                  >
-                    <Pencil :size="15" />
-                  </button>
+  class="action-btn-mockup"
+  title="Ver historial del vehículo"
+  @click="abrirHistorial(mantenimiento.vehiculoId)"
+>
+  <ClipboardList :size="15" />
+</button>
+
+                 <button
+  class="action-btn-mockup"
+  :class="{ 'btn-disabled': !puedeModificarMantenimiento }"
+  :disabled="!puedeModificarMantenimiento"
+  title="Editar mantenimiento"
+  @click="abrirFormularioEdicion(mantenimiento)"   
+>
+  <Pencil :size="15" />
+</button>
 
                   <button
-                    class="action-btn-mockup"
-                    :class="{ 'btn-disabled': !puedeEliminarMantenimientos }"
-                    :disabled="!puedeEliminarMantenimientos"
-                    title="Eliminar mantenimiento"
-                    @click="eliminarMantenimiento(mantenimiento.id)"
-                  >
+  class="action-btn-mockup"
+  :class="{ 'btn-disabled': !puedeModificarMantenimiento }"
+  :disabled="!puedeModificarMantenimiento"
+  title="Eliminar mantenimiento"
+  @click="eliminarMantenimiento(mantenimiento.id)"
+>
                     <Trash2 :size="15" />
                   </button>
                 </div>
@@ -394,6 +402,49 @@
   </div>
   <button class="btn-close-toast" @click="mensajeAvisoFlotante = ''">×</button>
 </div>
+
+<div v-if="mostrarHistorial" class="modal-overlay-mockup" @click.self="mostrarHistorial = false">
+  <div class="modal-container-central">
+    <div class="form-panel-header-central">
+      <h3>Historial — {{ obtenerNombreVehiculo(vehiculoHistorialId) }}</h3>
+      <button class="btn-close-modal" @click="mostrarHistorial = false">×</button>
+    </div>
+
+    <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
+      <table class="custom-table-mockup">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Fecha</th>
+            <th>Tipo</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="m in historialVehiculo" :key="m.id">
+            <td>{{ m.id }}</td>
+            <td>{{ formatearFechaVista(m.fechaMantenimiento) }}</td>
+            <td>{{ formatearTipoVista(m.tipoMantenimiento) }}</td>
+            <td>
+              <span :class="['status-pill-mockup', obtenerClaseEstado(m.estado)]">
+                {{ formatearEstadoVista(m.estado) }}
+              </span>
+            </td>
+          </tr>
+          <tr v-if="historialVehiculo.length === 0">
+            <td colspan="4" class="text-center text-muted" style="padding: 20px;">
+              No hay historial para este vehículo.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="form-actions-central" style="margin-top: 16px;">
+      <button class="btn-submit-mockup" @click="mostrarHistorial = false">Cerrar</button>
+    </div>
+  </div>
+</div>
 </template>
 
 <script setup>
@@ -408,16 +459,44 @@ import {
   Search,
   Eye,
   Pencil,
-  Trash2
+  Trash2,
+  ClipboardList 
 } from 'lucide-vue-next'
 
 
-const rolUsuario = ref(localStorage.getItem('usuario_rol') || 'Operador')
+const rolUsuario = ref('Operador')
+
+const obtenerRolDesdeToken = () => {
+  const token = localStorage.getItem('token_transporte')
+  if (!token) return
+  try {
+    const base64Url = token.split('.')[1]
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+    const decoded = JSON.parse(atob(base64))
+    rolUsuario.value = decoded.role || decoded["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] || 'Operador'
+  } catch (e) {
+    console.error("Error leyendo credenciales:", e)
+  }
+}
 
 const puedeModificarMantenimiento = computed(() => {
   const rol = rolUsuario.value.toLowerCase()
   return rol === 'administrador' || rol === 'admin' || rol === 'superadmin'
 })
+
+const mostrarHistorial   = ref(false)
+const vehiculoHistorialId = ref(null)
+
+const historialVehiculo = computed(() =>
+  mantenimientos.value
+    .filter(m => m.vehiculoId === vehiculoHistorialId.value)
+    .sort((a, b) => new Date(b.fechaMantenimiento) - new Date(a.fechaMantenimiento))
+)
+
+const abrirHistorial = (vehiculoId) => {
+  vehiculoHistorialId.value = vehiculoId
+  mostrarHistorial.value = true
+}
 
 const esAdmin = computed(() => puedeModificarMantenimiento.value)
 
@@ -522,12 +601,15 @@ const verDetalleMantenimiento = (mantenimiento) => {
   mostrarDetalle.value = true
 }
 
-const mostrarAvisoEliminacion = () => {
-  mensajeAvisoFlotante.value = 'No se pudo eliminar el registro.'
-  
+const eliminarMantenimiento = async (id) => {
+
+  mensajeAvisoFlotante.value = `No se permite eliminar el mantenimiento #${id}. El registro de historial es obligatorio.`
+
   setTimeout(() => { 
     mensajeAvisoFlotante.value = '' 
   }, 5000)
+  
+  return 
 }
 
 
@@ -771,6 +853,7 @@ const actualizarMantenimiento = async () => {
 
 
 onMounted(() => {
+  obtenerRolDesdeToken()
   fetchVehiculosDeAPI()
   fetchMantenimientosDeAPI()
 })
