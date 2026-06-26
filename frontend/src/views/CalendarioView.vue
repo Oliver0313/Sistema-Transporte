@@ -378,31 +378,65 @@ const redireccionarNuevaSolicitud = () => {
 const fetchCalendarioCoreData = async () => {
   const token = localStorage.getItem('token_transporte')
   const headers = { Authorization: `Bearer ${token}` }
-  
+
   try {
-    const [resV, resC, resS] = await Promise.all([
-      fetch('https://localhost:7221/api/Vehiculos', { headers }),
-      fetch('https://localhost:7221/api/Conductores', { headers }),
-      fetch('https://localhost:7221/api/solicitudestransporte', { headers })
+    const [resS, resA, resV, resC] = await Promise.allSettled([
+      fetch('https://localhost:7221/api/solicitudestransporte', { headers }),
+      fetch('https://localhost:7221/api/asignaciones', { headers }),
+      fetch('https://localhost:7221/api/vehiculos', { headers }),
+      fetch('https://localhost:7221/api/conductores', { headers })
     ])
 
-    if (resV.ok) vehiculos.value = await resV.json()
-    if (resC.ok) conductores.value = await resC.json()
-    if (resS.ok) {
-      const dataSolicitudes = await resS.json()
-      solicitudes.value = dataSolicitudes.map(s => ({
-        ...s,
-        vehiculo: s.vehiculo || vehiculos.value.find(v => v.id === s.vehiculoId) || null,
-        conductor: s.conductor || conductores.value.find(c => c.id === s.conductorId) || null
-      }))
+    let dataSolicitudes = []
+    let dataAsignaciones = []
+    let dataVehiculos = []
+    let dataConductores = []
+
+    if (resS.status === 'fulfilled' && resS.value.ok) {
+      dataSolicitudes = await resS.value.json()
     }
+
+    if (resA.status === 'fulfilled' && resA.value.ok) {
+      dataAsignaciones = await resA.value.json()
+    }
+
+    if (resV.status === 'fulfilled' && resV.value.ok) {
+      dataVehiculos = await resV.value.json()
+    }
+
+    if (resC.status === 'fulfilled' && resC.value.ok) {
+      dataConductores = await resC.value.json()
+    }
+
+    vehiculos.value = dataVehiculos
+    conductores.value = dataConductores
+
+    solicitudes.value = dataSolicitudes.map(s => {
+      const asignacion = dataAsignaciones.find(a => a.solicitudTransporteId === s.id)
+
+      const vehiculo = asignacion
+        ? dataVehiculos.find(v => v.id === asignacion.vehiculoId)
+        : null
+
+      const conductor = asignacion
+        ? dataConductores.find(c => c.id === asignacion.conductorId)
+        : null
+
+      return {
+        ...s,
+        vehiculoId: asignacion?.vehiculoId || null,
+        conductorId: asignacion?.conductorId || null,
+        vehiculo,
+        conductor
+      }
+    })
   } catch (error) {
-    console.error('Error inyectando datos del calendario:', error)
+    console.error('Error cargando datos del calendario:', error)
   }
 }
 
-onMounted(() => {
-  fetchCalendarioCoreData()
+onMounted(async () => {
+  await fetchCalendarioCoreData()
 })
 </script>
 
@@ -646,6 +680,61 @@ onMounted(() => {
 
 .grid-day-cell:nth-child(7n) {
   border-right: none;
+}
+
+.mant-cards-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.mant-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+}
+
+.mant-card-icon {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 14px;
+  background: #f3f4f6;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mant-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mant-card-info span {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.mant-card-info h3 {
+  margin: 0;
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.1;
+}
+
+.mant-card-info small {
+  font-size: 0.78rem;
+  color: #9ca3af;
 }
 
 .day-number-label {
