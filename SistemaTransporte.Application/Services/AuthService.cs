@@ -1,12 +1,15 @@
-﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SistemaTransporte.Application.DTOs.Auth;
 using SistemaTransporte.Application.Interfaces;
 using SistemaTransporte.Domain.Entities;
 using SistemaTransporte.Domain.Enums;
+using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace SistemaTransporte.Application.Services
 {
@@ -15,15 +18,18 @@ namespace SistemaTransporte.Application.Services
         private readonly IRepository<Usuario> _usuarioRepository;
         private readonly IRepository<Rol> _rolRepository;
         private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
 
         public AuthService(
             IRepository<Usuario> usuarioRepository,
             IRepository<Rol> rolRepository,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IEmailService emailService)
         {
             _usuarioRepository = usuarioRepository;
             _rolRepository = rolRepository;
             _configuration = configuration;
+            _emailService = emailService;
         }
 
         public async Task<AuthResponseDto> RegisterAsync(RegisterDto dto)
@@ -75,6 +81,12 @@ namespace SistemaTransporte.Application.Services
             if (!BCrypt.Net.BCrypt.Verify(dto.Contrasena, usuario.ContrasenaHash))
                 return null;
 
+            // === CONTROL DE USUARIO INACTIVO ===
+            if (usuario.EstadoUsuario == EstadoUsuario.Inactivo)
+            {
+                throw new UnauthorizedAccessException("Su cuenta está inactiva. Contacte al administrador.");
+            }
+
             var rol = await _rolRepository.GetByIdAsync(usuario.RolId);
 
             if (rol == null)
@@ -105,7 +117,7 @@ namespace SistemaTransporte.Application.Services
             {
                 return new
                 {
-                    mensaje = "Si el correo existe, se generará un enlace de recuperación."
+                    mensaje = "Si el correo existe, se enviarán instrucciones de recuperación."
                 };
             }
 
@@ -119,10 +131,25 @@ namespace SistemaTransporte.Application.Services
 
             var resetLink = $"http://localhost:5173/reset-password?token={token}";
 
+            var subject = "Recuperación de contraseña - Sistema Transporte";
+
+            var body = $@"
+                <h2>Recuperación de contraseña</h2>
+                <p>Hola {usuario.Nombre},</p>
+                <p>Recibimos una solicitud para restablecer tu contraseña.</p>
+                <p>Haz clic en el siguiente enlace para continuar:</p>
+                <p>
+                    <a href='{resetLink}'>Restablecer contraseña</a>
+                </p>
+                <p>Este enlace expirará en 30 minutos.</p>
+                <p>Si no solicitaste este cambio, puedes ignorar este mensaje.</p>
+            ";
+
+            await _emailService.SendEmailAsync(usuario.Correo, subject, body);
+
             return new
             {
-                mensaje = "Token generado correctamente.",
-                resetLink
+                mensaje = "Se enviaron instrucciones de recuperación al correo registrado."
             };
         }
 

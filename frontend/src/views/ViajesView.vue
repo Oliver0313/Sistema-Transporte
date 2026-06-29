@@ -1,59 +1,73 @@
 <template>
   <div>
-    <div class="section-header">
-      <h2>Viajes</h2>
-      <p>Administra y gestiona los viajes</p>
+    <div class="dashboard-header">
+      <div class="dashboard-header-left">
+        <h2>Viajes</h2>
+        <p>Administra los viajes activos, finalizados y su seguimiento en tiempo real.</p>
+      </div>
+
+      <div class="dashboard-header-badge">
+        {{ viajesEnCurso }} en curso
+      </div>
     </div>
 
     <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon">
-          <img src="../assets/icons/vehiculo-negro.png" class="stat-icon-img" alt="Viajes activos" />
-        </div>
-        <div>
-          <span>Viajes activos</span>
-          <strong>{{ viajesEnCurso }}</strong>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon">
-          <img src="../assets/icons/ruta.png" class="stat-icon-img" alt="Vehículos en ruta" />
-        </div>
-        <div>
-          <span>Vehículos en ruta</span>
-          <strong>{{ viajesEnCurso }}</strong>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon">
-          <img src="../assets/icons/disponible-negro.png" class="stat-icon-img" alt="Finalizados" />
-        </div>
-        <div>
-          <span>Finalizados</span>
-          <strong>{{ viajesFinalizados }}</strong>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon">
-          <img src="../assets/icons/total.png" class="stat-icon-img" alt="Total viajes" />
-        </div>
-        <div>
-          <span>Total viajes</span>
-          <strong>{{ totalViajes }}</strong>
-        </div>
-      </div>
+  <div class="stat-card">
+    <div class="stat-icon">
+      <Route :size="24" />
     </div>
 
+    <div class="stat-info">
+      <span>Viajes activos</span>
+      <strong>{{ viajesEnCurso }}</strong>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon">
+      <MapPinned :size="24" />
+    </div>
+
+    <div class="stat-info">
+      <span>Vehículos en ruta</span>
+      <strong>{{ viajesEnCurso }}</strong>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon">
+      <CircleCheck :size="24" />
+    </div>
+
+    <div class="stat-info">
+      <span>Finalizados</span>
+      <strong>{{ viajesFinalizados }}</strong>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-icon">
+      <ClipboardList :size="24" />
+    </div>
+
+    <div class="stat-info">
+      <span>Total viajes</span>
+      <strong>{{ totalViajes }}</strong>
+    </div>
+  </div>
+</div>
+
 <div class="filters-bar">
-  <input
-    v-model="filtroBusqueda"
-    type="text"
-    placeholder="Buscar viaje..."
-    class="search-box"
-  />
+  <div class="search-wrapper">
+    <Search :size="16" class="search-icon" />
+
+    <input
+      v-model="filtroBusqueda"
+      type="text"
+      placeholder="Buscar viaje..."
+      class="search-box"
+    />
+  </div>
 
   <select v-model="filtroEstado" class="filter-select">
     <option value="todos">Todos</option>
@@ -165,6 +179,14 @@
 <script setup>
 import { ref, onMounted, computed, watch } from 'vue'
 import MapaViaje from '../components/MapaViaje.vue'
+
+import {
+  Route,
+  MapPinned,
+  CircleCheck,
+  ClipboardList,
+  Search
+} from 'lucide-vue-next'
 
 const viajes = ref([])
 const viajeSeleccionado = ref(null)
@@ -348,19 +370,33 @@ onMounted(() => {
 
 .search-box {
   width: 100%;
-  padding: 12px 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 12px;
-  margin-bottom: 14px;
-  outline: none;
-  background: #f9fafb;
-  color: #111827;
-  font-size: 0.9rem;
+  height: 40px;
+  padding: 0 14px 0 42px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+  font-size: .9rem;
+  box-sizing: border-box;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
 }
 
 .search-box:focus {
   border-color: #111827;
   background: white;
+}
+
+.search-wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 500px;
 }
 
 .viajes-layout {
@@ -502,8 +538,10 @@ onMounted(() => {
 
 .filters-bar {
   display: flex;
-  gap: 14px;
-  margin-bottom: 16px;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  max-width: 860px;
 }
 
 .search-box {
@@ -512,22 +550,33 @@ onMounted(() => {
 }
 
 .filter-select {
-  width: 180px;
-  padding: 12px 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 12px;
-  background: #f9fafb;
+  width: 220px;
+  height: 40px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 0 12px;
+  font-size: .9rem;
 }
 
 .stat-icon {
-  width: 45px;   
-  height: 45px;        
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;   
-  background: #f3f4f6; 
-  flex-shrink: 0;      
+
+  background: #f3f4f6;
+  border-radius: 14px;
+
+  color: #111827;
+}
+
+.stat-icon svg {
+  width: 24px;
+  height: 24px;
 }
 
 .stat-icon-img {

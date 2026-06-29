@@ -83,23 +83,29 @@
               <td>{{ solicitud.conductorAsignado || '---' }}</td>
               <td class="actions-cell-fixed">
                 <div class="actions-wrapper">
-                  <button class="action-btn-mockup icon-view" title="Ver detalle" @click="verDetalleSolicitud(solicitud)"></button>
+                  <button class="action-btn-mockup" title="Ver detalle" @click="verDetalleSolicitud(solicitud)">
+                <Eye :size="15" />
+              </button>
                   
-                  <button 
-                    class="action-btn-mockup icon-edit" 
-                    :class="{ 'btn-disabled': !puedeEditarOAsignar }"
-                    :disabled="!puedeEditarOAsignar" 
-                    :title="puedeEditarOAsignar ? (esSupervisor ? 'Asignar Unidad' : 'Editar Solicitud') : 'No permitido para operador'"
-                    @click="abrirModificarSolicitud(solicitud)">
-                  </button>
+                <button 
+                  class="action-btn-mockup" 
+                  :class="{ 'btn-disabled': !puedeEditarOAsignar }"
+                  :disabled="!puedeEditarOAsignar" 
+                  :title="puedeEditarOAsignar ? (esSupervisor ? 'Asignar Unidad' : 'Editar Solicitud') : 'No permitido para operador'"
+                  @click="abrirModificarSolicitud(solicitud)"
+                >
+                  <Pencil :size="15" />
+                </button>
                   
-                  <button 
-                    class="action-btn-mockup icon-delete" 
-                    :class="{ 'btn-disabled': !puedeEliminar }"
-                    :disabled="!puedeEliminar" 
-                    :title="puedeEliminar ? 'Eliminar solicitud' : 'No permitido para su rol'"
-                    @click="eliminarSolicitud(solicitud.id)">
-                  </button>
+                <button 
+                  class="action-btn-mockup" 
+                  :class="{ 'btn-disabled': !puedeEliminar }"
+                  :disabled="!puedeEliminar" 
+                  :title="puedeEliminar ? 'Eliminar solicitud' : 'No permitido para su rol'"
+                  @click="eliminarSolicitud(solicitud.id)"
+                >
+                  <Trash2 :size="15" />
+                </button>
                 </div>
               </td>
             </tr>
@@ -123,78 +129,58 @@
       </div>
 
       <form @submit.prevent="guardarSolicitud" class="form-solicitud-mockup">
-        
-        <div class="form-row-mockup">
-          <div class="form-group-mockup">
-            <label>Área Solicitante</label>
-            <input type="text" v-model="formModel.areaSolicitante" :disabled="esSupervisor" placeholder="Ej. RRHH" required />
-          </div>
-          <div class="form-group-mockup">
-            <label>Cantidad de Colaboradores</label>
-            <input type="number" v-model.number="formModel.cantidadColaboradores" :disabled="esSupervisor" min="1" required />
-          </div>
-        </div>
+  
+  <div class="form-row-mockup">
+    <div class="form-group-mockup">
+      <label>Área Solicitante</label>
+      <input type="text" v-model="formModel.areaSolicitante" :disabled="esSupervisor" placeholder="Ej. RRHH" required />
+    </div>
+    <div class="form-group-mockup">
+      <label>Cantidad de Colaboradores</label>
+      <input type="number" v-model.number="formModel.cantidadColaboradores" :disabled="esSupervisor" min="1" required />
+    </div>
+  </div>
 
-        <div class="form-row-mockup">
-          <div class="form-group-mockup">
-            <label>Fecha y Hora Salida</label>
-            <input type="datetime-local" v-model="formModel.fechaHoraSalida" :disabled="esSupervisor" required />
-          </div>
-          <div class="form-group-mockup">
-            <label>Fecha y Hora Regreso</label>
-            <input type="datetime-local" v-model="formModel.fechaHoraRegreso" :disabled="esSupervisor" required />
-          </div>
-        </div>
+  <div class="form-row-mockup">
+    <div class="form-group-mockup">
+      <label>Fecha y Hora Salida</label>
+      <input type="datetime-local" v-model="formModel.fechaHoraSalida" :disabled="esSupervisor" required />
+    </div>
+    <div class="form-group-mockup">
+      <label>Fecha y Hora Regreso</label>
+      <input type="datetime-local" v-model="formModel.fechaHoraRegreso" :disabled="esSupervisor" required />
+    </div>
+  </div>
 
-        <div class="form-row-mockup">
-          <div class="form-group-mockup">
-            <label>Destino</label>
-            <input type="text" v-model="formModel.destino" :disabled="esSupervisor" placeholder="Ej. Bonao" required />
-          </div>
-          <div v-if="formModel.id" class="form-group-mockup">
-            <label>Estado Proceso</label>
-            <select class="mockup-select" v-model="formModel.estado">
-              <option value="1">Pendiente</option>
-              <option value="2">Aprobada</option>
-              <option value="3">Rechazada</option>
-              <option value="4">Cancelada</option>
-              <option value="5">Finalizada</option>
-            </select>
-          </div>
-        </div>
+  <div class="form-row-mockup">
+    <div class="form-group-mockup">
+      <label>Destino</label>
+      <input type="text" v-model="formModel.destino" :disabled="esSupervisor" placeholder="Ej. Bonao" required />
+    </div>
+    <div v-if="formModel.id" class="form-group-mockup">
+      <label>Estado Proceso</label>
+      <select class="mockup-select" v-model="formModel.estado" :disabled="!esSupervisor">
+        <option value="1">Pendiente</option>
+        <option value="2">Aprobada</option>
+        <option value="3">Rechazada</option>
+        <option value="4">Cancelada</option>
+        <option value="5">Finalizada</option>
+      </select>
+    </div>
+  </div>
 
-        <div class="form-group-mockup">
-          <label>Motivo del Viaje</label>
-          <textarea v-model="formModel.motivo" :disabled="esSupervisor" placeholder="Ej. Capacitacion" rows="2" required></textarea>
-        </div>
+  <div class="form-group-mockup">
+    <label>Motivo del Viaje</label>
+    <textarea v-model="formModel.motivo" :disabled="esSupervisor" placeholder="Ej. Capacitacion" rows="2" required></textarea>
+  </div>
 
-        <div class="form-group-mockup">
-            <label>Conductor Asignado</label>
-            <select v-model="formModel.conductorId" class="mockup-select-modern" required>
-              <option value="" disabled selected>Seleccione un conductor</option>
-              <option v-for="c in conductores" :key="c.id" :value="c.id">
-                {{ c.nombre }} {{ c.apellido }}
-              </option>
-            </select>
-          </div>
-
-          <div class="form-group-mockup">
-            <label>Vehículo Asignado</label>
-            <select v-model="formModel.vehiculoId" class="mockup-select-modern" required>
-              <option value="" disabled selected>Seleccione un vehículo</option>
-              <option v-for="v in vehiculos" :key="v.id" :value="v.id">
-                {{ v.marca }} {{ v.modelo }} - {{ v.matricula }}
-              </option>
-            </select>
-          </div>
-
-        <div class="form-actions-central" style="margin-top: 10px;">
-          <button type="button" class="btn-cancel-mockup" @click="cerrarFormulario">Cancelar</button>
-          <button type="submit" class="btn-submit-mockup" :disabled="guardando">
-            {{ guardando ? 'Enviando a la API...' : (formModel.id ? 'Confirmar Cambios' : 'Registrar Solicitud') }}
-          </button>
-        </div>
-      </form>
+  <div class="form-actions-central" style="margin-top: 10px;">
+    <button type="button" class="btn-cancel-mockup" @click="cerrarFormulario">Cancelar</button>
+    <button type="submit" class="btn-submit-mockup" :disabled="guardando">
+      {{ guardando ? 'Enviando a la API...' : (formModel.id ? 'Confirmar Cambios' : 'Registrar Solicitud') }}
+    </button>
+  </div>
+</form>
     </div>
   </div>
 
@@ -268,6 +254,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { Eye, Pencil, Trash2 } from 'lucide-vue-next'
 
 const filtroBusqueda = ref('')
 const filtroEstado = ref('')
@@ -368,16 +355,25 @@ const fetchSolicitudesDeAPI = async () => {
 }
 
 const areasDisponibles = computed(() => {
-  const areas = solicitudes.value.map(s => s.areaSolicitante).filter(Boolean)
-  return [...new Set(areas)]
+  const areas = solicitudes.value
+    .map(s => s.areaSolicitante?.trim())
+    .filter(Boolean)
+  return [...new Set(areas)].sort()
 })
 
 const solicitudesFiltradas = computed(() => {
   return solicitudes.value.filter(solicitud => {
+    const texto = filtroBusqueda.value.toLowerCase().trim()
     const cumpleBusqueda =
-      !filtroBusqueda.value ||
-      solicitud.destino?.toLowerCase().includes(filtroBusqueda.value.toLowerCase()) ||
-      solicitud.motivo?.toLowerCase().includes(filtroBusqueda.value.toLowerCase())
+      !texto ||
+      solicitud.destino?.toLowerCase().includes(texto) ||
+      solicitud.motivo?.toLowerCase().includes(texto) ||
+      solicitud.areaSolicitante?.toLowerCase().includes(texto) ||
+      solicitud.cantidadColaboradores?.toString().includes(texto) ||
+      formatearEstadoVista(solicitud.estado).toLowerCase().includes(texto) ||
+      solicitud.vehiculoAsignado?.toLowerCase().includes(texto) ||
+      solicitud.conductorAsignado?.toLowerCase().includes(texto) ||
+      solicitud.id?.toString().includes(texto)
 
     const cumpleEstado = !filtroEstado.value || solicitud.estado == filtroEstado.value
     const cumpleArea = !filtroArea.value || solicitud.areaSolicitante === filtroArea.value
@@ -510,8 +506,8 @@ const guardarSolicitud = async () => {
     motivo: formModel.value.motivo,
     estado: parseInt(formModel.value.estado),
     usuarioSolicitanteId: idUsuarioLogueado,
-    conductorId: formModel.value.conductorId ? parseInt(formModel.value.conductorId) : null,  // ← CLAVE
-    vehiculoId: formModel.value.vehiculoId ? parseInt(formModel.value.vehiculoId) : null      // ← CLAVE
+conductorId: formModel.value.conductorId ? parseInt(formModel.value.conductorId) : null,
+vehiculoId: formModel.value.vehiculoId ? parseInt(formModel.value.vehiculoId) : null
   }
 
   const url = formModel.value.id
@@ -769,15 +765,17 @@ onMounted(() => {
 }
 
 .action-btn-mockup {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: 10px;
   background-color: white;
+  color: #374151;
   cursor: pointer;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
 .action-btn-mockup:hover:not(:disabled) {

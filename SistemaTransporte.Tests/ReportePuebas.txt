@@ -1,0 +1,99 @@
+﻿Log level is set to Informational (Default).
+Connected to test environment '< Local Windows Environment >'
+Test data store opened in 0.361 sec.
+========== Starting test discovery ==========
+========== Test discovery skipped: All test containers are up to date ==========
+Starting test discovery for requested test run
+========== Starting test discovery ==========
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.3.1+6b60a9e56a (64-bit .NET 8.0.12)
+[xUnit.net 00:00:00.15]   Discovering: SistemaTransporte.Tests
+[xUnit.net 00:00:00.24]   Discovered:  SistemaTransporte.Tests
+========== Test discovery finished: 25 Tests found in 3.7 sec ==========
+========== Starting test run ==========
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.3.1+6b60a9e56a (64-bit .NET 8.0.12)
+[xUnit.net 00:00:00.12]   Starting:    SistemaTransporte.Tests
+[xUnit.net 00:00:01.65]   Finished:    SistemaTransporte.Tests
+========== Test run finished: 25 Tests (25 Passed, 0 Failed, 0 Skipped) run in 1.7 sec ==========
+Starting test discovery for requested test run
+========== Starting test discovery ==========
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.3.1+6b60a9e56a (64-bit .NET 8.0.12)
+[xUnit.net 00:00:00.17]   Discovering: SistemaTransporte.Tests
+[xUnit.net 00:00:00.25]   Discovered:  SistemaTransporte.Tests
+========== Test discovery finished: 30 Tests found in 1.4 sec ==========
+========== Starting test run ==========
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.3.1+6b60a9e56a (64-bit .NET 8.0.12)
+[xUnit.net 00:00:00.18]   Starting:    SistemaTransporte.Tests
+[xUnit.net 00:00:01.55]   Finished:    SistemaTransporte.Tests
+========== Test run finished: 30 Tests (30 Passed, 0 Failed, 0 Skipped) run in 1.6 sec ==========
+Starting test discovery for requested test run
+========== Starting test discovery ==========
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.3.1+6b60a9e56a (64-bit .NET 8.0.12)
+[xUnit.net 00:00:00.15]   Discovering: SistemaTransporte.Tests
+[xUnit.net 00:00:00.20]   Discovered:  SistemaTransporte.Tests
+========== Test discovery finished: 35 Tests found in 1.7 sec ==========
+========== Starting test run ==========
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.3.1+6b60a9e56a (64-bit .NET 8.0.12)
+[xUnit.net 00:00:00.13]   Starting:    SistemaTransporte.Tests
+[xUnit.net 00:00:01.43]   Finished:    SistemaTransporte.Tests
+========== Test run finished: 35 Tests (35 Passed, 0 Failed, 0 Skipped) run in 1.5 sec ==========
+Starting test discovery for requested test run
+========== Starting test discovery ==========
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.3.1+6b60a9e56a (64-bit .NET 8.0.12)
+[xUnit.net 00:00:00.11]   Discovering: SistemaTransporte.Tests
+[xUnit.net 00:00:00.16]   Discovered:  SistemaTransporte.Tests
+========== Test discovery finished: 40 Tests found in 1.4 sec ==========
+========== Starting test run ==========
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.3.1+6b60a9e56a (64-bit .NET 8.0.12)
+[xUnit.net 00:00:00.11]   Starting:    SistemaTransporte.Tests
+[xUnit.net 00:00:01.28]   Finished:    SistemaTransporte.Tests
+========== Test run finished: 40 Tests (40 Passed, 0 Failed, 0 Skipped) run in 1.3 sec ==========
+Starting test discovery for requested test run
+========== Starting test discovery ==========
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.3.1+6b60a9e56a (64-bit .NET 8.0.12)
+[xUnit.net 00:00:00.11]   Discovering: SistemaTransporte.Tests
+[xUnit.net 00:00:00.15]   Discovered:  SistemaTransporte.Tests
+========== Test discovery finished: 42 Tests found in 1.4 sec ==========
+========== Starting test run ==========
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.3.1+6b60a9e56a (64-bit .NET 8.0.12)
+[xUnit.net 00:00:00.09]   Starting:    SistemaTransporte.Tests
+[xUnit.net 00:00:00.39]     SistemaTransporte.Tests.EmailServiceTests.SendEmailAsync_FaltaPuertoEnConfiguracion_DebeLanzarNullReferenceException [FAIL]
+[xUnit.net 00:00:00.39]       Assert.Throws() Failure: Exception type was not an exact match
+[xUnit.net 00:00:00.39]       Expected: typeof(System.NullReferenceException)
+[xUnit.net 00:00:00.39]       Actual:   typeof(System.ArgumentNullException)
+[xUnit.net 00:00:00.39]       ---- System.ArgumentNullException : Value cannot be null. (Parameter 's')
+[xUnit.net 00:00:00.39]       Stack Trace:
+[xUnit.net 00:00:00.39]         C:\Users\Morel Technology\Sistema-Transporte\SistemaTransporte.Tests\EmailServiceTests.cs(36,0): at SistemaTransporte.Tests.EmailServiceTests.SendEmailAsync_FaltaPuertoEnConfiguracion_DebeLanzarNullReferenceException()
+[xUnit.net 00:00:00.39]         --- End of stack trace from previous location ---
+[xUnit.net 00:00:00.39]         ----- Inner Stack Trace -----
+[xUnit.net 00:00:00.39]            at System.Int32.Parse(String s)
+[xUnit.net 00:00:00.39]         C:\Users\Morel Technology\Sistema-Transporte\SistemaTransporte.Application\Services\EmailService.cs(21,0): at SistemaTransporte.Application.Services.EmailService.SendEmailAsync(String to, String subject, String body)
+[xUnit.net 00:00:00.39]         C:\Users\Morel Technology\Sistema-Transporte\SistemaTransporte.Tests\EmailServiceTests.cs(37,0): at SistemaTransporte.Tests.EmailServiceTests.<SendEmailAsync_FaltaPuertoEnConfiguracion_DebeLanzarNullReferenceException>b__4_1()
+[xUnit.net 00:00:01.29]   Finished:    SistemaTransporte.Tests
+========== Test run finished: 42 Tests (41 Passed, 1 Failed, 0 Skipped) run in 1.3 sec ==========
+Starting test discovery for requested test run
+========== Starting test discovery ==========
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.3.1+6b60a9e56a (64-bit .NET 8.0.12)
+[xUnit.net 00:00:00.16]   Discovering: SistemaTransporte.Tests
+[xUnit.net 00:00:00.26]   Discovered:  SistemaTransporte.Tests
+========== Test discovery finished: 42 Tests found in 1.4 sec ==========
+========== Starting test run ==========
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.3.1+6b60a9e56a (64-bit .NET 8.0.12)
+[xUnit.net 00:00:00.16]   Starting:    SistemaTransporte.Tests
+[xUnit.net 00:00:01.43]   Finished:    SistemaTransporte.Tests
+========== Test run finished: 42 Tests (42 Passed, 0 Failed, 0 Skipped) run in 1.4 sec ==========
+========== Starting test run ==========
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.3.1+6b60a9e56a (64-bit .NET 8.0.12)
+[xUnit.net 00:00:00.10]   Starting:    SistemaTransporte.Tests
+[xUnit.net 00:00:01.16]   Finished:    SistemaTransporte.Tests
+========== Test run finished: 42 Tests (42 Passed, 0 Failed, 0 Skipped) run in 1.2 sec ==========
+Starting test discovery for requested test run
+========== Starting test discovery ==========
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.3.1+6b60a9e56a (64-bit .NET 8.0.12)
+[xUnit.net 00:00:00.18]   Discovering: SistemaTransporte.Tests (method display = Method, method display options = None)
+[xUnit.net 00:00:00.24]   Discovered:  SistemaTransporte.Tests (found 42 test cases)
+========== Test discovery finished: 42 Tests found in 1.8 sec ==========
+========== Starting test run ==========
+[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v2.5.3.1+6b60a9e56a (64-bit .NET 8.0.12)
+[xUnit.net 00:00:00.13]   Starting:    SistemaTransporte.Tests (parallel test collections = on, max threads = 8)
+[xUnit.net 00:00:01.60]   Finished:    SistemaTransporte.Tests
+========== Test run finished: 42 Tests (42 Passed, 0 Failed, 0 Skipped) run in 1.6 sec ==========

@@ -1,51 +1,64 @@
 <template>
-  <div class="calendar-page-container">
-    <div class="section-header-mockup">
-      <h2>Calendario</h2>
-      <p>Administra y gesiona la Agenda</p>
-    </div>
-
-    <div class="metrics-grid-mockup">
-      <div class="metric-card-item card-blue">
-        <div class="metric-icon-box bg-light-blue">
-          <img src="../assets/icons/calendario-negro.png" alt="Viajes" class="metric-png-icon" />
-        </div>
-        <div class="metric-data-box">
-          <span class="metric-label">Viajes este mes</span>
-          <h3 class="metric-value">{{ totalViajesMes }}</h3>
-        </div>
+    <div class="dashboard-header">
+      <div class="dashboard-header-left">
+        <h2>Calendario</h2>
+        <p>Administra la agenda, viajes programados y disponibilidad de la flota.</p>
       </div>
 
-      <div class="metric-card-item card-green">
-        <div class="metric-icon-box bg-light-green">
-          <img src="../assets/icons/disponible-negro.png" alt="Confirmados" class="metric-png-icon" />
-        </div>
-        <div class="metric-data-box">
-          <span class="metric-label">Confirmados</span>
-          <h3 class="metric-value">{{ totalConfirmados }}</h3>
-        </div>
-      </div>
-
-      <div class="metric-card-item card-purple">
-        <div class="metric-icon-box bg-light-purple">
-          <img src="../assets/icons/pendiente-negro.png" alt="Pendientes" class="metric-png-icon" />
-        </div>
-        <div class="metric-data-box">
-          <span class="metric-label">Pendientes</span>
-          <h3 class="metric-value">{{ totalPendientes }}</h3>
-        </div>
-      </div>
-
-      <div class="metric-card-item card-yellow">
-        <div class="metric-icon-box bg-light-yellow">
-          <img src="../assets/icons/activo-negro.png" alt="Conductores" class="metric-png-icon" />
-        </div>
-        <div class="metric-data-box">
-          <span class="metric-label">Conductores activos</span>
-          <h3 class="metric-value">{{ conductores.length }}</h3>
-        </div>
+      <div class="dashboard-header-badge">
+        {{ solicitudesFiltradas.length }} viajes programados
       </div>
     </div>
+
+    <div class="mant-cards-row">
+  <div class="mant-card">
+    <div class="mant-card-icon">
+      <CalendarDays :size="24" />
+    </div>
+
+    <div class="mant-card-info">
+      <span>Viajes este mes</span>
+      <h3>{{ totalViajesMes }}</h3>
+      <small>Programados en agenda</small>
+    </div>
+  </div>
+
+  <div class="mant-card">
+    <div class="mant-card-icon">
+      <CircleCheck :size="24" />
+    </div>
+
+    <div class="mant-card-info">
+      <span>Confirmados</span>
+      <h3>{{ totalConfirmados }}</h3>
+      <small>Viajes aprobados</small>
+    </div>
+  </div>
+
+  <div class="mant-card">
+    <div class="mant-card-icon">
+      <Clock :size="24" />
+    </div>
+
+    <div class="mant-card-info">
+      <span>Pendientes</span>
+      <h3>{{ totalPendientes }}</h3>
+      <small>Esperando aprobación</small>
+    </div>
+  </div>
+
+  <div class="mant-card">
+    <div class="mant-card-icon">
+      <UserRound :size="24" />
+    </div>
+
+    <div class="mant-card-info">
+      <span>Conductores activos</span>
+      <h3>{{ conductores.length }}</h3>
+      <small>Disponibles en el sistema</small>
+    </div>
+  </div>
+</div>
 
     <div class="calendar-filters-top">
       <select v-model="filtroConductor" class="mockup-select-modern">
@@ -194,16 +207,27 @@
               </div>
             </div>
           </div>
-
         </div>
       </div>
-
     </div>
-  </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+
+import {
+  CalendarDays,
+  CircleCheck,
+  Clock,
+  UserRound,
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
+  Users,
+  IdCard,
+  CarFront,
+  X
+} from 'lucide-vue-next'
 
 const rolUsuario = ref(localStorage.getItem('usuario_rol') || 'Operador')
 
@@ -354,41 +378,81 @@ const redireccionarNuevaSolicitud = () => {
 const fetchCalendarioCoreData = async () => {
   const token = localStorage.getItem('token_transporte')
   const headers = { Authorization: `Bearer ${token}` }
-  
+
   try {
-    const [resV, resC, resS] = await Promise.all([
-      fetch('https://localhost:7221/api/Vehiculos', { headers }),
-      fetch('https://localhost:7221/api/Conductores', { headers }),
-      fetch('https://localhost:7221/api/solicitudestransporte', { headers })
+    const [resS, resA, resV, resC] = await Promise.allSettled([
+      fetch('https://localhost:7221/api/solicitudestransporte', { headers }),
+      fetch('https://localhost:7221/api/asignaciones', { headers }),
+      fetch('https://localhost:7221/api/vehiculos', { headers }),
+      fetch('https://localhost:7221/api/conductores', { headers })
     ])
 
-    if (resV.ok) vehiculos.value = await resV.json()
-    if (resC.ok) conductores.value = await resC.json()
-    if (resS.ok) {
-      const dataSolicitudes = await resS.json()
-      solicitudes.value = dataSolicitudes.map(s => ({
-        ...s,
-        vehiculo: s.vehiculo || vehiculos.value.find(v => v.id === s.vehiculoId) || null,
-        conductor: s.conductor || conductores.value.find(c => c.id === s.conductorId) || null
-      }))
+    let dataSolicitudes = []
+    let dataAsignaciones = []
+    let dataVehiculos = []
+    let dataConductores = []
+
+    if (resS.status === 'fulfilled' && resS.value.ok) {
+      dataSolicitudes = await resS.value.json()
     }
+
+    if (resA.status === 'fulfilled' && resA.value.ok) {
+      dataAsignaciones = await resA.value.json()
+    }
+
+    if (resV.status === 'fulfilled' && resV.value.ok) {
+      dataVehiculos = await resV.value.json()
+    }
+
+    if (resC.status === 'fulfilled' && resC.value.ok) {
+      dataConductores = await resC.value.json()
+    }
+
+    vehiculos.value = dataVehiculos
+    conductores.value = dataConductores
+
+    solicitudes.value = dataSolicitudes.map(s => {
+      const asignacion = dataAsignaciones.find(a => a.solicitudTransporteId === s.id)
+
+      const vehiculo = asignacion
+        ? dataVehiculos.find(v => v.id === asignacion.vehiculoId)
+        : null
+
+      const conductor = asignacion
+        ? dataConductores.find(c => c.id === asignacion.conductorId)
+        : null
+
+      return {
+        ...s,
+        vehiculoId: asignacion?.vehiculoId || null,
+        conductorId: asignacion?.conductorId || null,
+        vehiculo,
+        conductor
+      }
+    })
   } catch (error) {
-    console.error('Error inyectando datos del calendario:', error)
+    console.error('Error cargando datos del calendario:', error)
   }
 }
 
-onMounted(() => {
-  fetchCalendarioCoreData()
+onMounted(async () => {
+  await fetchCalendarioCoreData()
 })
 </script>
 
 <style scoped>
+
+.calendar-page-container,
+.calendar-page-container * {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+
 .calendar-page-container {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  font-family: sans-serif;
 }
+
 
 .metrics-grid-mockup {
   display: grid;
@@ -397,64 +461,59 @@ onMounted(() => {
 }
 
 .metric-card-item {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  padding: 16px;
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 18px;
-  background: white;
-  border-radius: 18px;
-  border: 1px solid #e5e7eb;
 }
 
 .metric-icon-box {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 46px;
-  height: 46px;
+  width: 44px;
+  height: 44px;
   border-radius: 12px;
+  flex-shrink: 0;
 }
 
 .metric-png-icon {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   object-fit: contain;
 }
 
 .metric-data-box {
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
 
 .metric-label {
-  font-size: 0.85rem;
-  color: #6b7280;
-  font-weight: 600;
+  font-size: 0.82rem !important;
+  color: #6b7280 !important;
+  font-weight: 500 !important;
+  text-transform: none !important;
+  order: 1; 
 }
 
 .metric-value {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: #111827;
-  margin: 4px 0 0 0;
+  font-size: 1.3rem !important;
+  font-weight: 700 !important;
+  color: #111827 !important;
+  line-height: 1.2 !important;
+  margin: 0 !important;
+  order: 2; 
 }
 
-.bg-light-blue {
-  background: #eff6ff;
-}
 
-.bg-light-green {
-  background: #f0fdf4;
-}
-
-.bg-light-purple {
-  background: #faf5ff;
-}
-
-.bg-light-yellow {
-  background: #fefce8;
-}
-
+.bg-light-blue   { background: #eff6ff; }
+.bg-light-green  { background: #f0fdf4; }
+.bg-light-purple { background: #f5f3ff; }
+.bg-light-yellow { background: #fffbeb; }
 
 .calendar-filters-top {
   display: flex;
@@ -465,7 +524,6 @@ onMounted(() => {
   border: 1px solid #e5e7eb;
   align-items: center; 
 }
-
 
 .mockup-select-modern, 
 .mockup-date-modern {
@@ -478,7 +536,6 @@ onMounted(() => {
   background: white;
   box-sizing: border-box;
 }
-
 
 .btn-today-action {
   height: 40px;
@@ -494,7 +551,6 @@ onMounted(() => {
   align-items: center;
   box-sizing: border-box;
 }
-
 
 .btn-clear-filters {
   height: 40px;
@@ -515,6 +571,7 @@ onMounted(() => {
 .btn-clear-filters:hover {
   opacity: 0.92;
 }
+
 
 .calendar-layout-grid {
   display: grid;
@@ -561,9 +618,11 @@ onMounted(() => {
   text-align: center;
 }
 
-.total-indicators-text {
-  font-size: 0.88rem;
-  color: #6b7280;
+.total-indicators-text,
+.empty-agenda-placeholder,
+.rep-empty {
+  font-size: 0.8rem !important;
+  color: #6b7280 !important;
   font-weight: 500;
 }
 
@@ -602,7 +661,7 @@ onMounted(() => {
   background: #f9fafb;
   padding: 12px;
   text-align: center;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: #4b5563;
   border-bottom: 1px solid #e5e7eb;
@@ -623,8 +682,63 @@ onMounted(() => {
   border-right: none;
 }
 
+.mant-cards-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.mant-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+}
+
+.mant-card-icon {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 14px;
+  background: #f3f4f6;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mant-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mant-card-info span {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.mant-card-info h3 {
+  margin: 0;
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.1;
+}
+
+.mant-card-info small {
+  font-size: 0.78rem;
+  color: #9ca3af;
+}
+
 .day-number-label {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: #374151;
 }
@@ -657,10 +771,11 @@ onMounted(() => {
   max-height: 65px;
 }
 
+
 .event-badge-pill {
   padding: 3px 6px;
   border-radius: 6px;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
   white-space: nowrap;
   overflow: hidden;
@@ -668,41 +783,17 @@ onMounted(() => {
   cursor: pointer;
 }
 
-.badge-pendiente {
-  background: #fef3c7;
-  color: #92400e;
-  border-left: 3px solid #d97706;
-}
-
-.badge-aprobada {
-  background: #dcfce7;
-  color: #166534;
-  border-left: 3px solid #16a34a;
-}
-
-.badge-rechazada {
-  background: #fee2e2;
-  color: #991b1b;
-  border-left: 3px solid #dc2626;
-}
-
-.badge-cancelada {
-  background: #f3f4f6;
-  color: #4b5563;
-  border-left: 3px solid #9ca3af;
-}
-
-.badge-finalizada {
-  background: #e0f2fe;
-  color: #0369a1;
-  border-left: 3px solid #0284c7;
-}
+.badge-pendiente { background: #fef3c7; color: #92400e; border-left: 3px solid #d97706; }
+.badge-aprobada   { background: #dcfce7; color: #166534; border-left: 3px solid #16a34a; }
+.badge-rechazada  { background: #fee2e2; color: #991b1b; border-left: 3px solid #dc2626; }
+.badge-cancelada  { background: #f3f4f6; color: #4b5563; border-left: 3px solid #9ca3af; }
+.badge-finalizada { background: #e0f2fe; color: #0369a1; border-left: 3px solid #0284c7; }
 
 .status-pill-mockup {
   display: inline-block;
   padding: 4px 10px;
   border-radius: 99px;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
 }
 
@@ -716,7 +807,7 @@ onMounted(() => {
 .side-agenda-wrapper h4 {
   margin: 0 0 14px 0;
   font-size: 0.95rem;
-  font-weight: 800;
+  font-weight: 700;
   color: #111827;
 }
 
@@ -724,7 +815,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 700;
   margin-bottom: 10px;
 }
@@ -743,7 +834,7 @@ onMounted(() => {
 }
 
 .mini-grid-th {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: #9ca3af;
   padding-bottom: 4px;
@@ -777,7 +868,7 @@ onMounted(() => {
 .btn-close-detail {
   background: transparent;
   border: none;
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   color: #9ca3af;
   cursor: pointer;
 }
@@ -785,23 +876,24 @@ onMounted(() => {
 .detail-card-body {
   background: #f9fafb;
   border: 1px solid #e5e7eb;
-  padding: 14px;
-  border-radius: 14px;
+  padding: 12px;
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
 .detail-item-group label {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   color: #6b7280;
   font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .detail-item-group p {
   margin: 2px 0 0 0;
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   color: #111827;
   font-weight: 600;
 }
@@ -813,6 +905,7 @@ onMounted(() => {
   border: 1px solid #e5e7eb;
   font-weight: 500 !important;
 }
+
 
 .agenda-items-scroll {
   display: flex;
@@ -830,8 +923,8 @@ onMounted(() => {
 }
 
 .timeline-bullet {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   margin-top: 5px;
   flex-shrink: 0;
@@ -847,14 +940,15 @@ onMounted(() => {
 
 .timeline-content-card h5 {
   margin: 0;
-  font-size: 0.85rem;
-  font-weight: 800;
+  font-size: 0.82rem;
+  font-weight: 700;
   color: #111827;
 }
 
 .timeline-time-sub {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   margin: 2px 0 6px 0;
+  color: #6b7280;
 }
 
 .timeline-route-desc {
@@ -863,33 +957,10 @@ onMounted(() => {
   color: #4b5563;
 }
 
-.bullet-yellow {
-  background: #fbbf24;
-  box-shadow: 0 0 0 3px #fef3c7;
-}
 
-.bullet-green {
-  background: #4ade80;
-  box-shadow: 0 0 0 3px #dcfce7;
-}
-
-.bullet-red {
-  background: #f87171;
-  box-shadow: 0 0 0 3px #fee2e2;
-}
-
-.bullet-gray {
-  background: #9ca3af;
-  box-shadow: 0 0 0 3px #f3f4f6;
-}
-
-.bullet-blue {
-  background: #60a5fa;
-  box-shadow: 0 0 0 3px #e0f2fe;
-}
-
-.empty-agenda-placeholder {
-  font-size: 0.8rem;
-  padding: 20px 0;
-}
+.bullet-yellow { background: #fbbf24; box-shadow: 0 0 0 3px #fef3c7; }
+.bullet-green  { background: #4ade80; box-shadow: 0 0 0 3px #dcfce7; }
+.bullet-red    { background: #f87171; box-shadow: 0 0 0 3px #fee2e2; }
+.bullet-gray   { background: #9ca3af; box-shadow: 0 0 0 3px #f3f4f6; }
+.bullet-blue   { background: #60a5fa; box-shadow: 0 0 0 3px #e0f2fe; }
 </style>

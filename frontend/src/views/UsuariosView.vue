@@ -1,8 +1,14 @@
 <template>
   <div>
-    <div class="section-header">
-    <h2>Gestión de Usuarios</h2>
-    <p>Gestiona y administra los usuarios</p>
+    <div class="dashboard-header">
+      <div>
+        <h2>Gestión de Usuarios</h2>
+        <p>Gestiona y administra los usuarios del sistema</p>
+      </div>
+
+      <div class="dashboard-header-badge">
+        Panel administrativo
+      </div>
     </div>
 
     <div v-if="mensajeExito" class="success-alert">
@@ -10,38 +16,54 @@
     </div>
 
     <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon">👤</div>
-        <div>
-          <span>Usuarios totales</span>
-          <strong>{{ totalUsuarios }}</strong>
-        </div>
-      </div>
+  <div class="stat-card">
+    <div class="stat-icon">
+      <Users :size="24" />
+    </div>
 
-      <div class="stat-card">
-        <div class="stat-icon">✅</div>
-        <div>
-          <span>Activos</span>
-          <strong>{{ usuariosActivos }}</strong>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon">⏳</div>
-        <div>
-          <span>Inactivos</span>
-          <strong>{{ usuariosInactivos }}</strong>
-        </div>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-icon">🔐</div>
-        <div>
-          <span>Administradores</span>
-          <strong>{{ administradores }}</strong>
-        </div>
+      <div>
+        <span>Usuarios totales</span>
+        <strong>{{ totalUsuarios }}</strong>
+        <p>Registrados en el sistema</p>
       </div>
     </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <UserCheck :size="24" />
+      </div>
+
+      <div>
+        <span>Activos</span>
+        <strong>{{ usuariosActivos }}</strong>
+        <p>Con acceso habilitado</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <UserX :size="24" />
+      </div>
+
+      <div>
+        <span>Inactivos</span>
+        <strong>{{ usuariosInactivos }}</strong>
+        <p>Acceso deshabilitado</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon">
+        <ShieldCheck :size="24" />
+      </div>
+
+      <div>
+        <span>Administradores</span>
+        <strong>{{ administradores }}</strong>
+        <p>Usuarios con permisos altos</p>
+      </div>
+    </div>
+  </div>
 
     <div class="usuarios-layout">
       <section class="main-panel">
@@ -102,11 +124,7 @@
                     {{ usuario.estadoUsuario === 1 ? 'Activo' : 'Inactivo' }}
                 </span>
                 </td>
-
                 <td>
-                <button class="btn-action" @click="abrirModal(usuario)">
-                    ✏️
-                </button>
                 </td>
             </tr>
 
@@ -197,6 +215,8 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { Users, UserCheck, UserX, ShieldCheck, Pencil } from 'lucide-vue-next'
+
 
 const usuarios = ref([])
 const filtroBusqueda = ref('')
@@ -211,6 +231,19 @@ const formUsuario = ref({
   rolId: 0,
   estadoUsuario: 1
 })
+
+const rolUsuario = (localStorage.getItem('usuario_rol') || '').trim().toLowerCase()
+
+const esSuperAdmin = computed(() => rolUsuario === 'superadmin')
+const esAdministrador = computed(() => rolUsuario === 'administrador' || rolUsuario === 'admin')
+
+const puedeVerUsuarios = computed(() =>
+  esSuperAdmin.value || esAdministrador.value
+)
+
+const puedeModificarUsuarios = computed(() =>
+  esSuperAdmin.value
+)
 
 const cargarUsuarios = async () => {
   const token = localStorage.getItem('token_transporte')
@@ -347,28 +380,72 @@ onMounted(() => {
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  gap: 18px;
   margin-bottom: 24px;
 }
 
 .stat-card {
-  background: white;
+  position: relative;
+  background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
+  border-radius: 18px;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  column-gap: 14px;
+  align-items: start;
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.04);
+  transition: all .2s ease;
+}
+
+.stat-card::before {
+  content: "";
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  top: 0;
+  height: 3px;
+  border-radius: 999px;
+  background: #111827;
+  opacity: .08;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
 }
 
 .stat-icon {
   width: 44px;
   height: 44px;
-  border-radius: 12px;
+  border-radius: 14px;
   background: #f3f4f6;
+  color: #111827;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.stat-card span {
+  display: block;
+  font-size: .88rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.stat-card strong {
+  display: block;
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.2;
+  margin-top: 4px;
+}
+
+.stat-card p {
+  margin-top: 6px;
+  font-size: .82rem;
+  color: #6b7280;
 }
 
 .stat-card span { font-size: 0.85rem; color: #4b5563; }
@@ -402,16 +479,33 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 
-.search-box,
-.filter-select,
-.modal-body select {
-  padding: 10px 14px;
-  border: 1px solid #d1d5db;
+.search-box {
+  flex: 1;
+  max-width: 380px;
+  height: 40px;
+  padding: 0 14px;
+  border: 1px solid #e5e7eb;
   border-radius: 10px;
-  background: #f9fafb;
+  background: #ffffff;
+  font-size: .9rem;
+  transition: all .2s ease;
 }
 
 .search-box { flex: 1; }
+
+.search-box:focus {
+  outline: none;
+  border-color: #9ca3af;
+  box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.05);
+}
+
+.modal-body select {
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+}
 
 .usuarios-table {
   width: 100%;
@@ -421,21 +515,34 @@ onMounted(() => {
 .usuarios-table th {
   background: #f9fafb;
   text-align: left;
-  padding: 14px;
-  font-size: 0.85rem;
+  padding: 14px 16px;
+  font-size: 0.82rem;
+  font-weight: 800;
   color: #374151;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+  white-space: nowrap;
 }
 
 .usuarios-table td {
-  padding: 14px;
+  padding: 15px 16px;
   border-top: 1px solid #e5e7eb;
-  font-size: 0.9rem;
+  font-size: .88rem;
   color: #374151;
+  vertical-align: middle;
 }
 
 .usuarios-table td strong {
   display: block;
   color: #111827;
+}
+
+.usuarios-table tbody tr {
+  transition: background .2s ease;
+}
+
+.usuarios-table tbody tr:hover {
+  background: #fafafa;
 }
 
 .usuarios-table td small {
@@ -468,11 +575,22 @@ onMounted(() => {
 }
 
 .btn-action {
+  width: 32px;
+  height: 32px;
   border: 1px solid #e5e7eb;
-  background: white;
-  border-radius: 8px;
-  padding: 7px 10px;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #374151;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.btn-action:hover {
+  background: #f3f4f6;
+  color: #111827;
 }
 
 .side-panel {
@@ -557,12 +675,23 @@ onMounted(() => {
 @media (max-width: 1200px) {
   .stats-grid,
   .usuarios-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
   }
 
-  .toolbar {
-    flex-direction: column;
+  @media (max-width: 700px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
   }
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  }   
 }
 
 .success-alert {
@@ -579,5 +708,36 @@ onMounted(() => {
   text-align: center;
   color: #6b7280;
   padding: 28px;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 22px;
+}
+
+.dashboard-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #111827;
+  letter-spacing: -0.02em;
+}
+
+.dashboard-header p {
+  margin-top: 6px;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.dashboard-header-badge {
+  background: #ecfdf5;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 </style>

@@ -1,14 +1,19 @@
 <template>
-  <div>
-    <div class="section-header">
-      <h2>Asignaciones</h2>
-      <p>Gestión y consulta de asignaciones de transporte</p>
+    <div class="dashboard-header">
+      <div class="dashboard-header-left">
+        <h2>Asignaciones</h2>
+        <p>Gestiona la asignación de vehículos y conductores para cada solicitud.</p>
+      </div>
+
+      <div class="dashboard-header-badge">
+        {{ asignacionesActivas }} activas
+      </div>
     </div>
 
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-icon">
-          <img src="../assets/icons/total.png" class="stat-icon-img" alt="Total" />
+          <CircleCheck :size="24" />
         </div>
         <div class="stat-info">
           <span>Total</span>
@@ -18,7 +23,7 @@
 
       <div class="stat-card">
         <div class="stat-icon">
-          <img src="../assets/icons/activo-negro.png" class="stat-icon-img" alt="Activas" />
+          <CircleCheck :size="24" />
         </div>
         <div class="stat-info">
           <span>Activas</span>
@@ -28,7 +33,7 @@
 
       <div class="stat-card">
         <div class="stat-icon">
-          <img src="../assets/icons/encurso.png" class="stat-icon-img" alt="En curso" />
+          <Truck :size="24" />
         </div>
         <div class="stat-info">
           <span>En curso</span>
@@ -38,7 +43,7 @@
 
       <div class="stat-card">
         <div class="stat-icon">
-          <img src="../assets/icons/disponible-negro.png" class="stat-icon-img" alt="Completas" />
+          <CircleCheck :size="24" />
         </div>
         <div class="stat-info">
           <span>Completas</span>
@@ -48,7 +53,7 @@
 
       <div class="stat-card">
         <div class="stat-icon">
-          <img src="../assets/icons/cancelar.png" class="stat-icon-img" alt="Canceladas" />
+          <Ban :size="24" />
         </div>
         <div class="stat-info">
           <span>Canceladas</span>
@@ -60,12 +65,16 @@
     <div class="content-layout">
       <div class="main-content">
         <div class="toolbar">
-          <input
-            v-model="filtroBusqueda"
-            type="text"
-            placeholder="Buscar asignación..."
-            class="search-box"
-          />
+          <div class="search-wrapper">
+            <input
+              v-model="filtroBusqueda"
+              type="text"
+              placeholder="Buscar asignación..."
+              class="search-box"
+            />
+
+            <Search :size="16" class="search-icon" />
+          </div>
 
           <button
             class="btn-new-solicitud-trigger"
@@ -147,27 +156,31 @@
                 
                 <td class="actions-cell-fixed" @click.stop>
                   <div class="actions-wrapper">
-                    <button 
-                      class="action-btn-mockup icon-view" 
-                      title="Ver detalle" 
+                    <button
+                      class="action-btn-mockup"
+                      title="Ver detalle"
                       @click="asignacionSeleccionada = asignacion"
-                    ></button>
-                    
-                    <button 
-                      class="action-btn-mockup icon-edit" 
+                    >
+                      <Eye :size="15" />
+                    </button>
+
+                    <button
+                      class="action-btn-mockup"
                       :class="{ 'btn-disabled': !puedeCrearOEditar || asignacion.estado === 3 || asignacion.estado === 4 }"
                       :disabled="!puedeCrearOEditar || asignacion.estado === 3 || asignacion.estado === 4"
-                      :title="puedeCrearOEditar ? 'Modificar asignación' : 'No permitido para su rol'" 
                       @click="abrirModificarAsignacion(asignacion)"
-                    ></button>
-                    
-                    <button 
-                      class="action-btn-mockup icon-delete" 
+                    >
+                      <Pencil :size="15" />
+                    </button>
+
+                    <button
+                      class="action-btn-mockup"
                       :class="{ 'btn-disabled': !puedeCrearOEditar }"
                       :disabled="!puedeCrearOEditar"
-                      :title="puedeCrearOEditar ? 'Eliminar asignación' : 'No permitido para su rol'" 
                       @click="eliminarAsignacionApi(asignacion.id)"
-                    ></button>
+                    >
+                      <Trash2 :size="15" />
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -238,28 +251,33 @@
         <div class="modal-body">
           <form @submit.prevent="guardarAsignacion" class="form-solicitud-mockup">
             <div class="form-group-mockup">
-              <label>Solicitud de Transporte Pendiente</label>
-              <select v-model.number="formAsignacion.solicitudTransporteId" required class="mockup-select">
-                <option value="">Seleccione una solicitud aprobada...</option>
-                <option
-                  v-for="solicitud in solicitudes.filter(s => s.estado === 2)"
-                  :key="solicitud.id"
-                  :value="solicitud.id"
-                >
-                  #{{ solicitud.id }} — {{ solicitud.areaSolicitante }} con destino a {{ solicitud.destino }}
-                </option>
-              </select>
-            </div>
+  <label>Solicitud de Transporte</label>
+  <select 
+    v-model.number="formAsignacion.solicitudTransporteId" 
+    required 
+    class="mockup-select"
+    :disabled="!!formAsignacion.id"
+  >
+    <option value="">Seleccione una solicitud aprobada...</option>
+    <option
+  v-for="solicitud in solicitudesDisponibles"
+  :key="solicitud.id"
+  :value="solicitud.id"
+>
+      #{{ solicitud.id }} — {{ solicitud.areaSolicitante }} → {{ solicitud.destino }}
+    </option>
+  </select>
+</div>
 
             <div class="form-row-mockup">
               <div class="form-group-mockup">
                 <label>Conductor Disponible</label>
                 <select v-model.number="formAsignacion.conductorId" required class="mockup-select">
-  <option value="">Seleccione un conductor...</option>
-  <option
-    v-for="conductor in conductores.filter(c => c.estado === 1 || c.id === formAsignacion.conductorId)"
-    :key="conductor.id"
-    :value="conductor.id"
+                <option value="">Seleccione un conductor...</option>
+                <option
+                v-for="conductor in conductores.filter(c => c.estado === 1 || c.id === formAsignacion.conductorId)"
+               :key="conductor.id"
+                :value="conductor.id"
   >
     {{ conductor.nombre }} {{ conductor.apellido }} (Cat. {{ conductor.tipoLicencia }}) {{ conductor.id === formAsignacion.conductorId ? '— [Asignado]' : '' }}
   </option>
@@ -279,6 +297,16 @@
   </option>
 </select>
               </div>
+
+              <div class="form-group-mockup" v-if="formAsignacion.id">
+  <label>Estado</label>
+  <select v-model.number="formAsignacion.estado" class="mockup-select">
+    <option :value="1">Activa</option>
+    <option :value="2">Reasignada</option>
+    <option :value="3">Cancelada</option>
+    <option :value="4">Finalizada</option>
+  </select>
+</div>
             </div>
 
             <p v-if="errorModal" class="modal-error" style="color: #dc2626; font-size: 0.85rem; font-weight: 600; margin: 4px 0;">
@@ -303,11 +331,22 @@
       </div>
       <button class="btn-close-toast" @click="errorModal = ''">×</button>
     </div>
-
-  </div> </template>
+  </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+
+import {
+  ClipboardList,
+  CircleCheck,
+  Truck,
+  Ban,
+  Eye,
+  Pencil,
+  Trash2,
+  Search,
+  Plus
+} from 'lucide-vue-next'
 
 const asignaciones = ref([])
 const solicitudes = ref([])
@@ -347,7 +386,7 @@ const obtenerRolDesdeToken = () => {
 
 const puedeCrearOEditar = computed(() => {
   const r = userRole.value.toLowerCase()
-  return r === 'administrador' || r === 'admin' || r === 'superadmin'
+  return r === 'administrador' || r === 'admin' || r === 'superadmin' || r === 'supervisor'
 })
 
 const totalAsignaciones = computed(() => asignaciones.value.length)
@@ -388,14 +427,14 @@ const abrirModal = () => {
     return
   }
   errorModal.value = ''
-  formAsignacion.value = { id: null, solicitudTransporteId: '', conductorId: '', vehiculoId: '', usuarioAsignadorId: '' }
+  formAsignacion.value = { id: null, solicitudTransporteId: '', conductorId: '', vehiculoId: '', usuarioAsignadorId: '',  estado: null  }
   mostrarModal.value = true
   cargarDatosFormulario()
 }
 
 const guardarAsignacion = async () => {
   errorModal.value = ''
-  
+
   const idUsuarioLogueado = parseInt(localStorage.getItem('usuario_id')) || 1
   formAsignacion.value.usuarioAsignadorId = idUsuarioLogueado
 
@@ -412,26 +451,52 @@ const guardarAsignacion = async () => {
   guardando.value = true
   const token = localStorage.getItem('token_transporte')
 
-  const payload = {
-    solicitudTransporteId: Number(formAsignacion.value.solicitudTransporteId),
-    conductorId: Number(formAsignacion.value.conductorId),
-    vehiculoId: Number(formAsignacion.value.vehiculoId),
-    usuarioAsignadorId: Number(formAsignacion.value.usuarioAsignadorId)
-  }
+ const payload = {
+  solicitudTransporteId: Number(formAsignacion.value.solicitudTransporteId),
+  conductorId: Number(formAsignacion.value.conductorId),
+  vehiculoId: Number(formAsignacion.value.vehiculoId),
+  usuarioAsignadorId: Number(formAsignacion.value.usuarioAsignadorId),
+  ...(formAsignacion.value.id ? { estado: Number(formAsignacion.value.estado) } : {})
+}
 
   try {
-    const url = formAsignacion.value.id 
+
+    if (formAsignacion.value.id) {
+      const asignacionOriginal = asignaciones.value.find(a => a.id === formAsignacion.value.id)
+
+      if (asignacionOriginal) {
+        const conductorCambio = asignacionOriginal.conductorId !== payload.conductorId
+        const vehiculoCambio = asignacionOriginal.vehiculoId !== payload.vehiculoId
+
+  
+        if (conductorCambio) {
+          await fetch(`https://localhost:7221/api/Conductores/${asignacionOriginal.conductorId}/estado`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ estado: 1 }) // 1 = disponible
+          })
+        }
+
+        // Liberar vehículo anterior
+        if (vehiculoCambio) {
+          await fetch(`https://localhost:7221/api/Vehiculos/${asignacionOriginal.vehiculoId}/estado`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ estado: 1 }) // 1 = disponible
+          })
+        }
+      }
+    }
+
+    const url = formAsignacion.value.id
       ? `https://localhost:7221/api/Asignaciones/${formAsignacion.value.id}`
       : 'https://localhost:7221/api/Asignaciones'
-    
+
     const method = formAsignacion.value.id ? 'PUT' : 'POST'
 
     const response = await fetch(url, {
-      method: method,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`
-      },
+      method,
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
       body: JSON.stringify(payload)
     })
 
@@ -439,6 +504,7 @@ const guardarAsignacion = async () => {
       mostrarModal.value = false
       formAsignacion.value = { id: null, solicitudTransporteId: '', conductorId: '', vehiculoId: '', usuarioAsignadorId: '' }
       await cargarAsignaciones()
+      await cargarDatosFormulario() 
     } else {
       const textoError = await response.text()
       errorModal.value = textoError || 'No se pudo procesar la asignación.'
@@ -449,7 +515,6 @@ const guardarAsignacion = async () => {
     guardando.value = false
   }
 }
-
 const asignacionesFiltradas = computed(() => {
   const texto = filtroBusqueda.value.toLowerCase().trim()
   let resultado = asignaciones.value
@@ -472,18 +537,36 @@ const asignacionesFiltradas = computed(() => {
   return resultado
 })
 
+const solicitudesDisponibles = computed(() => {
+
+  const solicitudesYaAsignadas = new Set(
+    asignaciones.value
+      .filter(a => a.estado === 1 || a.estado === 2)
+      .map(a => a.solicitudTransporteId)
+  )
+
+  return solicitudes.value.filter(s => {
+    if (s.estado !== 2) return false // Solo aprobadas
+
+
+    if (formAsignacion.value.id && s.id === formAsignacion.value.solicitudTransporteId) return true
+
+    return !solicitudesYaAsignadas.has(s.id)
+  })
+})
+
 const abrirModificarAsignacion = (asignacion) => {
   formAsignacion.value = {
     id: asignacion.id,
     solicitudTransporteId: asignacion.solicitudTransporteId,
     conductorId: asignacion.conductorId,
     vehiculoId: asignacion.vehiculoId,
-    usuarioAsignadorId: asignacion.usuarioAsignadorId
+    usuarioAsignadorId: asignacion.usuarioAsignadorId,
+    estado: asignacion.estado  // <-- sin esto el select no tiene valor inicial
   }
   mostrarModal.value = true
   cargarDatosFormulario()
 }
-
 const eliminarAsignacionApi = async (id) => {
   if (!confirm(`¿Está completamente seguro de eliminar permanentemente la solicitud #${id}?`)) return
   
@@ -763,10 +846,35 @@ onMounted(() => {
 }
 
 .search-box {
-  width: 320px;
-  padding: 12px 16px;
-  border: 1px solid #d1d5db;
-  border-radius: 12px;
+  width: 100%;
+  height: 40px;
+  padding: 0 14px 0 42px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+  font-size: .9rem;
+  box-sizing: border-box;
+}
+
+.search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.search-box:focus {
+  outline: none;
+  border-color: #9ca3af;
+  box-shadow: 0 0 0 3px rgba(17,24,39,.05);
+}
+
+.search-wrapper {
+  position: relative;
+  flex: 1;
+  max-width: 500px;
 }
 
 .tabs {
@@ -833,13 +941,23 @@ onMounted(() => {
 }
 
 .stat-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: #f3f4f6;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
+  background: #f3f4f6;
+  border-radius: 14px;
+
+  color: #111827;
+}
+
+.stat-icon svg {
+  width: 24px;
+  height: 24px;
 }
 
 .stat-info {
@@ -881,7 +999,7 @@ onMounted(() => {
   width: 40px;
   height: 40px;
   border-radius: 10px;
-  background: #f9fafb;
+  background: #f3f4f6;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -987,7 +1105,7 @@ onMounted(() => {
 .btn-disabled-main {
   color: #9ca3af !important;
   cursor: not-allowed !important;
-  border-radius: 10px !important; /* Mantenemos tus 10px de asignaciones */
+  border-radius: 10px !important; 
   font-weight: 700 !important;
   box-shadow: none !important;
    opacity: 0.35;

@@ -1,9 +1,15 @@
 <template>
   <div class="rep-page">
 
-    <div class="section-header">
-      <h2>Gestión de reportes</h2>
-      <p>Creación y exportación de reportes.</p>
+    <div class="dashboard-header">
+      <div class="dashboard-header-left">
+        <h2>Reportes</h2>
+        <p>Visualiza métricas, estadísticas y exporta reportes del sistema.</p>
+      </div>
+
+      <div class="dashboard-header-badge">
+        Reportes inteligentes
+      </div>
     </div>
 
     <div class="rep-filters-bar">
@@ -50,8 +56,12 @@
       </button>
 
       <div class="rep-export-group">
-        <button class="btn-export-mockup-file btn-excel-variant" @click="exportarExcel" :disabled="isLoading" title="Exportar Excel">
-          Excel
+        <button
+            class="btn-export-mockup-file btn-excel-variant"
+            @click="exportarExcel"
+        >
+            <FileSpreadsheet :size="16"/>
+            Excel
         </button>
         <button class="btn-export-mockup-file btn-pdf-variant" @click="exportarPDF" :disabled="isLoading" title="Imprimir / PDF">
           PDF
@@ -67,8 +77,8 @@
     <template v-else>
       <div class="rep-kpi-grid">
         <div class="rep-kpi-card">
-          <div class="rep-kpi-icon-wrap rep-icon-green">
-            <img src="../assets/icons/vehiculo-negro.png" alt="Viajes" class="rep-kpi-img" />
+          <div class="rep-kpi-icon-wrap">
+              <Fuel :size="24" />
           </div>
           <div class="rep-kpi-card-data">
             <div class="rep-kpi-label">Viajes realizados</div>
@@ -77,8 +87,8 @@
         </div>
 
         <div class="rep-kpi-card">
-          <div class="rep-kpi-icon-wrap rep-icon-blue">
-            <img src="../assets/icons/gota-negra.png" alt="Combustible" class="rep-kpi-img" />
+          <div class="rep-kpi-icon-wrap">
+              <Fuel :size="24" />
           </div>
           <div class="rep-kpi-card-data">
             <div class="rep-kpi-label">Consumo de combustible</div>
@@ -87,8 +97,8 @@
         </div>
 
         <div class="rep-kpi-card">
-          <div class="rep-kpi-icon-wrap rep-icon-yellow">
-            <img src="../assets/icons/hoja.png" alt="Solicitudes" class="rep-kpi-img" />
+          <div class="rep-kpi-icon-wrap">
+              <FileText :size="24" />
           </div>
           <div class="rep-kpi-card-data">
             <div class="rep-kpi-label">Solicitudes procesadas</div>
@@ -97,8 +107,8 @@
         </div>
 
         <div class="rep-kpi-card">
-          <div class="rep-kpi-icon-wrap rep-icon-purple">
-            <img src="../assets/icons/personas.png" alt="Conductores" class="rep-kpi-img" />
+          <div class="rep-kpi-icon-wrap">
+              <Users :size="24" />
           </div>
           <div class="rep-kpi-card-data">
             <div class="rep-kpi-label">Conductores activos</div>
@@ -399,6 +409,15 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 
+import {
+  Route,
+  Fuel,
+  FileText,
+  Users,
+  FileSpreadsheet,
+  FileDown
+} from 'lucide-vue-next'
+
 const API_BASE = 'https://localhost:7221/api/Reportes'
 
 const isLoading       = ref(false)
@@ -603,15 +622,24 @@ onMounted(() => cargarReportes())
   gap: 14px;
 }
 
-.rep-kpi-icon-wrap {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 0;
-  flex-shrink: 0;
+.rep-kpi-icon-wrap{
+    width:48px;
+    height:48px;
+    min-width:48px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:#f3f4f6 !important;
+    border-radius:14px;
+
+    color:#111827;
+}
+
+.rep-kpi-icon-wrap svg{
+    width:24px;
+    height:24px;
 }
 
 .rep-icon-green  { background: #f0fdf4; }
@@ -905,6 +933,7 @@ onMounted(() => cargarReportes())
   color: #9ca3af !important;
   border-color: #e5e7eb !important;
   cursor: not-allowed;
+
 }
 
 .status-pill-mockup { padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; font-weight: 700; display: inline-block; }

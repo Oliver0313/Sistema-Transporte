@@ -21,6 +21,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Database", "Database", "{02
 		datos-prueba.sql = datos-prueba.sql
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SistemaTransporte.Tests", "SistemaTransporte.Tests\SistemaTransporte.Tests.csproj", "{FC81BFF3-777D-4E3C-92EC-21D041B30540}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +45,10 @@ Global
 		{83D0A7B1-B042-4F5D-A70F-DE91C844C233}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{83D0A7B1-B042-4F5D-A70F-DE91C844C233}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{83D0A7B1-B042-4F5D-A70F-DE91C844C233}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC81BFF3-777D-4E3C-92EC-21D041B30540}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC81BFF3-777D-4E3C-92EC-21D041B30540}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC81BFF3-777D-4E3C-92EC-21D041B30540}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC81BFF3-777D-4E3C-92EC-21D041B30540}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

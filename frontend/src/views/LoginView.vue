@@ -128,15 +128,27 @@ const manejarLogin = async () => {
       },
       body: JSON.stringify({
         correo: email.value,
-        contrasena: password.value
+        contrasena: password.value 
       })
     })
 
     if (!respuesta.ok) {
-      if (respuesta.status === 401) {
-        throw new Error('Correo o contraseña incorrectos.')
+ 
+      let detalleError = 'El usuario se encuentra deshabilitado en el sistema.'
+      
+      try {
+
+        const dataError = await respuesta.json()
+        if (dataError && dataError.mensaje) {
+          detalleError = dataError.mensaje
+        }
+      } catch (jsonErr) {
+
+        if (respuesta.status === 401) detalleError = 'Correo o contraseña incorrectos.'
+        if (respuesta.status === 403) detalleError = 'El usuario se encuentra deshabilitado en el sistema.'
       }
-      throw new Error('Ocurrió un error al intentar conectar con el servidor.')
+
+      throw new Error(detalleError)
     }
 
     const data = await respuesta.json()
@@ -148,14 +160,8 @@ const manejarLogin = async () => {
 
       console.log('Login exitoso. Rol detectado:', data.rol)
 
-// Convertimos a minúsculas o aseguramos que el rol redirija bien
-if (data.rol === 'Operador') {
-  router.push('/dashboard')
-} else {
-  // Si no es operador (o por si acaso), mándalo también al dashboard principal nuevo
-  // Evitamos a toda costa que intente buscar la raíz vieja '/' si está rompiendo
-  router.push('/dashboard') 
-}
+
+      router.push('/dashboard')
     } else {
       throw new Error('La respuesta del servidor no contiene un token válido.')
     }
