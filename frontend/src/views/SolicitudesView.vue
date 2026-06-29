@@ -43,6 +43,10 @@
       @click="mostrarFormulario = true">
       Nueva solicitud
     </button>
+
+    <button class="btn-new-solicitud-trigger" @click="mostrarHistorial = true">
+  Ver historial
+</button>
   </div>
 
   <div class="solicitudes-grid full-width-table">
@@ -250,6 +254,74 @@
     </div>
     <button class="btn-close-toast" @click="mensajeErrorFlotante = ''">×</button>
   </div>
+  <div v-if="mostrarHistorial" class="modal-overlay-mockup" @click.self="mostrarHistorial = false">
+  <div class="modal-container-historial">
+    <div class="form-panel-header-central">
+      <h3>Historial de solicitudes</h3>
+      <button class="btn-close-modal" @click="mostrarHistorial = false">×</button>
+    </div>
+
+    <div class="historial-filters">
+      <input type="text" placeholder="Buscar por ID, área, destino..." v-model="histBusqueda" class="filter-search-input" style="flex:2" />
+      <select class="mockup-select" v-model="histEstado">
+        <option value="">Todos los estados</option>
+        <option value="1">Pendiente</option>
+        <option value="2">Aprobada</option>
+        <option value="3">Rechazada</option>
+        <option value="4">Cancelada</option>
+        <option value="5">Finalizada</option>
+        <option value="6">Asignada</option>
+      </select>
+      <input type="date" class="mockup-date-input" v-model="histDesde" />
+      <input type="date" class="mockup-date-input" v-model="histHasta" />
+      <button class="btn-cancel-mockup" @click="limpiarHistorial">Limpiar</button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="custom-table-mockup">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Área</th>
+            <th>Personas</th>
+            <th>Salida</th>
+            <th>Destino</th>
+            <th>Motivo</th>
+            <th>Estado</th>
+            <th>Vehículo</th>
+            <th>Conductor</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="s in solicitudesHistorial" :key="s.id">
+            <td>#{{ s.id }}</td>
+            <td>{{ s.areaSolicitante }}</td>
+            <td>{{ s.cantidadColaboradores }}</td>
+            <td>{{ formatearFechaVista(s.fechaHoraSalida) }}</td>
+            <td>{{ s.destino }}</td>
+            <td>{{ s.motivo }}</td>
+            <td>
+              <span :class="['status-pill-mockup', obtenerClaseEstado(s.estado)]">
+                {{ formatearEstadoVista(s.estado) }}
+              </span>
+            </td>
+            <td>{{ s.vehiculoAsignado || '---' }}</td>
+            <td>{{ s.conductorAsignado || '---' }}</td>
+          </tr>
+          <tr v-if="solicitudesHistorial.length === 0">
+            <td colspan="9" style="text-align:center;padding:30px;color:#6b7280">
+              No se encontraron solicitudes.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="padding:10px 14px;font-size:0.8rem;color:#9ca3af;border-top:1px solid #e5e7eb">
+      Mostrando {{ solicitudesHistorial.length }} de {{ solicitudes.length }} solicitudes
+    </div>
+  </div>
+</div>
 </template>
 
 <script setup>
@@ -271,6 +343,36 @@ const vehiculos = ref([])
 const conductores = ref([])
 
 const mensajeErrorFlotante = ref('')
+
+const mostrarHistorial = ref(false)
+const histBusqueda = ref('')
+const histEstado   = ref('')
+const histDesde    = ref('')
+const histHasta    = ref('')
+
+const limpiarHistorial = () => {
+  histBusqueda.value = ''
+  histEstado.value   = ''
+  histDesde.value    = ''
+  histHasta.value    = ''
+}
+
+const solicitudesHistorial = computed(() => {
+  const txt = histBusqueda.value.toLowerCase().trim()
+  return solicitudes.value.filter(s => {
+    const matchTxt = !txt || [
+      String(s.id), s.areaSolicitante, s.destino, s.motivo,
+      s.vehiculoAsignado, s.conductorAsignado
+    ].some(v => v?.toLowerCase().includes(txt))
+
+    const matchEst   = !histEstado.value || s.estado == histEstado.value
+    const fecha      = s.fechaHoraSalida?.slice(0, 10)
+    const matchDesde = !histDesde.value  || fecha >= histDesde.value
+    const matchHasta = !histHasta.value  || fecha <= histHasta.value
+
+    return matchTxt && matchEst && matchDesde && matchHasta
+  })
+})
 
 const formModel = ref({
   id: null,
@@ -549,26 +651,8 @@ vehiculoId: formModel.value.vehiculoId ? parseInt(formModel.value.vehiculoId) : 
 }
 
 const eliminarSolicitud = async (id) => {
-  if (!confirm(`¿Está completamente seguro de eliminar permanentemente la solicitud #${id}?`)) return
-  
-  const token = localStorage.getItem('token_transporte')
-  try {
-    const response = await fetch(`https://localhost:7221/api/solicitudestransporte/${id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    
-    if (response.ok) {
-      await fetchSolicitudesDeAPI()
-    } else {
-      mensajeErrorFlotante.value = 'No se pudo eliminar la solicitud.'
-      setTimeout(() => { mensajeErrorFlotante.value = '' }, 5000)
-    }
-  } catch (error) {
-    console.error('Error al realizar la petición DELETE:', error)
-    mensajeErrorFlotante.value = 'Ocurrió un error de red o el servidor no responde.'
-    setTimeout(() => { mensajeErrorFlotante.value = '' }, 5000)
-  }
+  mensajeErrorFlotante.value = 'Las solicitudes no pueden ser eliminadas del sistema.'
+  setTimeout(() => { mensajeErrorFlotante.value = '' }, 5000)
 }
 
 onMounted(() => {
@@ -963,5 +1047,42 @@ onMounted(() => {
   position: absolute;
   top: 10px;
   right: 12px;
+}
+
+.modal-container-historial {
+  background: white;
+  width: 95vw;
+  max-width: 1100px;
+  max-height: 88vh;
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 15px 35px rgba(0,0,0,.12);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow: hidden;
+}
+
+.modal-container-historial .table-responsive {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.historial-filters {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.historial-filters input,
+.historial-filters select {
+  height: 36px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0 10px;
+  font-size: 0.88rem;
+  flex: 1;
+  min-width: 120px;
 }
 </style>
