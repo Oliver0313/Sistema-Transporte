@@ -44,9 +44,6 @@
         </select>
       </div>
 
-      <button class="rep-btn-generar" @click="cargarReportes" :disabled="isLoading">
-        {{ isLoading ? 'Cargando...' : 'Generar' }}
-      </button>
 
       <button class="rep-btn-limpiar" @click="limpiarFiltros" :disabled="isLoading">
         Limpiar Filtros
@@ -302,69 +299,99 @@
     </div>
 
     <div class="tabla-impresion-pdf">
-      <div class="print-header">
-        <div class="print-header-left">
-          <h1>SISTEMA DE GESTIÓN DE TRANSPORTE</h1>
-          <h2>Reporte Consolidado de Flota — {{ filtroAnio }}</h2>
-          <p class="print-meta">Área: <strong>{{ filtroArea.toUpperCase() }}</strong> | Filtro: <strong>{{ filtroModulo.toUpperCase() }}</strong></p>
-        </div>
-        <div class="print-header-right">
-          <p>Fecha emisión: {{ new Date().toLocaleDateString('es-DO') }}</p>
-          <p>Estatus: Consolidado Oficial</p>
-        </div>
-      </div>
+  <div class="print-logo-bar">
+    <h1>SISTEMA DE GESTIÓN DE TRANSPORTE</h1>
+    <span class="print-badge">Reporte oficial</span>
+  </div>
 
-      <div class="print-kpi-row">
-        <div class="print-kpi-box">
-          <span class="print-kpi-box-label">Viajes Completados</span>
-          <strong class="print-kpi-box-val">{{ kpis.viajes.totalViajes }}</strong>
-        </div>
-        <div class="print-kpi-box">
-          <span class="print-kpi-box-label">Consumo Combustible</span>
-          <strong class="print-kpi-box-val">{{ kpis.combustible.totalGalones }} L</strong>
-        </div>
-        <div class="print-kpi-box">
-          <span class="print-kpi-box-label">Kilómetros Totales</span>
-          <strong class="print-kpi-box-val">{{ kpis.combustible.totalKilometros.toLocaleString() }} km</strong>
-        </div>
-        <div class="print-kpi-box">
-          <span class="print-kpi-box-label">Inversión Total</span>
-          <strong class="print-kpi-box-val">{{ formatearCosto(kpis.combustible.totalGastado) }}</strong>
-        </div>
-      </div>
-
-      <h3 class="print-section-title">Desglose de Indicadores del Periodo</h3>
-      <table class="reporte-print-table">
-        <thead>
-          <tr>
-            <th>Dimensión / Indicador Operativo</th>
-            <th class="text-right">Métrica Registrada</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td>Solicitudes Totales Procesadas</td><td class="text-right"><strong>{{ kpis.solicitudes.totalSolicitudes }}</strong></td></tr>
-          <tr><td>Conductores Activos en Ruta</td><td class="text-right"><strong>{{ kpis.conductores.totalConductores }}</strong></td></tr>
-          <tr><td>Rendimiento General de Combustible</td><td class="text-right"><strong>{{ kpis.combustible.rendimientoKmPorGalon.toFixed(2) }} km/gal</strong></td></tr>
-          <tr><td>Costo Promedio Estimado por Galón</td><td class="text-right"><strong>{{ formatearCosto(kpis.combustible.costoPromedioPorGalon) }}</strong></td></tr>
-          <tr class="print-divider-row"><td colspan="2">Estados del Transporte</td></tr>
-          <tr><td>• Viajes Programados</td><td class="text-right">{{ kpis.viajes.programados }} ({{ obtenerPorcentaje(kpis.viajes.programados, kpis.viajes.totalViajes) }})</td></tr>
-          <tr><td>• Viajes Activos / En Curso</td><td class="text-right">{{ kpis.viajes.enCurso }} ({{ obtenerPorcentaje(kpis.viajes.enCurso, kpis.viajes.totalViajes) }})</td></tr>
-          <tr><td>• Viajes Finalizados</td><td class="text-right">{{ kpis.viajes.finalizados }} ({{ obtenerPorcentaje(kpis.viajes.finalizados, kpis.viajes.totalViajes) }})</td></tr>
-          <tr><td>• Viajes Cancelados</td><td class="text-right">{{ kpis.viajes.cancelados }} ({{ obtenerPorcentaje(kpis.viajes.cancelados, kpis.viajes.totalViajes) }})</td></tr>
-        </tbody>
-      </table>
-
-      <div class="print-footer-signatures">
-        <div class="signature-block">
-          <div class="signature-line"></div>
-          <p>Firma Gestor de Operaciones</p>
-        </div>
-        <div class="signature-block">
-          <div class="signature-line"></div>
-          <p>Sello Auditoría Interna</p>
-        </div>
-      </div>
+  <div class="print-meta-row">
+    <div class="print-meta-block">
+      <span class="print-meta-label">Periodo</span>
+      <span class="print-meta-val">{{ mesesNombres[parseInt(filtroPeriodo) - 1] }} {{ filtroAnio }}</span>
     </div>
+    <div class="print-meta-block">
+      <span class="print-meta-label">Área</span>
+      <span class="print-meta-val">{{ filtroArea }}</span>
+    </div>
+    <div class="print-meta-block">
+      <span class="print-meta-label">Módulo</span>
+      <span class="print-meta-val">{{ filtroModulo }}</span>
+    </div>
+    <div class="print-meta-block">
+      <span class="print-meta-label">Fecha emisión</span>
+      <span class="print-meta-val">{{ new Date().toLocaleDateString('es-DO') }}</span>
+    </div>
+  </div>
+
+  <div class="print-kpi-grid">
+    <div class="print-kpi-box">
+      <span class="print-kpi-label">Viajes realizados</span>
+      <strong>{{ kpis.viajes.totalViajes }}</strong>
+    </div>
+    <div class="print-kpi-box">
+      <span class="print-kpi-label">Combustible (L)</span>
+      <strong>{{ kpis.combustible.totalGalones }}</strong>
+    </div>
+    <div class="print-kpi-box">
+      <span class="print-kpi-label">Solicitudes</span>
+      <strong>{{ kpis.solicitudes.totalSolicitudes }}</strong>
+    </div>
+    <div class="print-kpi-box">
+      <span class="print-kpi-label">Conductores activos</span>
+      <strong>{{ kpis.conductores.totalConductores }}</strong>
+    </div>
+  </div>
+
+  <h3 class="print-section-title">Distribución de viajes por estado</h3>
+  <table class="reporte-print-table">
+    <thead>
+      <tr><th>Estado</th><th>Cantidad</th><th>Porcentaje</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Programados</td><td>{{ kpis.viajes.programados }}</td><td>{{ obtenerPorcentaje(kpis.viajes.programados, kpis.viajes.totalViajes) }}</td></tr>
+      <tr><td>En Curso</td><td>{{ kpis.viajes.enCurso }}</td><td>{{ obtenerPorcentaje(kpis.viajes.enCurso, kpis.viajes.totalViajes) }}</td></tr>
+      <tr><td>Finalizados</td><td>{{ kpis.viajes.finalizados }}</td><td>{{ obtenerPorcentaje(kpis.viajes.finalizados, kpis.viajes.totalViajes) }}</td></tr>
+      <tr><td>Cancelados</td><td>{{ kpis.viajes.cancelados }}</td><td>{{ obtenerPorcentaje(kpis.viajes.cancelados, kpis.viajes.totalViajes) }}</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="print-section-title">Métricas de combustible</h3>
+  <table class="reporte-print-table">
+    <thead>
+      <tr><th>Indicador</th><th>Valor</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Total gastado</td><td>{{ formatearCosto(kpis.combustible.totalGastado) }}</td></tr>
+      <tr><td>Kilómetros totales</td><td>{{ kpis.combustible.totalKilometros.toLocaleString() }} km</td></tr>
+      <tr><td>Costo promedio / galón</td><td>{{ formatearCosto(kpis.combustible.costoPromedioPorGalon) }}</td></tr>
+      <tr><td>Rendimiento promedio</td><td>{{ kpis.combustible.rendimientoKmPorGalon.toFixed(2) }} km/gal</td></tr>
+    </tbody>
+  </table>
+
+  <h3 class="print-section-title">Estado de la flota</h3>
+  <table class="reporte-print-table">
+    <thead>
+      <tr><th>Condición</th><th>Unidades</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Disponibles</td><td>{{ kpis.vehiculos.disponibles }}</td></tr>
+      <tr><td>En Viaje</td><td>{{ kpis.vehiculos.enViaje }}</td></tr>
+      <tr><td>En Mantenimiento</td><td>{{ kpis.vehiculos.enMantenimiento }}</td></tr>
+      <tr><td>Fuera de Servicio</td><td>{{ kpis.vehiculos.fueraDeServicio }}</td></tr>
+    </tbody>
+  </table>
+
+  <div class="print-footer-signatures">
+    <div class="signature-block">
+      <div class="signature-line"></div>
+      <p>Gestor de Operaciones</p>
+    </div>
+    <div class="signature-block">
+      <div class="signature-line"></div>
+      <p>Auditoría Interna</p>
+    </div>
+  </div>
+</div>
 
   </div>
 </template>
@@ -468,59 +495,77 @@ const formatearCosto = (c) =>
   new Intl.NumberFormat('es-DO', { style: 'currency', currency: 'DOP' }).format(c || 0)
 
 const exportarExcel = () => {
-  const nombreMes = mesesNombres[parseInt(filtroPeriodo.value) - 1].toUpperCase()
-  const filas = [
-    ['SISTEMA DE GESTIÓN DE TRANSPORTE - INFORME CONSOLIDADO GENERAL'],
-    [`Periodo Evaluado: ${nombreMes} ${filtroAnio.value}`],
-    [`Área de Filtro: ${filtroArea.value.toUpperCase()}`],
-    [],
-    ['1. INDICADORES CLAVE DE RENDIMIENTO (KPIs)'],
-    ['Métrica', 'Valor Registrado'],
-    ['Viajes Realizados', kpis.value.viajes.totalViajes],
-    ['Consumo Total de Combustible (L)', kpis.value.combustible.totalGalones],
-    ['Solicitudes Procesadas', kpis.value.solicitudes.totalSolicitudes],
-    ['Conductores Activos en el Sistema', kpis.value.conductores.totalConductores],
-    [],
-    ['2. DISTRIBUCIÓN DE VIAJES POR ESTADO'],
-    ['Estado del Viaje', 'Cantidad', 'Porcentaje'],
-    ['Programados', kpis.value.viajes.programados, obtenerPorcentaje(kpis.value.viajes.programados, kpis.value.viajes.totalViajes)],
-    ['En Curso', kpis.value.viajes.enCurso, obtenerPorcentaje(kpis.value.viajes.enCurso, kpis.value.viajes.totalViajes)],
-    ['Finalizados', kpis.value.viajes.finalizados, obtenerPorcentaje(kpis.value.viajes.finalizados, kpis.value.viajes.totalViajes)],
-    ['Cancelados', kpis.value.viajes.cancelados, obtenerPorcentaje(kpis.value.viajes.cancelados, kpis.value.viajes.totalViajes)],
-    [],
-    ['3. RENDIMIENTO Y MÉTRICAS DE COMBUSTIBLE'],
-    ['Indicador de Eficiencia', 'Valor Computado'],
-    ['Inversión / Gasto Total', formatearCosto(kpis.value.combustible.totalGastado)],
-    ['Kilómetros Totales Recorridos', `${kpis.value.combustible.totalKilometros.toLocaleString()} km`],
-    ['Costo Promedio por Galón', formatearCosto(kpis.value.combustible.costoPromedioPorGalon)],
-    ['Rendimiento Promedio de Flota', `${kpis.value.combustible.rendimientoKmPorGalon.toFixed(2)} km/gal`],
-    [],
-    ['4. SOLICITUDES DE TRANSPORTE POR ÁREA DE LA EMPRESA'],
-    ['Área Solicitante', 'Cantidad Solicitudes'],
-    ...solicitudesPorArea.value.map(s => [s.area, s.cantidad]),
-    [],
-    ['5. TOP 5 - VEHÍCULOS MÁS UTILIZADOS'],
-    ['Identificación del Vehículo', 'Cantidad de Viajes'],
-    ...vehiculosMasUsados.value.map(v => [v.vehiculo, v.viajes]),
-    [],
-    ['6. RANKING - CONDUCTORES DESTACADOS'],
-    ['Nombre Completo del Conductor', 'Viajes Completados'],
-    ...conductoresMasViajes.value.map(c => [c.conductor, c.viajes]),
-    [],
-    ['7. DISPONIBILIDAD ACTUAL DE LA FLOTA AUTOMOTRIZ'],
-    ['Condición / Estado de Operación', 'Unidades'],
-    ['Disponibles para Asignación', kpis.value.vehiculos.disponibles],
-    ['En Ruta / Viaje Activo', kpis.value.vehiculos.enViaje],
-    ['En Taller / Mantenimiento', kpis.value.vehiculos.enMantenimiento],
-    ['Fuera de Servicio', kpis.value.vehiculos.fueraDeServicio],
-  ]
+  const nombreMes = mesesNombres[parseInt(filtroPeriodo.value) - 1]
 
-  const csv  = filas.map(f => f.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n')
+  const seccionesCSV = []
+
+
+  seccionesCSV.push([`"SISTEMA DE GESTIÓN DE TRANSPORTE — Reporte ${nombreMes} ${filtroAnio.value}"`])
+  seccionesCSV.push([`"Área: ${filtroArea.value}"`, `"Módulo: ${filtroModulo.value}"`])
+  seccionesCSV.push([])
+
+
+  seccionesCSV.push(['"INDICADORES CLAVE"', '"Valor"'])
+  seccionesCSV.push(['"Viajes realizados"', kpis.value.viajes.totalViajes])
+  seccionesCSV.push(['"Combustible (L)"', kpis.value.combustible.totalGalones])
+  seccionesCSV.push(['"Solicitudes procesadas"', kpis.value.solicitudes.totalSolicitudes])
+  seccionesCSV.push(['"Conductores activos"', kpis.value.conductores.totalConductores])
+  seccionesCSV.push([])
+
+
+  if (filtroModulo.value === 'todos' || filtroModulo.value === 'viajes') {
+    seccionesCSV.push(['"VIAJES POR ESTADO"', '"Cantidad"', '"Porcentaje"'])
+    seccionesCSV.push(['"Programados"', kpis.value.viajes.programados, `"${obtenerPorcentaje(kpis.value.viajes.programados, kpis.value.viajes.totalViajes)}"`])
+    seccionesCSV.push(['"En Curso"',    kpis.value.viajes.enCurso,     `"${obtenerPorcentaje(kpis.value.viajes.enCurso, kpis.value.viajes.totalViajes)}"`])
+    seccionesCSV.push(['"Finalizados"', kpis.value.viajes.finalizados, `"${obtenerPorcentaje(kpis.value.viajes.finalizados, kpis.value.viajes.totalViajes)}"`])
+    seccionesCSV.push(['"Cancelados"',  kpis.value.viajes.cancelados,  `"${obtenerPorcentaje(kpis.value.viajes.cancelados, kpis.value.viajes.totalViajes)}"`])
+    seccionesCSV.push([])
+  }
+
+
+  if (filtroModulo.value === 'todos' || filtroModulo.value === 'combustible') {
+    seccionesCSV.push(['"MÉTRICAS DE COMBUSTIBLE"', '"Valor"'])
+    seccionesCSV.push(['"Total gastado"',         `"${formatearCosto(kpis.value.combustible.totalGastado)}"`])
+    seccionesCSV.push(['"Kilómetros totales"',    `"${kpis.value.combustible.totalKilometros.toLocaleString()} km"`])
+    seccionesCSV.push(['"Costo promedio / galón"',`"${formatearCosto(kpis.value.combustible.costoPromedioPorGalon)}"`])
+    seccionesCSV.push(['"Rendimiento promedio"',  `"${kpis.value.combustible.rendimientoKmPorGalon.toFixed(2)} km/gal"`])
+    seccionesCSV.push([])
+  }
+
+
+  if (solicitudesPorArea.value.length && (filtroModulo.value === 'todos' || filtroModulo.value === 'solicitudes')) {
+    seccionesCSV.push(['"SOLICITUDES POR ÁREA"', '"Cantidad"'])
+    solicitudesPorArea.value.forEach(s => seccionesCSV.push([`"${s.area}"`, s.cantidad]))
+    seccionesCSV.push([])
+  }
+
+
+  if (vehiculosMasUsados.value.length && (filtroModulo.value === 'todos' || filtroModulo.value === 'viajes')) {
+    seccionesCSV.push(['"VEHÍCULOS MÁS UTILIZADOS"', '"Viajes"'])
+    vehiculosMasUsados.value.forEach(v => seccionesCSV.push([`"${v.vehiculo}"`, v.viajes]))
+    seccionesCSV.push([])
+  }
+
+
+  if (conductoresMasViajes.value.length && (filtroModulo.value === 'todos' || filtroModulo.value === 'conductores')) {
+    seccionesCSV.push(['"CONDUCTORES DESTACADOS"', '"Viajes"'])
+    conductoresMasViajes.value.forEach((c, i) => seccionesCSV.push([`"${i + 1}. ${c.conductor}"`, c.viajes]))
+    seccionesCSV.push([])
+  }
+
+
+  seccionesCSV.push(['"ESTADO DE FLOTA"', '"Unidades"'])
+  seccionesCSV.push(['"Disponibles"',       kpis.value.vehiculos.disponibles])
+  seccionesCSV.push(['"En Viaje"',          kpis.value.vehiculos.enViaje])
+  seccionesCSV.push(['"En Mantenimiento"',  kpis.value.vehiculos.enMantenimiento])
+  seccionesCSV.push(['"Fuera de Servicio"', kpis.value.vehiculos.fueraDeServicio])
+
+  const csv  = seccionesCSV.map(fila => fila.join(',')).join('\n')
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
   const url  = URL.createObjectURL(blob)
   const a    = document.createElement('a')
   a.href     = url
-  a.download = `Reporte_Consolidado_Flota_${filtroAnio.value}_${filtroPeriodo.value}.csv`
+  a.download = `Reporte_${filtroModulo.value}_${nombreMes}_${filtroAnio.value}.csv`
   a.click()
   URL.revokeObjectURL(url)
 }
@@ -874,36 +919,184 @@ onMounted(() => cargarReportes())
 @keyframes rep-spin { to { transform: rotate(360deg); } }
 
 @media print {
-  body *, #app *, .sidebar, .navbar, .app-sidebar, .app-header, header, aside, .nav-container, .user-profile-bar {
-    display: none !important;
+  * { visibility: hidden !important; }
+  
+  .tabla-impresion-pdf,
+  .tabla-impresion-pdf * { 
+    visibility: visible !important; 
   }
-  html, body, #app, .rep-page, .tabla-impresion-pdf, .tabla-impresion-pdf * {
-    display: block !important;
-    visibility: visible !important;
-  }
-  @page { margin: 1.5cm !important; }
+
   .tabla-impresion-pdf {
-    position: absolute !important;
-    left: 0 !important;
+    position: fixed !important;
     top: 0 !important;
+    left: 0 !important;
     width: 100% !important;
+    background: white !important;
+    padding: 1.5cm !important;
+    box-sizing: border-box !important;
+  }
+
+  @page { margin: 0; size: A4; }
+
+  .print-logo-bar {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    border-bottom: 3px solid #111827 !important;
+    padding-bottom: 14px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .print-logo-bar h1 {
+    font-size: 13pt !important;
+    font-weight: 800 !important;
+    color: #111827 !important;
+    text-transform: uppercase !important;
     margin: 0 !important;
-    padding: 0 !important;
-    background: #ffffff !important;
   }
-  .print-header {
+
+  .print-badge {
+    background: #111827 !important;
+    color: #fff !important;
+    font-size: 8pt !important;
+    font-weight: 700 !important;
+    padding: 4px 12px !important;
+    border-radius: 20px !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .print-meta-row {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 8px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .print-meta-block {
+    background: #f9fafb !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 6px !important;
+    padding: 8px 12px !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .print-meta-label {
+    display: block !important;
+    font-size: 7pt !important;
+    color: #6b7280 !important;
+    text-transform: uppercase !important;
+    font-weight: 700 !important;
+    margin-bottom: 2px !important;
+  }
+
+  .print-meta-val {
+    display: block !important;
+    font-size: 10pt !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+    text-transform: capitalize !important;
+  }
+
+  .print-kpi-grid {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 8px !important;
+    margin-bottom: 22px !important;
+  }
+
+  .print-kpi-box {
+    border: 2px solid #111827 !important;
+    border-radius: 8px !important;
+    padding: 10px !important;
     text-align: center !important;
-    margin-bottom: 25px !important;
-    border-bottom: 2px solid #111827 !important;
-    padding-bottom: 12px !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
-  .print-header h1 { font-size: 1.6rem !important; font-weight: 800 !important; margin: 0 !important; color: #111827 !important; text-transform: uppercase !important; }
-  .print-header h2 { font-size: 1.1rem !important; font-weight: 700 !important; margin: 6px 0 !important; color: #374151 !important; }
-  .print-header p { font-size: 0.85rem !important; color: #6b7280 !important; margin: 0 !important; }
-  .reporte-print-table { width: 100% !important; border-collapse: collapse !important; margin-top: 15px !important; }
-  .reporte-print-table th { background-color: #f3f4f6 !important; color: #111827 !important; font-weight: 700 !important; border: 1px solid #bcbfc2 !important; padding: 12px 14px !important; text-align: left !important; font-size: 0.9rem !important; print-color-adjust: exact !important; }
-  .reporte-print-table td { border: 1px solid #d1d5db !important; padding: 12px 14px !important; color: #111827 !important; font-size: 0.9rem !important; }
-  .reporte-print-table tr:nth-child(even) { background-color: #f9fafb !important; print-color-adjust: exact !important; }
+
+  .print-kpi-label {
+    display: block !important;
+    font-size: 7pt !important;
+    color: #6b7280 !important;
+    text-transform: uppercase !important;
+    font-weight: 600 !important;
+    margin-bottom: 4px !important;
+  }
+
+  .print-kpi-box strong {
+    font-size: 16pt !important;
+    font-weight: 800 !important;
+    color: #111827 !important;
+  }
+
+  .print-section-title {
+    font-size: 8pt !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    color: #6b7280 !important;
+    letter-spacing: 0.08em !important;
+    margin: 18px 0 6px 0 !important;
+    border-left: 3px solid #111827 !important;
+    padding-left: 8px !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .reporte-print-table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin-bottom: 6px !important;
+    page-break-inside: avoid !important;
+  }
+
+  .reporte-print-table th {
+    background: #111827 !important;
+    color: #ffffff !important;
+    font-size: 8pt !important;
+    font-weight: 700 !important;
+    padding: 7px 10px !important;
+    text-align: left !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .reporte-print-table td {
+    font-size: 9pt !important;
+    padding: 6px 10px !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    color: #374151 !important;
+  }
+
+  .reporte-print-table tr:nth-child(even) td {
+    background: #f9fafb !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .print-footer-signatures {
+    display: flex !important;
+    justify-content: space-around !important;
+    margin-top: 40px !important;
+    padding-top: 20px !important;
+    border-top: 1px solid #e5e7eb !important;
+  }
+
+  .signature-block {
+    text-align: center !important;
+    width: 180px !important;
+  }
+
+  .signature-line {
+    border-top: 1px solid #111827 !important;
+    margin-bottom: 6px !important;
+  }
+
+  .signature-block p {
+    font-size: 8pt !important;
+    color: #6b7280 !important;
+    margin: 0 !important;
+  }
 }
 
 @media screen {
