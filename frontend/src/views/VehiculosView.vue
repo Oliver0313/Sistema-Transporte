@@ -118,6 +118,7 @@
       </select>
     </div>
     <button class="btn-filter-action" @click="limpiarFiltros">Limpiar Filtros</button>
+    <button class="btn-new-solicitud-trigger" @click="abrirHistorialMantenimientos">Ver historial</button>
     <button class="btn-new-solicitud-trigger" :class="{ 'btn-disabled': !puedeModificarVehiculos }" :disabled="!puedeModificarVehiculos" @click="abrirFormularioModal">Agregar</button>
   </div>
 
@@ -196,7 +197,7 @@
     </section>
   </div>
 
-  <!-- Modal Formulario Vehículo -->
+ 
   <div v-if="mostrarFormulario" class="modal-overlay-mockup" @click.self="mostrarFormulario = false">
     <div class="modal-container-central">
       <div class="form-panel-header-central">
@@ -267,7 +268,7 @@
     </div>
   </div>
 
-  <!-- Modal Registrar Mantenimiento -->
+
   <div v-if="mostrarMantenimiento" class="modal-overlay-mockup" @click.self="cerrarMantenimiento">
     <div class="modal-container-central">
       <div class="form-panel-header-central">
@@ -332,7 +333,7 @@
     </div>
   </div>
 
-  <!-- Modal Registrar Consumo Combustible -->
+
   <div v-if="mostrarConsumo" class="modal-overlay-mockup" @click.self="cerrarConsumo">
     <div class="modal-container-central">
       <div class="form-panel-header-central">
@@ -437,6 +438,90 @@
     </div>
     <button class="btn-close-toast" @click="mensajeNotificacion = ''">×</button>
   </div>
+
+  <div v-if="mostrarHistorialMant" class="modal-overlay-mockup" @click.self="mostrarHistorialMant = false">
+  <div class="modal-container-historial">
+    <div class="form-panel-header-central">
+      <h3>Historial de mantenimientos</h3>
+      <button class="btn-close-modal" @click="mostrarHistorialMant = false">×</button>
+    </div>
+
+    <div class="historial-filters">
+      <input
+        type="text"
+        placeholder="Buscar por vehículo, taller, descripción..."
+        v-model="histMantBusqueda"
+        class="filter-search-input"
+        style="flex:2;min-width:200px"
+      />
+      <select class="mockup-select" v-model="histMantTipo">
+        <option value="">Todos los tipos</option>
+        <option value="1">Preventivo</option>
+        <option value="2">Correctivo</option>
+        <option value="3">Predictivo</option>
+      </select>
+      <select class="mockup-select" v-model="histMantEstado">
+        <option value="">Todos los estados</option>
+        <option value="1">Pendiente</option>
+        <option value="2">En proceso</option>
+        <option value="3">Completado</option>
+      </select>
+      <input type="date" class="mockup-select" v-model="histMantDesde" />
+      <input type="date" class="mockup-select" v-model="histMantHasta" />
+      <button class="btn-cancel-mockup" @click="limpiarHistorialMant">Limpiar</button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="custom-table-mockup">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Fecha</th>
+            <th>Vehículo</th>
+            <th>Tipo</th>
+            <th>Descripción</th>
+            <th>Taller</th>
+            <th>Kilometraje</th>
+            <th>Monto (RD$)</th>
+            <th>Estado</th>
+            <th>Próxima revisión</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="m in mantenimientosFiltrados" :key="m.id">
+            <td>#{{ m.id }}</td>
+            <td>{{ formatearFechaMant(m.fechaMantenimiento) }}</td>
+            <td>{{ obtenerNombreVehiculo(m.vehiculoId) }}</td>
+            <td>
+              <span :class="['status-pill-mockup', claseTipoMant(m.tipoMantenimiento)]">
+                {{ labelTipoMant(m.tipoMantenimiento) }}
+              </span>
+            </td>
+            <td>{{ m.descripcion || '---' }}</td>
+            <td>{{ m.taller || '---' }}</td>
+            <td>{{ m.kilometraje ? m.kilometraje.toLocaleString('es-DO') + ' km' : '---' }}</td>
+            <td>{{ m.costo ? 'RD$ ' + Number(m.costo).toLocaleString('es-DO') : '---' }}</td>
+            <td>
+              <span :class="['status-pill-mockup', claseEstadoMant(m.estado)]">
+                {{ labelEstadoMant(m.estado) }}
+              </span>
+            </td>
+            <td>{{ formatearFechaMant(m.proximoMantenimiento) }}</td>
+          </tr>
+          <tr v-if="mantenimientosFiltrados.length === 0">
+            <td colspan="10" style="text-align:center;padding:30px;color:#9ca3af">
+              No se encontraron registros de mantenimiento.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="padding:10px 14px;font-size:0.8rem;color:#9ca3af;border-top:1px solid #e5e7eb">
+      Mostrando {{ mantenimientosFiltrados.length }} de {{ mantenimientos.length }} registros
+    </div>
+  </div>
+</div>
 </template>
 
 <script setup>
@@ -473,6 +558,69 @@ const mensajeNotificacion = ref('')
 const vehiculoSeleccionado = ref({})
 const conductores = ref([])
 
+const mostrarHistorialMant = ref(false)
+const mantenimientos        = ref([])
+const histMantBusqueda      = ref('')
+const histMantTipo          = ref('')
+const histMantEstado        = ref('')
+const histMantDesde         = ref('')
+const histMantHasta         = ref('')
+
+const limpiarHistorialMant = () => {
+  histMantBusqueda.value = ''
+  histMantTipo.value     = ''
+  histMantEstado.value   = ''
+  histMantDesde.value    = ''
+  histMantHasta.value    = ''
+}
+
+const abrirHistorialMantenimientos = async () => {
+  mostrarHistorialMant.value = true
+  const token = localStorage.getItem('token_transporte')
+  try {
+    const res = await fetch('https://localhost:7221/api/Mantenimientos', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    if (res.ok) mantenimientos.value = await res.json()
+  } catch (e) {
+    console.error('Error cargando mantenimientos:', e)
+  }
+}
+
+const obtenerNombreVehiculo = (id) => {
+  const v = vehiculos.value.find(v => v.id === id)
+  return v ? `${v.marca} ${v.modelo} • ${v.matricula}` : `#${id}`
+}
+
+const mantenimientosFiltrados = computed(() => {
+  const txt = histMantBusqueda.value.toLowerCase().trim()
+  return mantenimientos.value.filter(m => {
+    const nombreVeh = obtenerNombreVehiculo(m.vehiculoId).toLowerCase()
+    const matchTxt  = !txt || [
+      String(m.id), nombreVeh, m.descripcion, m.taller
+    ].some(v => v?.toLowerCase().includes(txt))
+    const matchTipo  = !histMantTipo.value   || m.tipoMantenimiento == histMantTipo.value
+    const matchEst   = !histMantEstado.value || m.estado == histMantEstado.value
+    const fecha      = m.fechaMantenimiento?.slice(0, 10)
+    const matchDesde = !histMantDesde.value  || fecha >= histMantDesde.value
+    const matchHasta = !histMantHasta.value  || fecha <= histMantHasta.value
+    return matchTxt && matchTipo && matchEst && matchDesde && matchHasta
+  })
+})
+
+const labelTipoMant  = t => ({ 1:'Preventivo', 2:'Correctivo', 3:'Predictivo' }[t] || '---')
+const claseTipoMant  = t => ({ 1:'finalizada', 2:'rechazada', 3:'aprobada' }[t] || 'pendiente')
+
+const labelEstadoMant = e => ({ 1:'Pendiente', 2:'En proceso', 3:'Completado' }[e] || '---')
+const claseEstadoMant = e => ({ 1:'pendiente', 2:'aprobada', 3:'finalizada' }[e] || 'pendiente')
+
+const formatearFechaMant = (iso) => {
+  if (!iso) return '---'
+  return new Date(iso).toLocaleString('es-DO', {
+    year:'numeric', month:'2-digit', day:'2-digit',
+    hour:'2-digit', minute:'2-digit', hour12:true
+  })
+}
 
 const mostrarMantenimiento = ref(false)
 const guardandoMantenimiento = ref(false)
@@ -1137,5 +1285,31 @@ onMounted(() => {
   font-size: .82rem;
   font-weight: 700;
   border: 1px solid #e5e7eb;
+}
+
+.modal-container-historial {
+  background: white;
+  width: 95vw;
+  max-width: 1200px;
+  max-height: 88vh;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 15px 35px rgba(0,0,0,.12);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow: hidden;
+}
+
+.modal-container-historial .table-responsive {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.historial-filters {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 </style>
