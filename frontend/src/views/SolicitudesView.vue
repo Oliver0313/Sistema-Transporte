@@ -163,7 +163,11 @@
     </div>
     <div v-if="formModel.id" class="form-group-mockup">
       <label>Estado Proceso</label>
-      <select class="mockup-select" v-model="formModel.estado" :disabled="!esSupervisor">
+     <select
+  class="mockup-select"
+  v-model="formModel.estado"
+  :disabled="!puedeEditarEstadoProceso"
+>
         <option value="1">Pendiente</option>
         <option value="2">Aprobada</option>
         <option value="3">Rechazada</option>
@@ -414,14 +418,33 @@ const esSupervisor = computed(() => {
   return userRole.value.toLowerCase() === 'supervisor'
 })
 
+const rolNormalizado = computed(() => userRole.value.trim().toLowerCase())
+
+const puedeEditarEstadoProceso = computed(() => {
+  const rol = rolNormalizado.value
+
+  return (
+    rol === 'superadmin' ||
+    rol === 'administrador' ||
+    rol === 'admin' ||
+    rol === 'supervisor'
+  )
+})
+
 const puedeCrear = computed(() => {
   const rol = userRole.value.toLowerCase()
   return rol === 'operador' || rol === 'admin' || rol === 'superadmin' || rol === 'administrador'
 })
 
 const puedeEditarOAsignar = computed(() => {
-  const rol = userRole.value.toLowerCase()
-  return rol === 'supervisor' || rol === 'admin' || rol === 'superadmin' || rol === 'administrador'
+  const rol = rolNormalizado.value
+
+  return (
+    rol === 'superadmin' ||
+    rol === 'administrador' ||
+    rol === 'admin' ||
+    rol === 'supervisor'
+  )
 })
 
 const puedeEliminar = computed(() => {
@@ -456,12 +479,14 @@ const fetchSolicitudesDeAPI = async () => {
   }
 }
 
+
 const areasDisponibles = computed(() => {
   const areas = solicitudes.value
     .map(s => s.areaSolicitante?.trim())
     .filter(Boolean)
   return [...new Set(areas)].sort()
 })
+
 
 const solicitudesFiltradas = computed(() => {
   return solicitudes.value.filter(solicitud => {

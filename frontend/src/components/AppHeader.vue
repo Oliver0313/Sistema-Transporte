@@ -1,7 +1,7 @@
 <template>
   <header class="app-header">
     <div class="header-left">
-      <button class="menu-button">
+      <button class="menu-button" @click="$emit('toggle-sidebar')">
         ☰
       </button>
 
@@ -30,6 +30,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+
+defineEmits(['toggle-sidebar'])
 
 const route = useRoute()
 
