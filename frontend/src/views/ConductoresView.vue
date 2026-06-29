@@ -7,30 +7,34 @@
 
     <div class="card-panel">
       <div class="table-responsive">
-        <div class="toolbar">
+       <div class="toolbar">
+  <div class="search-wrapper">
+    <Search :size="16" class="search-icon" />
+    <input
+      v-model="filtroBusqueda"
+      type="text"
+      placeholder="Buscar conductor..."
+      class="search-box"
+    />
+  </div>
 
-          <div class="search-wrapper">
-            <Search :size="16" class="search-icon" />
+  <div class="toolbar-actions">
+    <button
+      class="btn-new-solicitud-trigger"
+      :class="{ 'btn-disabled-main': !puedeModificarConductores }"
+      :disabled="!puedeModificarConductores"
+      :title="puedeModificarConductores ? 'Registrar nuevo conductor' : 'No permitido para su rol'"
+      @click="abrirFormularioNuevo"
+    >
+      <Plus :size="17" />
+      <span>Nuevo conductor</span>
+    </button>
 
-            <input
-              v-model="filtroBusqueda"
-              type="text"
-              placeholder="Buscar conductor..."
-              class="search-box"
-            />
-          </div>
-
-          <button
-            class="btn-new-solicitud-trigger"
-            :class="{ 'btn-disabled-main': !puedeModificarConductores }"
-            :disabled="!puedeModificarConductores"
-            :title="puedeModificarConductores ? 'Registrar nuevo conductor' : 'No permitido para su rol'"
-            @click="abrirFormularioNuevo"
-          >
-            <Plus :size="17" />
-            <span>Nuevo conductor</span>
-          </button>
-        </div>
+   <button class="btn-new-solicitud-trigger" @click="mostrarHistorial = true; cargarDatosHistorial()">
+  Ver historial
+</button>
+  </div>
+</div>
         
         <table class="conductores-table">
           <thead>
@@ -228,6 +232,69 @@
     </div>
     <button class="btn-close-toast" @click="mensajeNotificacion = ''">×</button>
   </div>
+
+  <div v-if="mostrarHistorial" class="modal-overlay" @click.self="mostrarHistorial = false">
+  <div class="modal-container-historial">
+    <div class="modal-header">
+      <h3>Historial de viajes</h3>
+      <button class="btn-close" @click="mostrarHistorial = false">×</button>
+    </div>
+
+    <div class="historial-filters">
+      <input type="text" placeholder="Buscar por destino, vehículo, conductor..." v-model="histBusqueda" class="search-box" style="flex:2;min-width:200px" />
+      <select class="mockup-select" v-model="histEstado">
+        <option value="">Todos los estados</option>
+        <option value="1">Activa</option>
+        <option value="2">Reasignada</option>
+        <option value="3">Cancelada</option>
+        <option value="4">Finalizada</option>
+      </select>
+      <input type="date" class="mockup-select" v-model="histDesde" />
+      <input type="date" class="mockup-select" v-model="histHasta" />
+      <button class="btn-cancel" @click="limpiarHistorial">Limpiar</button>
+    </div>
+
+    <div class="table-responsive">
+      <table class="conductores-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Fecha</th>
+            <th>Conductor</th>
+            <th>Destino</th>
+            <th>Vehículo</th>
+            <th>Pasajeros</th>
+            <th>Estado del viaje</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="v in viajesHistorial" :key="v.id">
+            <td>#{{ v.id }}</td>
+            <td>{{ formatearFecha(v.fecha) }}</td>
+            <td>{{ v.conductorNombre }}</td>
+            <td>{{ v.destino }}</td>
+            <td>{{ v.vehiculo }}</td>
+            <td>{{ v.pasajeros }}</td>
+            <td>
+              <span :class="['estado-badge', claseViaje(v.estado)]">
+                {{ labelViaje(v.estado) }}
+              </span>
+            </td>
+          </tr>
+          <tr v-if="viajesHistorial.length === 0">
+            <td colspan="7" style="text-align:center;padding:30px;color:#6b7280">
+              No se encontraron viajes.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="padding:10px 14px;font-size:0.8rem;color:#9ca3af;border-top:1px solid #e5e7eb">
+      Mostrando {{ viajesHistorial.length }} de {{ asignaciones.length }} viajes registrados
+    </div>
+  </div>
+</div>
 </template>
 
 <script setup>
@@ -245,6 +312,84 @@ const guardando = ref(false)
 
 const mensajeNotificacion = ref('')
 const conductorSeleccionado = ref({})
+
+const mostrarHistorial = ref(false)
+const histBusqueda    = ref('')
+const histEstado      = ref('')
+const histDesde       = ref('')
+const histHasta       = ref('')
+const asignaciones    = ref([])
+const solicitudesHist = ref([])
+
+const limpiarHistorial = () => {
+  histBusqueda.value = ''
+  histEstado.value   = ''
+  histDesde.value    = ''
+  histHasta.value    = ''
+}
+
+const viajesHistorial = computed(() => {
+  const txt = histBusqueda.value.toLowerCase().trim()
+
+  return asignaciones.value
+    .map(a => {
+      const solicitud = solicitudesHist.value.find(s => s.id === a.solicitudTransporteId)
+      const conductor = conductores.value.find(c => c.id === a.conductorId)
+      return {
+        id:          a.id,
+        fecha:       a.fechaHoraAsignacion,
+        destino:     solicitud?.destino     || '---',
+        vehiculo:    obtenerVehiculo(a.vehiculoId),
+        pasajeros:   solicitud?.cantidadColaboradores ?? '---',
+        estado:      a.estado,
+        conductorId: a.conductorId,
+        conductorNombre: conductor ? `${conductor.nombre} ${conductor.apellido}` : `#${a.conductorId}`
+      }
+    })
+    .filter(v => {
+      const matchTxt = !txt || [
+        String(v.id), v.destino, v.vehiculo, v.conductorNombre
+      ].some(x => x?.toLowerCase().includes(txt))
+      const matchEst   = !histEstado.value || v.estado == histEstado.value
+      const fecha      = v.fecha?.slice(0, 10)
+      const matchDesde = !histDesde.value  || fecha >= histDesde.value
+      const matchHasta = !histHasta.value  || fecha <= histHasta.value
+      return matchTxt && matchEst && matchDesde && matchHasta
+    })
+})
+
+const labelViaje = (estado) => {
+  return { 1:'Activa', 2:'Reasignada', 3:'Cancelada', 4:'Finalizada' }[estado] || '---'
+}
+
+const claseViaje = (estado) => {
+  return { 1:'activo', 2:'activo', 3:'inactivo', 4:'activo' }[estado] || 'activo'
+}
+
+const cargarDatosHistorial = async () => {
+  const token = localStorage.getItem('token_transporte')
+  const headers = { Authorization: `Bearer ${token}` }
+  try {
+    const [resA, resS, resV] = await Promise.all([
+      fetch('https://localhost:7221/api/Asignaciones', { headers }),
+      fetch('https://localhost:7221/api/solicitudestransporte', { headers }),
+      fetch('https://localhost:7221/api/Vehiculos', { headers })
+    ])
+    if (resA.ok) asignaciones.value    = await resA.json()
+    if (resS.ok) solicitudesHist.value = await resS.json()
+    if (resV.ok) vehiculosHist.value   = await resV.json()
+  } catch (e) {
+    console.error('Error cargando historial:', e)
+  }
+}
+
+const obtenerVehiculo = (id) => {
+
+  const v = vehiculosHist.value?.find(v => v.id === id)
+  return v ? `${v.marca} ${v.modelo} • ${v.matricula}` : `#${id}`
+}
+
+const vehiculosHist = ref([])
 
 const formConductor = ref({
   nombre: '', apellido: '', cedula: '', email: '', licencia: '',
@@ -558,8 +703,17 @@ onMounted(() => {
   opacity: 0.92;
 }
 
-.btn-new-solicitud-trigger {
+.toolbar-actions {
+  display: flex;
+  gap: 10px;
   margin-left: auto;
+}
+
+.btn-new-solicitud-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .btn-new-solicitud-trigger:disabled,
@@ -856,5 +1010,41 @@ onMounted(() => {
 
 .feed-clickable:active {
   transform: scale(0.99); 
+}
+
+.modal-container-historial {
+  background: white;
+  width: 95vw;
+  max-width: 1100px;
+  max-height: 88vh;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: 0 15px 35px rgba(0,0,0,.12);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow: hidden;
+}
+
+.modal-container-historial .table-responsive {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.historial-filters {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.mockup-select {
+  height: 40px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 0 12px;
+  font-size: 0.9rem;
+  background: #fff;
+  outline: none;
 }
 </style>
