@@ -71,8 +71,6 @@
       </ul>
     </nav>
 
-    <div class="menu-divider"></div>
-
     <div class="sidebar-footer">
       <button class="btn-logout" @click="cerrarSesion">
         <LogOut :size="20" class="menu-icon" />
@@ -133,13 +131,13 @@ const cerrarSesion = () => {
   width: 260px;
   min-width: 260px;
   height: 100vh;
+  box-sizing: border-box;
   background-color: #111827;
   color: #d1d5db;
-  padding: 20px;
+  padding: 18px 20px 14px;
   display: flex;
   flex-direction: column;
-  gap: 28px;
-  transition:transform .3s ease;
+  gap: 18px;
 }
 
 .dashboard-layout.sidebar-collapsed .app-sidebar{
@@ -164,6 +162,7 @@ const cerrarSesion = () => {
 
 .logo-container {
   text-align: center;
+  margin-bottom: 4px;
 }
 
 .logo-container h2 {
@@ -176,8 +175,12 @@ const cerrarSesion = () => {
 .menu-divider {
   height: 2px;
   background: rgba(255, 255, 255, 0.12);
-  margin: 12px 14px;
+  margin: 8px 14px;
   border-radius: 2px;
+}
+
+.menu {
+  flex: 1;
 }
 
 .logo-container h3 {
@@ -197,11 +200,11 @@ const cerrarSesion = () => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 9px 14px;
+  padding: 7px 14px;
   border-radius: 10px;
   color: #d1d5db;
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: 0.86rem;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
@@ -224,25 +227,31 @@ const cerrarSesion = () => {
 
 .sidebar-footer {
   margin-top: auto;
-  padding-top: 14px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  flex-shrink: 0;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .btn-logout {
   width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 10px;
-  background: transparent;
+  padding: 9px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
   color: #ffffff;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
+  min-height: 42px;
+  border-radius: 12px;
+  box-sizing: border-box;
 }
 
+
 .btn-logout:hover {
-  background-color: rgba(239, 68, 68, 0.15);
+  background-color: rgba(239, 68, 68, 0.18);
 }
 </style>

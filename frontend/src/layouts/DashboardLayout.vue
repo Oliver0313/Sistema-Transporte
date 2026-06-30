@@ -20,9 +20,13 @@
 
   const sidebarVisible = ref(true)
 
-  const toggleSidebar = () => {
-    sidebarVisible.value = !sidebarVisible.value
-  }
+ const toggleSidebar = () => {
+  sidebarVisible.value = !sidebarVisible.value
+
+  setTimeout(() => {
+    window.dispatchEvent(new Event('resize'))
+  }, 350)
+}
 </script>
 
 <style>
@@ -31,7 +35,7 @@
   grid-template-columns: 260px 1fr;
   height: 100vh;
   overflow: hidden;
-  transition: grid-template-columns 0.25s ease;
+  transition: grid-template-columns 0.35s ease;
 }
 
 .dashboard-layout.sidebar-collapsed {
@@ -39,15 +43,23 @@
 }
 
 .dashboard-layout.sidebar-collapsed .app-sidebar {
-  overflow: hidden;
   opacity: 0;
   pointer-events: none;
+  overflow: hidden;
+}
+
+.app-sidebar {
+  height: 100vh;
+  box-sizing: border-box;
+  transition: opacity 0.25s ease;
 }
 
 .main-content {
   min-width: 0;
   height: 100vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .view-container {
@@ -55,16 +67,5 @@
   padding: 24px;
   overflow-y: auto;
   background: #f5f6f8;
-}
-
-.sidebar-hidden {
-  transform: translateX(-100%);
-  width: 0;
-  min-width: 0;
-  overflow: hidden;
-}
-
-.app-sidebar {
-  transition: opacity 0.2s ease;
 }
 </style>
