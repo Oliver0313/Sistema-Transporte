@@ -1,7 +1,9 @@
 <template>
-  <div class="section-header-mockup">
-    <h2>Gestión de Solicitudes</h2>
-    <p>Gestiona y administra las solicitudes</p>
+  <div class="section-header">
+    <div>
+      <h2>Solicitudes</h2>
+      <p>Administra las solicitudes de transporte y su estado.</p>
+    </div>
   </div>
 
   <div class="filters-bar-mockup">
@@ -587,6 +589,9 @@ const abrirModificarSolicitud = (solicitud) => {
   mostrarFormulario.value = true
 }
 
+const solicitudesPendientes = computed(() =>
+  solicitudes.value.filter(s => s.estado === 1).length
+)
 
 const cerrarFormulario = () => {
   mostrarFormulario.value = false
@@ -810,6 +815,32 @@ onMounted(() => {
   font-weight: 700;
 }
 
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.header-badge {
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.header-badge.warning {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+.header-badge.success {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
 
 .card-panel-mockup {
   background: white;

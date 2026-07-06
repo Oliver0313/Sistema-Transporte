@@ -4,10 +4,6 @@
       <h2>Gestión de Vehículos</h2>
       <p>Administra la flota, disponibilidad y estado operativo de cada unidad.</p>
     </div>
-
-    <div class="dashboard-header-badge">
-      {{ totalVehiculos }} vehículos registrados
-    </div>
   </div>
 
   <div class="cards-kpi-container">

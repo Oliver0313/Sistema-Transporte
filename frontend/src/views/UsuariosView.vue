@@ -5,10 +5,6 @@
         <h2>Gestión de Usuarios</h2>
         <p>Gestiona y administra los usuarios del sistema</p>
       </div>
-
-      <div class="dashboard-header-badge">
-        Panel administrativo
-      </div>
     </div>
 
     <div v-if="mensajeExito" class="success-alert">

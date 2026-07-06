@@ -4,10 +4,6 @@
       <h2>Mantenimiento</h2>
       <p>Administra servicios, revisiones y estado de mantenimiento de la flota.</p>
     </div>
-
-    <div class="dashboard-header-badge">
-      {{ cardPendientes }} pendientes
-    </div>
   </div>
 
   <div class="mant-cards-row">

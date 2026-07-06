@@ -5,10 +5,6 @@
         <h2>Viajes</h2>
         <p>Administra los viajes activos, finalizados y su seguimiento en tiempo real.</p>
       </div>
-
-      <div class="dashboard-header-badge">
-        {{ viajesEnCurso }} en curso
-      </div>
     </div>
 
     <div class="stats-grid">

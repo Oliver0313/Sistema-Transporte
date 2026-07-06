@@ -6,10 +6,6 @@
         <h2>Reportes</h2>
         <p>Visualiza métricas, estadísticas y exporta reportes del sistema.</p>
       </div>
-
-      <div class="dashboard-header-badge">
-        Reportes inteligentes
-      </div>
     </div>
 
     <div class="rep-filters-bar">

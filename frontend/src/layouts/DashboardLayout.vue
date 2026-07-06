@@ -35,23 +35,20 @@
   grid-template-columns: 260px 1fr;
   height: 100vh;
   overflow: hidden;
-  transition: grid-template-columns 0.35s ease;
 }
 
 .dashboard-layout.sidebar-collapsed {
   grid-template-columns: 0 1fr;
 }
 
-.dashboard-layout.sidebar-collapsed .app-sidebar {
-  opacity: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
 .app-sidebar {
   height: 100vh;
   box-sizing: border-box;
-  transition: opacity 0.25s ease;
+  overflow: hidden;
+}
+
+.dashboard-layout.sidebar-collapsed .app-sidebar {
+  pointer-events: none;
 }
 
 .main-content {
