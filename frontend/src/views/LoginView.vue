@@ -4,12 +4,6 @@
     <div class="login-hero-side" :style="{ backgroundImage: `url(${imagenesCarrusel[indiceActivo]})` }">
       <div class="hero-overlay">
         <div class="hero-content">
-          <p class="hero-tagline">SISTEMA INTELIGENTE DE GESTIÓN CON MONITOREO DE TRANSPORTE</p>
-          
-          <div class="hero-footer-info">
-            <span class="project-name">Transporte Frontend</span>
-            <span class="project-email">transportefrontend@gmail.com</span>
-          </div>
         </div>
         
         <div class="hero-arrows">
@@ -32,6 +26,8 @@
       <div class="form-wrapper">
         
         <div class="form-header">
+          <img
+            <img src="/src/assets/icons/logo-blanco.png" class="logo-login" alt="Trayecto">
           <h2>Bienvenido</h2>
           <p>Inicia sesión con tu información</p>
         </div>
@@ -289,17 +285,17 @@ if (estado === 2) {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px 60px; 
+  padding: 20px 50px;
 }
 
 .form-wrapper {
   width: 100%;
-  max-width: 360px; 
+  max-width: 340px;
 }
 
 .form-header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: 22px;
 }
 
 .form-header h2 {
@@ -317,13 +313,13 @@ if (estado === 2) {
 .custom-form {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap:16px;
 }
 
 .input-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 5px;
 }
 
 .input-group label {
@@ -334,7 +330,7 @@ if (estado === 2) {
 
 .input-group input {
   width: 100%;
-  padding: 12px 16px;
+  padding:10px 14px;
   border: 1px solid var(--border-color, #e5e7eb);
   border-radius: var(--radius-md, 12px); 
   font-size: 0.9rem;
@@ -351,13 +347,13 @@ if (estado === 2) {
   width: 100%;
   background-color: #222222;
   color: #ffffff;
-  padding: 14px;
+  padding: 12px;
   border-radius: var(--radius-md, 12px);
   font-size: 0.95rem;
   font-weight: 600;
   border: none;
   cursor: pointer;
-  margin-top: 10px;
+  margin-top: 4px;
   transition: background-color 0.2s ease;
 }
 
@@ -367,7 +363,7 @@ if (estado === 2) {
 
 .form-footer {
   text-align: center;
-  margin-top: 32px;
+  margin-top:18px;
   font-size: 0.8rem;
   color: var(--text-muted, #9ca3af);
 }
@@ -409,7 +405,7 @@ button:disabled {
 
 .forgot-password {
   text-align: left;
-  margin-top: -12px;
+  margin-top:-6px;
 }
 
 .forgot-password a {
@@ -417,5 +413,12 @@ button:disabled {
   font-size: 0.8rem;
   font-weight: 600;
   text-decoration: none;
+}
+
+.logo-login{
+    width:170px;
+    height: auto;
+    display: block;
+    margin:0 auto 15px;
 }
 </style>
