@@ -59,7 +59,14 @@
               <td>{{ conductor.email }}</td>
               <td>{{ conductor.licencia }}</td>
               <td>{{ formatearTipoLicencia(conductor.tipoLicencia) }}</td>
-              <td>{{ formatearFecha(conductor.fechaVencimientoLicencia) }}</td>
+              <td>
+  <span :class="{ 'fecha-vencida': esLicenciaVencida(conductor.fechaVencimientoLicencia) }">
+    {{ formatearFecha(conductor.fechaVencimientoLicencia) }}
+  </span>
+  <span v-if="esLicenciaVencida(conductor.fechaVencimientoLicencia)" class="badge-vencida">
+    Vencida
+  </span>
+</td>
               <td>{{ conductor.telefono }}</td>
               <td>{{ conductor.direccion }}</td>
               <td>
@@ -328,6 +335,14 @@ const limpiarHistorial = () => {
   histHasta.value    = ''
 }
 
+const esLicenciaVencida = (fecha) => {
+  if (!fecha) return false
+  const vencimiento = new Date(fecha)
+  const hoy = new Date()
+  hoy.setHours(0, 0, 0, 0) 
+  return vencimiento < hoy
+}
+
 const viajesHistorial = computed(() => {
   const txt = histBusqueda.value.toLowerCase().trim()
 
@@ -474,6 +489,17 @@ const verDetalleConductor = (conductor) => {
 }
 
 const guardarConductor = async () => {
+  // === VALIDACIÓN: licencia vencida ===
+  const vencimiento = new Date(formConductor.value.fechaVencimientoLicencia)
+  const hoy = new Date()
+  hoy.setHours(0, 0, 0, 0)
+
+  if (vencimiento < hoy) {
+    mensajeNotificacion.value = 'No se puede registrar: la licencia del conductor ya está vencida.'
+    setTimeout(() => { mensajeNotificacion.value = '' }, 5000)
+    return // detiene el guardado, no llega a hacer el fetch
+  }
+
   guardando.value = true
   const token = localStorage.getItem('token_transporte')
 
@@ -1046,5 +1072,21 @@ onMounted(() => {
   font-size: 0.9rem;
   background: #fff;
   outline: none;
+}
+
+.fecha-vencida {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.badge-vencida {
+  display: inline-block;
+  margin-left: 6px;
+  background: #fee2e2;
+  color: #991b1b;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
 }
 </style>
