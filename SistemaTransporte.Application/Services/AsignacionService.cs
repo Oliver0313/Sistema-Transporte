@@ -78,7 +78,20 @@ namespace SistemaTransporte.Application.Services
                 Origen = "Santo Domingo",
                 Destino = solicitud.Destino,
                 CantidadPasajeros = solicitud.CantidadColaboradores,
-                DistanciaRecorrida = 0,
+                DistanciaRecorrida = solicitud.Destino switch
+                {
+                    "Bonao" => 85,
+                    "Santiago" => 155,
+                    "San Pedro de Macoris" => 70,
+                    "San Pedro de Macorís" => 70,
+                    "La Romana" => 110,
+                    "Punta Cana" => 195,
+                    "Puerto Plata" => 215,
+                    "San Cristobal" => 30,
+                    "San Cristóbal" => 30,
+                    "Azua" => 120,
+                    _ => 0
+                },
 
                 Observaciones = "Viaje generado automáticamente desde la asignación."
             };
