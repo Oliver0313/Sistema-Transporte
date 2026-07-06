@@ -82,11 +82,12 @@
             <option value="Operador">Operador</option>
           </select>
 
-          <select v-model="filtroEstado" class="filter-select">
-            <option value="todos">Todos los estados</option>
-            <option value="1">Activos</option>
-            <option value="0">Inactivos</option>
-          </select>
+         <select v-model="filtroEstado" class="filter-select">
+  <option value="todos">Todos los estados</option>
+  <option value="1">Activos</option>
+  <option value="2">Bloqueados</option>
+  <option value="3">Inactivos</option>
+</select>
         </div>
 
         <table class="usuarios-table">
@@ -116,12 +117,21 @@
                 <td>{{ formatearFecha(usuario.ultimoAcceso) }}</td>
 
                 <td>
-                <span :class="['estado-pill', usuario.estadoUsuario === 1 ? 'activo' : 'inactivo']">
-                    {{ usuario.estadoUsuario === 1 ? 'Activo' : 'Inactivo' }}
-                </span>
+                <span :class="['estado-pill', estadoClase(usuario.estadoUsuario)]">
+    {{ estadoTexto(usuario.estadoUsuario) }}
+</span>
                 </td>
                 <td>
-                </td>
+  <button
+    class="btn-action"
+    :class="{ 'btn-disabled': !puedeModificarUsuarios }"
+    :disabled="!puedeModificarUsuarios"
+    :title="puedeModificarUsuarios ? 'Editar usuario' : 'No tienes permisos para editar usuarios'"
+    @click="abrirModal(usuario)"
+  >
+    <Pencil :size="15" />
+  </button>
+</td>
             </tr>
 
             <tr v-if="usuariosFiltrados.length === 0">
@@ -189,10 +199,11 @@
           </select>
 
           <label>Estado</label>
-          <select v-model.number="formUsuario.estadoUsuario">
-            <option value="1">Activo</option>
-            <option value="0">Inactivo</option>
-          </select>
+<select v-model.number="formUsuario.estadoUsuario">
+  <option value="1">Activo</option>
+  <option value="2">Bloqueado</option>
+  <option value="3">Inactivo</option>
+</select>
 
           <div class="modal-actions">
             <button class="btn-cancel" @click="mostrarModal = false">
@@ -228,18 +239,17 @@ const formUsuario = ref({
   estadoUsuario: 1
 })
 
-const rolUsuario = (localStorage.getItem('usuario_rol') || '').trim().toLowerCase()
+const rolUsuario = ref((localStorage.getItem('usuario_rol') || '').trim().toLowerCase())
 
-const esSuperAdmin = computed(() => rolUsuario === 'superadmin')
-const esAdministrador = computed(() => rolUsuario === 'administrador' || rolUsuario === 'admin')
-
-const puedeVerUsuarios = computed(() =>
-  esSuperAdmin.value || esAdministrador.value
+const esSuperAdmin    = computed(() => rolUsuario.value === 'superadmin')
+const esAdministrador = computed(() =>
+  rolUsuario.value === 'administrador' ||
+  rolUsuario.value === 'admin' ||
+  rolUsuario.value === 'superadmin'
 )
 
-const puedeModificarUsuarios = computed(() =>
-  esSuperAdmin.value
-)
+const puedeVerUsuarios      = computed(() => esSuperAdmin.value || esAdministrador.value)
+const puedeModificarUsuarios = computed(() => esSuperAdmin.value)
 
 const cargarUsuarios = async () => {
   const token = localStorage.getItem('token_transporte')
@@ -286,7 +296,7 @@ const usuariosActivos = computed(() =>
 )
 
 const usuariosInactivos = computed(() =>
-  usuarios.value.filter(u => u.estadoUsuario !== 1).length
+ usuarios.value.filter(u => u.estadoUsuario === 3).length
 )
 
 const administradores = computed(() =>
@@ -355,6 +365,20 @@ const formatearFecha = (fecha) => {
 onMounted(() => {
   cargarUsuarios()
 })
+
+const ESTADO = { ACTIVO: 1, BLOQUEADO: 2, INACTIVO: 3 }
+
+const estadoTexto = (estado) => {
+  if (estado === ESTADO.ACTIVO) return 'Activo'
+  if (estado === ESTADO.BLOQUEADO) return 'Bloqueado'
+  return 'Inactivo'
+}
+
+const estadoClase = (estado) => {
+  if (estado === ESTADO.ACTIVO) return 'activo'
+  if (estado === ESTADO.BLOQUEADO) return 'bloqueado'
+  return 'inactivo'
+}
 </script>
 
 <style scoped>
@@ -735,5 +759,16 @@ onMounted(() => {
   padding: 8px 14px;
   font-size: 0.82rem;
   font-weight: 700;
+}
+
+.filter-select {
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  background: #ffffff;
+  font-size: 0.9rem;
+  outline: none;
+  color: #374151;
 }
 </style>

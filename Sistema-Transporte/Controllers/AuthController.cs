@@ -26,12 +26,17 @@ namespace Sistema_Transporte.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto dto)
         {
-            var response = await _authService.LoginAsync(dto);
-
-            if (response == null)
-                return Unauthorized("Correo o contraseña incorrectos.");
-
-            return Ok(response);
+            try
+            {
+                var response = await _authService.LoginAsync(dto);
+                if (response == null)
+                    return Unauthorized(new { mensaje = "Correo o contraseña incorrectos." });
+                return Ok(response);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(403, new { mensaje = ex.Message });
+            }
         }
 
         [HttpPost("forgot-password")]
