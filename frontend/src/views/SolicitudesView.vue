@@ -1,7 +1,9 @@
 <template>
-  <div class="section-header-mockup">
-    <h2>Gestión de Solicitudes</h2>
-    <p>Gestiona y administra las solicitudes</p>
+  <div class="section-header">
+    <div>
+      <h2>Solicitudes</h2>
+      <p>Administra las solicitudes de transporte y su estado.</p>
+    </div>
   </div>
 
   <div class="filters-bar-mockup">
@@ -163,7 +165,11 @@
     </div>
     <div v-if="formModel.id" class="form-group-mockup">
       <label>Estado Proceso</label>
-      <select class="mockup-select" v-model="formModel.estado" :disabled="!esSupervisor">
+     <select
+  class="mockup-select"
+  v-model="formModel.estado"
+  :disabled="!puedeEditarEstadoProceso"
+>
         <option value="1">Pendiente</option>
         <option value="2">Aprobada</option>
         <option value="3">Rechazada</option>
@@ -414,14 +420,33 @@ const esSupervisor = computed(() => {
   return userRole.value.toLowerCase() === 'supervisor'
 })
 
+const rolNormalizado = computed(() => userRole.value.trim().toLowerCase())
+
+const puedeEditarEstadoProceso = computed(() => {
+  const rol = rolNormalizado.value
+
+  return (
+    rol === 'superadmin' ||
+    rol === 'administrador' ||
+    rol === 'admin' ||
+    rol === 'supervisor'
+  )
+})
+
 const puedeCrear = computed(() => {
   const rol = userRole.value.toLowerCase()
   return rol === 'operador' || rol === 'admin' || rol === 'superadmin' || rol === 'administrador'
 })
 
 const puedeEditarOAsignar = computed(() => {
-  const rol = userRole.value.toLowerCase()
-  return rol === 'supervisor' || rol === 'admin' || rol === 'superadmin' || rol === 'administrador'
+  const rol = rolNormalizado.value
+
+  return (
+    rol === 'superadmin' ||
+    rol === 'administrador' ||
+    rol === 'admin' ||
+    rol === 'supervisor'
+  )
 })
 
 const puedeEliminar = computed(() => {
@@ -456,12 +481,14 @@ const fetchSolicitudesDeAPI = async () => {
   }
 }
 
+
 const areasDisponibles = computed(() => {
   const areas = solicitudes.value
     .map(s => s.areaSolicitante?.trim())
     .filter(Boolean)
   return [...new Set(areas)].sort()
 })
+
 
 const solicitudesFiltradas = computed(() => {
   return solicitudes.value.filter(solicitud => {
@@ -562,6 +589,9 @@ const abrirModificarSolicitud = (solicitud) => {
   mostrarFormulario.value = true
 }
 
+const solicitudesPendientes = computed(() =>
+  solicitudes.value.filter(s => s.estado === 1).length
+)
 
 const cerrarFormulario = () => {
   mostrarFormulario.value = false
@@ -785,6 +815,32 @@ onMounted(() => {
   font-weight: 700;
 }
 
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.header-badge {
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.header-badge.warning {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+.header-badge.success {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
 
 .card-panel-mockup {
   background: white;

@@ -5,10 +5,6 @@
         <h2>Viajes</h2>
         <p>Administra los viajes activos, finalizados y su seguimiento en tiempo real.</p>
       </div>
-
-      <div class="dashboard-header-badge">
-        {{ viajesEnCurso }} en curso
-      </div>
     </div>
 
     <div class="stats-grid">
@@ -108,7 +104,14 @@
         </section>
 
       <section class="map-panel">
-        <MapaViaje :viaje="viajeSeleccionado" />
+        <MapaViaje
+            v-if="viajeSeleccionado && viajeSeleccionado.origen && viajeSeleccionado.destino"
+            :viaje="viajeSeleccionado"
+          />
+
+          <div v-else class="empty-text">
+            Selecciona un viaje con origen y destino para visualizar el mapa.
+          </div>
       </section>
 
             <aside class="detalle-panel">
@@ -292,13 +295,19 @@ const cargarViajes = async () => {
     }
   })
 
-  if (response.ok) {
-    const data = await response.json()
+if (response.ok) {
+  const data = await response.json()
 
-    viajes.value = data
+  console.log(data)
 
-    if (data.length > 0) {
-      viajeSeleccionado.value = data[0]
+  viajes.value = data
+
+const primerViajeCompleto = data.find(v => v.origen && v.destino)
+
+    if (primerViajeCompleto) {
+      viajeSeleccionado.value = primerViajeCompleto
+    } else {
+      viajeSeleccionado.value = null
     }
   }
 }

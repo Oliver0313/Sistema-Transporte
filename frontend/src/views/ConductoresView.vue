@@ -1,8 +1,10 @@
 <template>
   <div>
-    <div class="section-header-mockup">
-      <h2>Conductores</h2>
-      <p>Gestión y consulta de conductores registrados</p>
+    <div class="section-header">
+      <div>
+        <h2>Conductores</h2>
+        <p>Administra la información y disponibilidad de los conductores.</p>
+      </div>
     </div>
 
     <div class="card-panel">
@@ -487,6 +489,10 @@ const guardarConductor = async () => {
       : null
   }
 
+  const conductoresDisponibles = computed(() =>
+  conductores.value.filter(c => c.estado === 1).length
+  )
+
   const url = modoEdicion.value 
     ? `https://localhost:7221/api/Conductores/${formConductor.value.id}`
     : 'https://localhost:7221/api/Conductores'
@@ -667,6 +673,33 @@ onMounted(() => {
 .search-box:focus {
   border-color: #9ca3af;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.header-badge {
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.header-badge.warning {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+.header-badge.success {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
 }
 
 .btn-submit-mockup {

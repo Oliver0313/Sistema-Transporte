@@ -1,7 +1,7 @@
 <template>
   <header class="app-header">
     <div class="header-left">
-      <button class="menu-button">
+      <button class="menu-button" @click="$emit('toggle-sidebar')">
         ☰
       </button>
 
@@ -9,7 +9,13 @@
     </div>
 
     <div class="header-center">
-      <input type="text" placeholder="Buscar..." class="search-input" />
+      <input
+        v-model="busqueda"
+        type="text"
+        placeholder="Buscar..."
+        class="search-input"
+        @keydown.enter="buscar"
+      />
     </div>
 
     <div class="header-right">
@@ -31,7 +37,29 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 
+defineEmits(['toggle-sidebar'])
+
 const route = useRoute()
+const busqueda = ref('')
+
+const buscar = () => {
+  const texto = busqueda.value.trim().toLowerCase()
+
+  if (!texto) return
+
+  if (texto.includes('veh')) router.push('/vehiculos')
+  else if (texto.includes('conductor')) router.push('/conductores')
+  else if (texto.includes('solicitud')) router.push('/solicitudes')
+  else if (texto.includes('asign')) router.push('/asignaciones')
+  else if (texto.includes('viaje')) router.push('/viajes')
+  else if (texto.includes('reporte')) router.push('/reportes')
+  else if (texto.includes('calendario') || texto.includes('agenda')) router.push('/calendario')
+  else if (texto.includes('mantenimiento')) router.push('/mantenimiento')
+  else if (texto.includes('combustible')) router.push('/combustible')
+  else if (texto.includes('usuario')) router.push('/usuarios')
+
+  busqueda.value = ''
+}
 
 const nombreUsuario = ref('Usuario')
 const rolUsuario = ref('Operador')
@@ -68,6 +96,9 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .header-left {

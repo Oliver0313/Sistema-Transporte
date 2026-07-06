@@ -4,11 +4,8 @@
       <h2>Combustible</h2>
       <p>Administra el consumo y los registros de combustible de la flota.</p>
     </div>
-
-    <div class="dashboard-header-badge">
-      {{ kpis.consumoElevado }} consumos elevados
-    </div>
   </div>
+  
 <div class="mant-cards-row">
   <div class="mant-card">
     <div class="mant-card-icon">
