@@ -118,56 +118,58 @@ const manejarLogin = async () => {
   cargando.value = true
   errorMensaje.value = ''
 
-  const URL_API = 'https://localhost:7221/api/auth/login'
-
   try {
-    const respuesta = await fetch(URL_API, {
+    const respuesta = await fetch('https://localhost:7221/api/auth/login', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         correo: email.value,
-        contrasena: password.value 
+        contrasena: password.value
       })
     })
 
+
     if (!respuesta.ok) {
- 
-      let detalleError = 'El usuario se encuentra deshabilitado en el sistema.'
-      
+      let detalleError = 'Error al iniciar sesión.'
       try {
-
         const dataError = await respuesta.json()
-        if (dataError && dataError.mensaje) {
-          detalleError = dataError.mensaje
-        }
-      } catch (jsonErr) {
-
+        if (dataError?.mensaje) detalleError = dataError.mensaje
+        else if (respuesta.status === 401) detalleError = 'Correo o contraseña incorrectos.'
+        else if (respuesta.status === 403) detalleError = 'El usuario se encuentra deshabilitado en el sistema.'
+      } catch {
         if (respuesta.status === 401) detalleError = 'Correo o contraseña incorrectos.'
         if (respuesta.status === 403) detalleError = 'El usuario se encuentra deshabilitado en el sistema.'
       }
-
       throw new Error(detalleError)
     }
 
     const data = await respuesta.json()
 
-    if (data && data.token) {
-      localStorage.setItem('token_transporte', data.token)
-      localStorage.setItem('usuario_rol', data.rol)
-      localStorage.setItem('usuario_nombre', data.nombre)
-
-      console.log('Login exitoso. Rol detectado:', data.rol)
-
-
-      router.push('/dashboard')
-    } else {
+    if (!data?.token) {
       throw new Error('La respuesta del servidor no contiene un token válido.')
     }
 
+    const estado = parseInt(data.estadoUsuario)
+
+if (estado === 3) {
+  throw new Error('El usuario se encuentra deshabilitado en el sistema.')
+}
+
+if (estado === 2) {
+  throw new Error('Tu cuenta ha sido bloqueada. Contacta al administrador.')
+}
+
+
+    localStorage.setItem('token_transporte', data.token)
+    localStorage.setItem('usuario_rol',      data.rol)
+    localStorage.setItem('usuario_nombre',   data.nombre)
+    localStorage.setItem('usuario_id',       data.id)
+    localStorage.setItem('usuario_estado',   data.estadoUsuario)
+
+    router.push('/dashboard')
+
   } catch (err) {
-    console.error('Error en la petición de autenticación:', err)
+    console.error('Error en login:', err)
     errorMensaje.value = err.message
   } finally {
     cargando.value = false

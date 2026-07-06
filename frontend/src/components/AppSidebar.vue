@@ -7,58 +7,65 @@
 
     <nav class="menu">
   <ul>
+
     <li @click="router.push('/dashboard')">
-      <img src="../assets/icons/dashboard.png" class="menu-icon" />
+      <LayoutDashboard :size="20" class="menu-icon" />
       Dashboard
     </li>
 
+    <div class="menu-divider"></div>
+
         <li v-if="puedeVerOperativo" @click="router.push('/solicitudes')">
-          <img src="../assets/icons/solicitudes.png" class="menu-icon" />
+          <FileText :size="20" class="menu-icon" />
           Solicitudes
         </li>
 
         <li v-if="puedeVerOperativo" @click="router.push('/vehiculos')">
-          <img src="../assets/icons/vehiculos.png" class="menu-icon" />
+          <CarFront :size="20" class="menu-icon" />
           Vehículos
         </li>
 
         <li v-if="puedeVerOperativo" @click="router.push('/conductores')">
-          <img src="../assets/icons/conductores.png" class="menu-icon" />
+          <Users :size="20" class="menu-icon" />
           Conductores
         </li>
 
         <li v-if="puedeVerOperativo" @click="router.push('/asignaciones')">
-          <img src="../assets/icons/asignaciones.png" class="menu-icon" />
+          <ClipboardList :size="20" class="menu-icon" />
           Asignaciones
         </li>
 
         <li v-if="puedeVerOperativo" @click="router.push('/viajes')">
-          <img src="../assets/icons/rutas.png" class="menu-icon" />
+          <Route :size="20" class="menu-icon" />
           Viajes
         </li>
 
-        <li v-if="puedeVerOperativo" @click="router.push('/reportes')">
-          <img src="../assets/icons/reportes.png" class="menu-icon" />
-          Reportes
-        </li>
-
-         <li v-if="puedeVerOperativo" @click="router.push('/calendario')">
-          <img src="../assets/icons/calendario.png" class="menu-icon" />
+        <li v-if="puedeVerOperativo" @click="router.push('/calendario')">
+          <CalendarDays :size="20" class="menu-icon" />
           Calendario
         </li>
 
+        <div class="menu-divider"></div>
+
+        <li v-if="puedeVerOperativo" @click="router.push('/reportes')">
+          <BarChart3 :size="20" class="menu-icon" />
+          Reportes
+        </li>
+
         <li v-if="puedeVerTodo" @click="router.push('/mantenimiento')">
-          <img src="../assets/icons/herramientas.png" class="menu-icon" />
+          <Wrench :size="20" class="menu-icon" />
           Mantenimiento
         </li>
 
         <li v-if="puedeVerTodo" @click="router.push('/combustible')">
-          <img src="../assets/icons/combustible.png" class="menu-icon" />
+          <Fuel :size="20" class="menu-icon" />
           Combustible
         </li>
 
+        <div class="menu-divider"></div>
+
         <li v-if="puedeVerTodo" @click="router.push('/usuarios')">
-          <img src="../assets/icons/conductores.png" class="menu-icon" />
+          <UserCog :size="20" class="menu-icon" />
           Usuarios
         </li>
       </ul>
@@ -66,7 +73,7 @@
 
     <div class="sidebar-footer">
       <button class="btn-logout" @click="cerrarSesion">
-        <img src="../assets/icons/logout.png" class="menu-icon" />
+        <LogOut :size="20" class="menu-icon" />
         Cerrar Sesión
       </button>
     </div>
@@ -76,6 +83,21 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+
+import {
+  LayoutDashboard,
+  FileText,
+  CarFront,
+  Users,
+  ClipboardList,
+  Route,
+  BarChart3,
+  CalendarDays,
+  Wrench,
+  Fuel,
+  UserCog,
+  LogOut
+} from 'lucide-vue-next'
 
 const router = useRouter()
 
@@ -109,16 +131,38 @@ const cerrarSesion = () => {
   width: 260px;
   min-width: 260px;
   height: 100vh;
+  box-sizing: border-box;
   background-color: #111827;
   color: #d1d5db;
-  padding: 20px;
+  padding: 18px 20px 14px;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 18px;
+}
+
+.dashboard-layout.sidebar-collapsed .app-sidebar{
+    transform:translateX(-100%);
+}
+
+.menu-section {
+  margin: 14px 0 6px;
+  padding: 0 14px;
+  font-size: 0.68rem !important;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6b7280 !important;
+  cursor: default !important;
+}
+
+.menu-section:hover {
+  background: transparent !important;
+  color: #6b7280 !important;
 }
 
 .logo-container {
   text-align: center;
+  margin-bottom: 4px;
 }
 
 .logo-container h2 {
@@ -126,6 +170,17 @@ const cerrarSesion = () => {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 500;
+}
+
+.menu-divider {
+  height: 2px;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 8px 14px;
+  border-radius: 2px;
+}
+
+.menu {
+  flex: 1;
 }
 
 .logo-container h3 {
@@ -145,11 +200,11 @@ const cerrarSesion = () => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 9px 14px;
+  padding: 7px 14px;
   border-radius: 10px;
   color: #d1d5db;
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: 0.86rem;
   transition: background-color 0.2s ease, color 0.2s ease;
 }
 
@@ -161,32 +216,42 @@ const cerrarSesion = () => {
 .menu-icon {
   width: 18px;
   height: 18px;
-  object-fit: contain;
-  display: block;
   flex-shrink: 0;
+  color: #d1d5db;
+  stroke-width: 2;
+}
+
+.menu li:hover .menu-icon {
+  color: #ffffff;
 }
 
 .sidebar-footer {
   margin-top: auto;
-  padding-top: 14px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  flex-shrink: 0;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .btn-logout {
   width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 10px;
-  background: transparent;
+  padding: 9px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
   color: #ffffff;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
+  min-height: 42px;
+  border-radius: 12px;
+  box-sizing: border-box;
 }
 
+
 .btn-logout:hover {
-  background-color: rgba(239, 68, 68, 0.15);
+  background-color: rgba(239, 68, 68, 0.18);
 }
 </style>

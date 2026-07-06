@@ -81,8 +81,7 @@ namespace SistemaTransporte.Application.Services
             if (!BCrypt.Net.BCrypt.Verify(dto.Contrasena, usuario.ContrasenaHash))
                 return null;
 
-            // === CONTROL DE USUARIO INACTIVO ===
-            if (usuario.EstadoUsuario == EstadoUsuario.Inactivo)
+            if (usuario.EstadoUsuario != EstadoUsuario.Activo)
             {
                 throw new UnauthorizedAccessException("Su cuenta está inactiva. Contacte al administrador.");
             }

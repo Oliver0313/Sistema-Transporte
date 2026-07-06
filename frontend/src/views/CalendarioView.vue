@@ -4,10 +4,6 @@
         <h2>Calendario</h2>
         <p>Administra la agenda, viajes programados y disponibilidad de la flota.</p>
       </div>
-
-      <div class="dashboard-header-badge">
-        {{ solicitudesFiltradas.length }} viajes programados
-      </div>
     </div>
 
     <div class="mant-cards-row">

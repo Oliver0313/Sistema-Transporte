@@ -1,6 +1,6 @@
 <template>
-  <div class="dashboard-layout">
-    <AppSidebar :class="{ 'sidebar-hidden': !sidebarVisible }" />
+    <div class="dashboard-layout" :class="{ 'sidebar-collapsed': !sidebarVisible }">
+      <AppSidebar />
 
     <div class="main-content">
       <AppHeader @toggle-sidebar="toggleSidebar" />
@@ -20,9 +20,13 @@
 
   const sidebarVisible = ref(true)
 
-  const toggleSidebar = () => {
-    sidebarVisible.value = !sidebarVisible.value
-  }
+ const toggleSidebar = () => {
+  sidebarVisible.value = !sidebarVisible.value
+
+  setTimeout(() => {
+    window.dispatchEvent(new Event('resize'))
+  }, 350)
+}
 </script>
 
 <style>
@@ -30,11 +34,25 @@
   display: grid;
   grid-template-columns: 260px 1fr;
   height: 100vh;
-  width: 100vw;
   overflow: hidden;
 }
 
+.dashboard-layout.sidebar-collapsed {
+  grid-template-columns: 0 1fr;
+}
+
+.app-sidebar {
+  height: 100vh;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.dashboard-layout.sidebar-collapsed .app-sidebar {
+  pointer-events: none;
+}
+
 .main-content {
+  min-width: 0;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -46,9 +64,5 @@
   padding: 24px;
   overflow-y: auto;
   background: #f5f6f8;
-}
-
-.sidebar-hidden {
-  display: none;
 }
 </style>

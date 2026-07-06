@@ -4,10 +4,6 @@
         <h2>Asignaciones</h2>
         <p>Gestiona la asignación de vehículos y conductores para cada solicitud.</p>
       </div>
-
-      <div class="dashboard-header-badge">
-        {{ asignacionesActivas }} activas
-      </div>
     </div>
 
     <div class="stats-grid">

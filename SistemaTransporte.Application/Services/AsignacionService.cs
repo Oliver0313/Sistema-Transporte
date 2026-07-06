@@ -11,17 +11,20 @@ namespace SistemaTransporte.Application.Services
         private readonly IRepository<SolicitudTransporte> _solicitudRepository;
         private readonly IRepository<Vehiculo> _vehiculoRepository;
         private readonly IRepository<Conductor> _conductorRepository;
+        private readonly IRepository<Viaje> _viajeRepository;
 
         public AsignacionService(
             IRepository<Asignacion> asignacionRepository,
             IRepository<SolicitudTransporte> solicitudRepository,
             IRepository<Vehiculo> vehiculoRepository,
-            IRepository<Conductor> conductorRepository)
+            IRepository<Conductor> conductorRepository,
+            IRepository<Viaje> viajeRepository)
         {
             _asignacionRepository = asignacionRepository;
             _solicitudRepository = solicitudRepository;
             _vehiculoRepository = vehiculoRepository;
             _conductorRepository = conductorRepository;
+            _viajeRepository = viajeRepository;
         }
 
         public async Task<AsignacionDto> CreateAsync(CrearAsignacionDto dto)
@@ -61,6 +64,26 @@ namespace SistemaTransporte.Application.Services
             };
 
             await _asignacionRepository.AddAsync(asignacion);
+            await _asignacionRepository.SaveChangesAsync();
+
+            var viaje = new Viaje
+            {
+                AsignacionId = asignacion.Id,
+
+                FechaHoraSalida = solicitud.FechaHoraSalida,
+                FechaHoraLlegada = solicitud.FechaHoraRegreso,
+
+                Estado = EstadoViaje.Programado,
+
+                Origen = "Santo Domingo",
+                Destino = solicitud.Destino,
+                CantidadPasajeros = solicitud.CantidadColaboradores,
+                DistanciaRecorrida = 0,
+
+                Observaciones = "Viaje generado automáticamente desde la asignación."
+            };
+
+            await _viajeRepository.AddAsync(viaje);
 
             vehiculo.Estado = EstadoVehiculo.EnViaje;
             conductor.Estado = EstadoConductor.EnViaje;
@@ -68,7 +91,7 @@ namespace SistemaTransporte.Application.Services
             _vehiculoRepository.Update(vehiculo);
             _conductorRepository.Update(conductor);
 
-            await _asignacionRepository.SaveChangesAsync();
+            await _viajeRepository.SaveChangesAsync();
 
             return new AsignacionDto
             {
