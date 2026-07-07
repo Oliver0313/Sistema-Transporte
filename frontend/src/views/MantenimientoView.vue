@@ -4,10 +4,6 @@
       <h2>Mantenimiento</h2>
       <p>Administra servicios, revisiones y estado de mantenimiento de la flota.</p>
     </div>
-
-    <div class="dashboard-header-badge">
-      {{ cardPendientes }} pendientes
-    </div>
   </div>
 
   <div class="mant-cards-row">
@@ -123,10 +119,10 @@
               <td>{{ mantenimiento.descripcion }}</td>
               <td>{{ formatearFechaVista(mantenimiento.fechaMantenimiento) }}</td>
               <td>
-                <span :class="['status-pill-mockup', obtenerClaseEstado(mantenimiento.estado)]">
-                  {{ formatearEstadoVista(mantenimiento.estado) }}
-                </span>
-              </td>
+  <span :class="['status-pill-mockup', claseEstadoVisual(mantenimiento)]">
+    {{ textoEstadoVisual(mantenimiento) }}
+  </span>
+</td>
               <td>{{ mantenimiento.taller || '---' }}</td>
               <td>{{ formatearCosto(mantenimiento.costo) }}</td>
               <td>{{ formatearFechaVista(mantenimiento.proximoMantenimiento) }}</td>
@@ -343,9 +339,9 @@
           <div class="detalle-item">
             <strong>Estado:</strong>
             <p>
-              <span :class="['status-pill-mockup', obtenerClaseEstado(mantenimientoSeleccionado.estado)]">
-                {{ formatearEstadoVista(mantenimientoSeleccionado.estado) }}
-              </span>
+             <span :class="['status-pill-mockup', claseEstadoVisual(mantenimientoSeleccionado)]">
+  {{ textoEstadoVisual(mantenimientoSeleccionado) }}
+</span>
             </p>
           </div>
         </div>
@@ -426,9 +422,9 @@
             <td>{{ formatearFechaVista(m.fechaMantenimiento) }}</td>
             <td>{{ formatearTipoVista(m.tipoMantenimiento) }}</td>
             <td>
-              <span :class="['status-pill-mockup', obtenerClaseEstado(m.estado)]">
-                {{ formatearEstadoVista(m.estado) }}
-              </span>
+              <span :class="['status-pill-mockup', claseEstadoVisual(m)]">
+  {{ textoEstadoVisual(m) }}
+</span>
             </td>
           </tr>
           <tr v-if="historialVehiculo.length === 0">
@@ -530,7 +526,7 @@ const cardPendientes = computed(() =>
   mantenimientos.value.filter(m => m.estado === 2).length
 )
 const cardVencidos = computed(() =>
-  mantenimientos.value.filter(m => m.estado === 5).length
+  mantenimientos.value.filter(m => calcularEstadoVisual(m) === 5).length
 )
 const cardCompletadosMes = computed(() =>
   mantenimientos.value.filter(m => m.estado === 4 && new Date(m.fechaMantenimiento) >= inicioMes).length
@@ -752,6 +748,8 @@ const formatearEstadoVista = (estado) =>
 const obtenerClaseEstado = (estado) =>
   ({ 1: 'programado', 2: 'pendiente', 3: 'en-progreso', 4: 'completado', 5: 'vencido' }[estado] || 'programado')
 
+const claseEstadoVisual = (mantenimiento) => obtenerClaseEstado(calcularEstadoVisual(mantenimiento))
+const textoEstadoVisual = (mantenimiento) => formatearEstadoVista(calcularEstadoVisual(mantenimiento))
 const obtenerClaseEstadoTipo = (tipo) =>
   ({ 1: 'tag-preventivo', 2: 'tag-correctivo', 3: 'tag-predictivo' }[tipo] || 'tag-preventivo')
 
@@ -814,14 +812,27 @@ const crearMantenimiento = async () => {
   }
 }
 
+const calcularEstadoVisual = (mantenimiento) => {
+  const yaVencido = new Date(mantenimiento.fechaMantenimiento) < hoy
+  const noCompletado = mantenimiento.estado !== 4 
+
+  if (yaVencido && noCompletado) {
+    return 5 
+  }
+  return mantenimiento.estado
+}
+
 const actualizarMantenimiento = async () => {
   if (!validarFormulario()) return
   if (!mantenimientoEditando.value) return
   guardando.value = true
   const token   = localStorage.getItem('token_transporte')
+  const fecha   = new Date(formModel.value.fechaMantenimiento)
   const proximo = formModel.value.proximoMantenimiento ? new Date(formModel.value.proximoMantenimiento) : null
 
   const payload = {
+    vehiculoId:           formModel.value.vehiculoId,       
+    fechaMantenimiento:   fecha.toISOString(),               
     estado:               formModel.value.estado,
     tipoMantenimiento:    formModel.value.tipoMantenimiento,
     descripcion:          formModel.value.descripcion,

@@ -19,6 +19,7 @@ namespace Sistema_Transporte.Controllers
         }
 
         [HttpGet("resumen")]
+        [Authorize(Roles = "SuperAdmin,Administrador,Operador,Supervisor")]
         public async Task<IActionResult> GetResumen()
         {
             var resumen = new

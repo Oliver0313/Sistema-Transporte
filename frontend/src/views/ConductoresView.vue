@@ -1,8 +1,10 @@
 <template>
   <div>
-    <div class="section-header-mockup">
-      <h2>Conductores</h2>
-      <p>Gestión y consulta de conductores registrados</p>
+    <div class="section-header">
+      <div>
+        <h2>Conductores</h2>
+        <p>Administra la información y disponibilidad de los conductores.</p>
+      </div>
     </div>
 
     <div class="card-panel">
@@ -59,7 +61,14 @@
               <td>{{ conductor.email }}</td>
               <td>{{ conductor.licencia }}</td>
               <td>{{ formatearTipoLicencia(conductor.tipoLicencia) }}</td>
-              <td>{{ formatearFecha(conductor.fechaVencimientoLicencia) }}</td>
+              <td>
+  <span :class="{ 'fecha-vencida': esLicenciaVencida(conductor.fechaVencimientoLicencia) }">
+    {{ formatearFecha(conductor.fechaVencimientoLicencia) }}
+  </span>
+  <span v-if="esLicenciaVencida(conductor.fechaVencimientoLicencia)" class="badge-vencida">
+    Vencida
+  </span>
+</td>
               <td>{{ conductor.telefono }}</td>
               <td>{{ conductor.direccion }}</td>
               <td>
@@ -328,6 +337,14 @@ const limpiarHistorial = () => {
   histHasta.value    = ''
 }
 
+const esLicenciaVencida = (fecha) => {
+  if (!fecha) return false
+  const vencimiento = new Date(fecha)
+  const hoy = new Date()
+  hoy.setHours(0, 0, 0, 0) 
+  return vencimiento < hoy
+}
+
 const viajesHistorial = computed(() => {
   const txt = histBusqueda.value.toLowerCase().trim()
 
@@ -474,6 +491,17 @@ const verDetalleConductor = (conductor) => {
 }
 
 const guardarConductor = async () => {
+  // === VALIDACIÓN: licencia vencida ===
+  const vencimiento = new Date(formConductor.value.fechaVencimientoLicencia)
+  const hoy = new Date()
+  hoy.setHours(0, 0, 0, 0)
+
+  if (vencimiento < hoy) {
+    mensajeNotificacion.value = 'No se puede registrar: la licencia del conductor ya está vencida.'
+    setTimeout(() => { mensajeNotificacion.value = '' }, 5000)
+    return // detiene el guardado, no llega a hacer el fetch
+  }
+
   guardando.value = true
   const token = localStorage.getItem('token_transporte')
 
@@ -486,6 +514,10 @@ const guardarConductor = async () => {
       ? new Date(formConductor.value.fechaVencimientoLicencia).toISOString()
       : null
   }
+
+  const conductoresDisponibles = computed(() =>
+  conductores.value.filter(c => c.estado === 1).length
+  )
 
   const url = modoEdicion.value 
     ? `https://localhost:7221/api/Conductores/${formConductor.value.id}`
@@ -667,6 +699,33 @@ onMounted(() => {
 .search-box:focus {
   border-color: #9ca3af;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.header-badge {
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.header-badge.warning {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fcd34d;
+}
+
+.header-badge.success {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
 }
 
 .btn-submit-mockup {
@@ -1046,5 +1105,21 @@ onMounted(() => {
   font-size: 0.9rem;
   background: #fff;
   outline: none;
+}
+
+.fecha-vencida {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.badge-vencida {
+  display: inline-block;
+  margin-left: 6px;
+  background: #fee2e2;
+  color: #991b1b;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 999px;
 }
 </style>

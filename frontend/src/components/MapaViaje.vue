@@ -5,7 +5,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import mapboxgl from 'mapbox-gl'
 
 const props = defineProps({
@@ -40,7 +40,7 @@ const obtenerCoordenadas = (ciudad) => {
 }
 
 const actualizarMapa = () => {
-  if (!map || !props.viaje) return
+  if (!map || !props.viaje?.origen || !props.viaje?.destino) return
 
   const origen = obtenerCoordenadas(props.viaje.origen)
   const destino = obtenerCoordenadas(props.viaje.destino)
@@ -91,10 +91,14 @@ const actualizarMapa = () => {
   })
 }
 
+const resizeMap = () => {
+  if (map) map.resize()
+}
+
 onMounted(async () => {
   await nextTick()
 
-mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN
+  mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN
 
   map = new mapboxgl.Map({
     container: mapContainer.value,
@@ -106,17 +110,44 @@ mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_TOKEN
   map.addControl(new mapboxgl.NavigationControl(), 'top-right')
 
   map.on('load', () => {
+    resizeMap()
     actualizarMapa()
   })
+
+  window.addEventListener('resize', resizeMap)
 })
 
 watch(
   () => props.viaje,
-  () => {
-    actualizarMapa()
+  async () => {
+    await nextTick()
+
+    setTimeout(() => {
+      resizeMap()
+
+      if (!map) return
+
+      if (map.loaded()) {
+        actualizarMapa()
+      } else {
+        map.once('load', actualizarMapa)
+      }
+    }, 300)
   },
   { deep: true }
 )
+
+onUnmounted(() => {
+  window.removeEventListener('resize', resizeMap)
+
+  if (origenMarker) origenMarker.remove()
+  if (destinoMarker) destinoMarker.remove()
+
+  if (map) {
+    map.remove()
+    map = null
+  }
+})
 </script>
 
 <style scoped>
