@@ -815,9 +815,12 @@ const actualizarMantenimiento = async () => {
   if (!mantenimientoEditando.value) return
   guardando.value = true
   const token   = localStorage.getItem('token_transporte')
+  const fecha   = new Date(formModel.value.fechaMantenimiento)
   const proximo = formModel.value.proximoMantenimiento ? new Date(formModel.value.proximoMantenimiento) : null
 
   const payload = {
+    vehiculoId:           formModel.value.vehiculoId,        // ✅ agregado
+    fechaMantenimiento:   fecha.toISOString(),                // ✅ agregado
     estado:               formModel.value.estado,
     tipoMantenimiento:    formModel.value.tipoMantenimiento,
     descripcion:          formModel.value.descripcion,
