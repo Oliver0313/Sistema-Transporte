@@ -102,6 +102,7 @@ namespace SistemaTransporte.Application.Services
 
             var vehiculo = await _vehiculoRepository.GetByIdAsync(mantenimiento.VehiculoId);
 
+            mantenimiento.FechaMantenimiento = dto.FechaMantenimiento;  
             mantenimiento.Estado = dto.Estado;
             mantenimiento.TipoMantenimiento = dto.TipoMantenimiento;
             mantenimiento.Descripcion = dto.Descripcion;
