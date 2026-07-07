@@ -408,6 +408,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+ import ExcelJS from 'exceljs'
 
 import {
   Route,
@@ -513,78 +514,192 @@ const obtenerPorcentaje = (valor, total) => {
 const formatearCosto = (c) =>
   new Intl.NumberFormat('es-DO', { style: 'currency', currency: 'DOP' }).format(c || 0)
 
-const exportarExcel = () => {
+const exportarExcel = async () => {
   const nombreMes = mesesNombres[parseInt(filtroPeriodo.value) - 1]
+ 
 
-  const seccionesCSV = []
+  const C_DARK   = 'FF111827'
+  const C_GRAY   = 'FF6B7280'
+  const C_LIGHT  = 'FFF3F4F6'
+  const C_WHITE  = 'FFFFFFFF'
+  const C_GREEN  = 'FF16A34A'
+  const C_GREEN_BG = 'FFDCFCE7'
+  const C_BLUE   = 'FF2563EB'
+  const C_BLUE_BG = 'FFDBEAFE'
+  const C_AMBER  = 'FFF59E0B'
+  const C_AMBER_BG = 'FFFEF3C7'
+  const C_RED    = 'FFEF4444'
+  const C_RED_BG = 'FFFEE2E2'
+  const C_BORDER = 'FFE5E7EB'
+ 
+  const workbook = new ExcelJS.Workbook()
+  workbook.creator = 'Sistema de Gestión de Transporte'
+  workbook.created = new Date()
+ 
+  const sheet = workbook.addWorksheet('Reporte', {
+    views: [{ showGridLines: false }],
+    pageSetup: { orientation: 'portrait', fitToPage: true }
+  })
+ 
+  sheet.columns = [
+    { width: 30 },
+    { width: 18 },
+    { width: 16 },
+    { width: 16 }
+  ]
+ 
+  let row = 1
+ 
 
+  sheet.mergeCells(`A${row}:D${row}`)
+  const titulo = sheet.getCell(`A${row}`)
+  titulo.value = 'SISTEMA DE GESTIÓN DE TRANSPORTE'
+  titulo.font = { bold: true, size: 15, color: { argb: C_WHITE } }
+  titulo.alignment = { vertical: 'middle', horizontal: 'left', indent: 1 }
+  titulo.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: C_DARK } }
+  sheet.getRow(row).height = 30
+  row++
+ 
+  sheet.mergeCells(`A${row}:D${row}`)
+  const subtitulo = sheet.getCell(`A${row}`)
+  subtitulo.value =
+    `Reporte de ${nombreMes} ${filtroAnio.value}   ·   Área: ${filtroArea.value}   ·   Módulo: ${filtroModulo.value}   ·   Emitido: ${new Date().toLocaleDateString('es-DO')}`
+  subtitulo.font = { italic: true, size: 10, color: { argb: C_GRAY } }
+  subtitulo.alignment = { vertical: 'middle', indent: 1 }
+  subtitulo.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: C_LIGHT } }
+  sheet.getRow(row).height = 22
+  row += 2
+ 
 
-  seccionesCSV.push([`"SISTEMA DE GESTIÓN DE TRANSPORTE — Reporte ${nombreMes} ${filtroAnio.value}"`])
-  seccionesCSV.push([`"Área: ${filtroArea.value}"`, `"Módulo: ${filtroModulo.value}"`])
-  seccionesCSV.push([])
+  const seccion = (texto) => {
+    sheet.mergeCells(row, 1, row, 4)
+    const c = sheet.getCell(row, 1)
+    c.value = texto.toUpperCase()
+    c.font = { bold: true, size: 11, color: { argb: C_WHITE } }
+    c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: C_DARK } }
+    c.alignment = { vertical: 'middle', indent: 1 }
+    sheet.getRow(row).height = 20
+    row++
+  }
+ 
+  const encabezados = (labels) => {
+    labels.forEach((texto, i) => {
+      const c = sheet.getCell(row, i + 1)
+      c.value = texto
+      c.font = { bold: true, size: 9, color: { argb: C_GRAY } }
+      c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: C_LIGHT } }
+      c.border = { bottom: { style: 'medium', color: { argb: C_BORDER } } }
+      c.alignment = { vertical: 'middle', indent: 1 }
+    })
+    sheet.getRow(row).height = 18
+    row++
+  }
+ 
+  const dato = (valores, { bold = false, badge = null } = {}) => {
+    valores.forEach((v, i) => {
+      const c = sheet.getCell(row, i + 1)
+      c.value = v
+      c.font = { size: 10, bold, color: { argb: 'FF374151' } }
+      c.border = { bottom: { style: 'thin', color: { argb: C_LIGHT } } }
+      c.alignment = { vertical: 'middle', indent: 1 }
+    })
 
+    if (badge) {
+      sheet.getCell(row, 1).border = {
+        ...sheet.getCell(row, 1).border,
+        left: { style: 'thick', color: { argb: badge } }
+      }
+    }
+    row++
+  }
+ 
+  const espacio = () => { row++ }
+ 
 
-  seccionesCSV.push(['"INDICADORES CLAVE"', '"Valor"'])
-  seccionesCSV.push(['"Viajes realizados"', kpis.value.viajes.totalViajes])
-  seccionesCSV.push(['"Combustible (L)"', kpis.value.combustible.totalGalones])
-  seccionesCSV.push(['"Solicitudes procesadas"', kpis.value.solicitudes.totalSolicitudes])
-  seccionesCSV.push(['"Conductores activos"', kpis.value.conductores.totalConductores])
-  seccionesCSV.push([])
-
+  seccion('Indicadores clave')
+  encabezados(['Indicador', 'Valor'])
+  dato(['Viajes realizados', kpis.value.viajes.totalViajes], { bold: true })
+  dato(['Combustible consumido (L)', kpis.value.combustible.totalGalones], { bold: true })
+  dato(['Solicitudes procesadas', kpis.value.solicitudes.totalSolicitudes], { bold: true })
+  dato(['Conductores activos', kpis.value.conductores.totalConductores], { bold: true })
+  espacio()
+ 
 
   if (filtroModulo.value === 'todos' || filtroModulo.value === 'viajes') {
-    seccionesCSV.push(['"VIAJES POR ESTADO"', '"Cantidad"', '"Porcentaje"'])
-    seccionesCSV.push(['"Programados"', kpis.value.viajes.programados, `"${obtenerPorcentaje(kpis.value.viajes.programados, kpis.value.viajes.totalViajes)}"`])
-    seccionesCSV.push(['"En Curso"',    kpis.value.viajes.enCurso,     `"${obtenerPorcentaje(kpis.value.viajes.enCurso, kpis.value.viajes.totalViajes)}"`])
-    seccionesCSV.push(['"Finalizados"', kpis.value.viajes.finalizados, `"${obtenerPorcentaje(kpis.value.viajes.finalizados, kpis.value.viajes.totalViajes)}"`])
-    seccionesCSV.push(['"Cancelados"',  kpis.value.viajes.cancelados,  `"${obtenerPorcentaje(kpis.value.viajes.cancelados, kpis.value.viajes.totalViajes)}"`])
-    seccionesCSV.push([])
+    seccion('Viajes por estado')
+    encabezados(['Estado', 'Cantidad', 'Porcentaje'])
+    const estados = [
+      ['Programados', kpis.value.viajes.programados, C_AMBER],
+      ['En Curso',    kpis.value.viajes.enCurso,      C_GREEN],
+      ['Finalizados', kpis.value.viajes.finalizados,  C_BLUE],
+      ['Cancelados',  kpis.value.viajes.cancelados,   C_RED],
+    ]
+    estados.forEach(([nombre, valor, color]) => {
+      dato([nombre, valor, obtenerPorcentaje(valor, kpis.value.viajes.totalViajes)], { badge: color })
+    })
+    espacio()
   }
-
+ 
 
   if (filtroModulo.value === 'todos' || filtroModulo.value === 'combustible') {
-    seccionesCSV.push(['"MÉTRICAS DE COMBUSTIBLE"', '"Valor"'])
-    seccionesCSV.push(['"Total gastado"',         `"${formatearCosto(kpis.value.combustible.totalGastado)}"`])
-    seccionesCSV.push(['"Kilómetros totales"',    `"${kpis.value.combustible.totalKilometros.toLocaleString()} km"`])
-    seccionesCSV.push(['"Costo promedio / galón"',`"${formatearCosto(kpis.value.combustible.costoPromedioPorGalon)}"`])
-    seccionesCSV.push(['"Rendimiento promedio"',  `"${kpis.value.combustible.rendimientoKmPorGalon.toFixed(2)} km/gal"`])
-    seccionesCSV.push([])
+    seccion('Métricas de combustible')
+    encabezados(['Indicador', 'Valor'])
+    dato(['Total gastado', formatearCosto(kpis.value.combustible.totalGastado)])
+    dato(['Kilómetros totales', `${kpis.value.combustible.totalKilometros.toLocaleString()} km`])
+    dato(['Costo promedio / galón', formatearCosto(kpis.value.combustible.costoPromedioPorGalon)])
+    dato(['Rendimiento promedio', `${kpis.value.combustible.rendimientoKmPorGalon.toFixed(2)} km/gal`])
+    espacio()
   }
-
+ 
 
   if (solicitudesPorArea.value.length && (filtroModulo.value === 'todos' || filtroModulo.value === 'solicitudes')) {
-    seccionesCSV.push(['"SOLICITUDES POR ÁREA"', '"Cantidad"'])
-    solicitudesPorArea.value.forEach(s => seccionesCSV.push([`"${s.area}"`, s.cantidad]))
-    seccionesCSV.push([])
+    seccion('Solicitudes por área')
+    encabezados(['Área', 'Cantidad'])
+    solicitudesPorArea.value.forEach(s => dato([s.area, s.cantidad]))
+    espacio()
   }
-
+ 
 
   if (vehiculosMasUsados.value.length && (filtroModulo.value === 'todos' || filtroModulo.value === 'viajes')) {
-    seccionesCSV.push(['"VEHÍCULOS MÁS UTILIZADOS"', '"Viajes"'])
-    vehiculosMasUsados.value.forEach(v => seccionesCSV.push([`"${v.vehiculo}"`, v.viajes]))
-    seccionesCSV.push([])
+    seccion('Vehículos más utilizados')
+    encabezados(['Vehículo', 'Viajes'])
+    vehiculosMasUsados.value.forEach(v => dato([v.vehiculo, v.viajes]))
+    espacio()
   }
-
+ 
 
   if (conductoresMasViajes.value.length && (filtroModulo.value === 'todos' || filtroModulo.value === 'conductores')) {
-    seccionesCSV.push(['"CONDUCTORES DESTACADOS"', '"Viajes"'])
-    conductoresMasViajes.value.forEach((c, i) => seccionesCSV.push([`"${i + 1}. ${c.conductor}"`, c.viajes]))
-    seccionesCSV.push([])
+    seccion('Conductores destacados')
+    encabezados(['#', 'Conductor', 'Viajes'])
+    conductoresMasViajes.value.forEach((c, i) => dato([i + 1, c.conductor, c.viajes]))
+    espacio()
   }
+ 
 
+  seccion('Estado de la flota')
+  encabezados(['Condición', 'Unidades', 'Porcentaje'])
+  const flota = [
+    ['Disponibles',        kpis.value.vehiculos.disponibles,       C_GREEN],
+    ['En Viaje',           kpis.value.vehiculos.enViaje,           C_BLUE],
+    ['En Mantenimiento',   kpis.value.vehiculos.enMantenimiento,   C_AMBER],
+    ['Fuera de Servicio',  kpis.value.vehiculos.fueraDeServicio,   C_RED],
+  ]
+  flota.forEach(([nombre, valor, color]) => {
+    dato([nombre, valor, obtenerPorcentaje(valor, kpis.value.vehiculos.totalVehiculos)], { badge: color })
+  })
+ 
 
-  seccionesCSV.push(['"ESTADO DE FLOTA"', '"Unidades"'])
-  seccionesCSV.push(['"Disponibles"',       kpis.value.vehiculos.disponibles])
-  seccionesCSV.push(['"En Viaje"',          kpis.value.vehiculos.enViaje])
-  seccionesCSV.push(['"En Mantenimiento"',  kpis.value.vehiculos.enMantenimiento])
-  seccionesCSV.push(['"Fuera de Servicio"', kpis.value.vehiculos.fueraDeServicio])
+  sheet.eachRow((r) => { r.alignment = { ...r.alignment, wrapText: false } })
+ 
 
-  const csv  = seccionesCSV.map(fila => fila.join(',')).join('\n')
-  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
-  const url  = URL.createObjectURL(blob)
-  const a    = document.createElement('a')
-  a.href     = url
-  a.download = `Reporte_${filtroModulo.value}_${nombreMes}_${filtroAnio.value}.csv`
+  const buffer = await workbook.xlsx.writeBuffer()
+  const blob = new Blob([buffer], {
+    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `Reporte_${filtroModulo.value}_${nombreMes}_${filtroAnio.value}.xlsx`
   a.click()
   URL.revokeObjectURL(url)
 }
