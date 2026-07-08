@@ -1,4 +1,4 @@
-# 🚚 SistemaTransporte - Módulo de Planificación y Control Logístico
+#  SistemaTransporte - Módulo de Planificación y Control Logístico
 
 Bienvenidos a **SmartRoute**, un Sistema de Transporte: una plataforma empresarial avanzada orientada a la administración, planificación y control del transporte institucional utilizado por los colaboradores de la empresa.
 
@@ -8,7 +8,7 @@ Desarrollado como un proyecto de práctica profesional, el ecosistema combina el
 
 ---
 
-## 🏗️ Estructura de la Solución (Capa Backend)
+##  Estructura de la Solución (Capa Backend)
 
 La arquitectura del backend está desarrollada bajo los principios de **Clean Architecture** y **DDD (Domain-Driven Design)**, dividida en proyectos totalmente desacoplados mediante Inversión de Dependencias. Esto garantiza la mantenibilidad del Core del negocio y la inyección segura de dobles de prueba (Mocks):
 
@@ -31,7 +31,7 @@ La arquitectura del backend está desarrollada bajo los principios de **Clean Ar
 
 ---
 
-## 🛠️ Stack Tecnológico & Librerías
+##  Stack Tecnológico & Librerías
 
 ### Backend
 * **Framework:** .NET 8.0 (C# 12)
@@ -53,7 +53,7 @@ La arquitectura del backend está desarrollada bajo los principios de **Clean Ar
 
 ---
 
-## 👥 División de Responsabilidades del Equipo
+##  División de Responsabilidades del Equipo
 
 * **Desarrollador Backend & Desarrollador Frontend (Oliver):**
   * Diseño del Core del negocio, lógica transaccional de servicios e interfaces.
@@ -66,7 +66,83 @@ La arquitectura del backend está desarrollada bajo los principios de **Clean Ar
 
 ---
 
-## ⚙️ Configuración de Variables de Entorno
+##  Capturas del Sistema
+
+A continuación se muestra un recorrido visual por los módulos principales de la plataforma en funcionamiento.
+
+### Autenticación
+
+| Login | Recuperar contraseña |  Registrarse |
+|---|---|---|
+| ![Login](frontend/assets/docs/screenshots/login.png) | ![Recuperar contraseña](frontend/assets/docs/screenshots/recuperar-password.png) |  ![Registrar](frontend/assets/docs/screenshots/registrar.png) |
+
+### Dashboard Principal
+
+![Dashboard](frontend/assets/docs/screenshots/dashboard.png)
+
+### Gestión de Vehículos
+
+| Listado de vehículos | Crear vehiculo |  Acciones |
+|---|---|---|
+| ![Listado de vehículos](frontend/assets/docs/screenshots/vehiculos-listado.png) | ![Detalle de vehículo](frontend/assets/docs/screenshots/vehiculos-detalle.png) | ![Editar / Detalles / Eliminar](frontend/assets/docs/screenshots/vehiculos-acciones.png) |
+
+
+### Gestión de Conductores
+
+| Listado de conductores | Crear conductor |  Acciones |
+|---|---|---|
+| ![Listado de conductores](frontend/assets/docs/screenshots/condutores-listado.png) | ![Detalle de conductores](frontend/assets/docs/screenshots/condutores-detalle.png) | ![Editar / Detalles / Eliminar](frontend/assets/docs/screenshots/conductores-acciones.png) |
+
+### Viajes y Mapa en Tiempo Real
+
+| Listado de viajes | 
+|---|
+| ![Listado de viajes](frontend/assets/docs/screenshots/viajes-listado.png) |
+
+### Calendario
+
+| Listado de calendario |
+|---|
+| ![Listado de calendario](frontend/assets/docs/screenshots/calendario-listado.png) | 
+
+### Solicitudes de Transporte
+
+| Listado de solicitudes | Crear solicitudes |  Acciones |
+|---|---|---|
+| ![Listado de solicitudes](frontend/assets/docs/screenshots/solicitudes-listado.png) | ![Detalle de solicitudes](frontend/assets/docs/screenshots/solicitudes-detalle.png) | ![Editar / Detalles / Eliminar](frontend/assets/docs/screenshots/solicitudes-acciones.png) |
+
+### Gestión de Asignaciones
+
+| Listado de asignaciones | Crear asignaciones |  Acciones |
+|---|---|---|
+| ![Listado de asignaciones](frontend/assets/docs/screenshots/asignaciones-listado.png) | ![Detalle de conductores](frontend/assets/docs/screenshots/asignaciones-detalle.png) | ![Editar / Detalles / Eliminar](frontend/assets/docs/screenshots/asignaciones-acciones.png) |
+
+### Mantenimiento de Flota
+
+| Listado de mantenimiento | Crear mantenimiento |  Acciones |
+|---|---|---|
+| ![Listado de mantenimiento](frontend/assets/docs/screenshots/solicitudes-listado.png) | ![Detalle de mantenimiento](frontend/assets/docs/screenshots/solicitudes-detalle.png) | ![Editar / Detalles / Eliminar](frontend/assets/docs/screenshots/solicitudes-acciones.png) |
+
+### Módulo de Reportes
+
+| Dashboard de métricas | Exportación a Excel/PDF |
+|---|---|
+| ![Reportes dashboard](frontend/assets/docs/screenshots/reportes-dashboard.png) | ![Reporte exportado](frontend/assets/docs/screenshots/reportes-export.png) |
+
+### Combustible
+
+| Listado de combustible | Crear combustible |  Acciones |
+|---|---|---|
+| ![Listado de combustible](frontend/assets/docs/screenshots/combustible-listado.png) | ![Detalle de combustible](frontend/assets/docs/screenshots/combustible-detalle.png) | ![Editar / Detalles / Eliminar](frontend/assets/docs/screenshots/combustible-acciones.png) |
+
+### Usuarios
+
+| Listado de usuarios |  Acciones |
+|---|---|
+| ![Listado de usuarios](frontend/assets/docs/screenshots/usuario-listado.png) | ![Editar / Detalles / Eliminar](frontend/assets/docs/screenshots/usuario-acciones.png) |
+
+
+##  Configuración de Variables de Entorno
 
 Antes de ejecutar el proyecto, configura el archivo `SistemaTransporte.API/appsettings.json` con tus valores locales:
 
@@ -86,9 +162,9 @@ Antes de ejecutar el proyecto, configura el archivo `SistemaTransporte.API/appse
 
 ---
 
-## 🚀 Instalación y Ejecución
+##  Instalación y Ejecución
 
-### 🛠️ Requisitos Previos
+###  Requisitos Previos
 
 * **SDK de .NET 8.0** o superior.
 * **Node.js (Versión LTS)** para el servidor de desarrollo del Frontend.
@@ -97,7 +173,7 @@ Antes de ejecutar el proyecto, configura el archivo `SistemaTransporte.API/appse
 
 ---
 
-### 📦 Paquetes del Backend (NuGet)
+###  Paquetes del Backend (NuGet)
 
 * **Persistencia y Datos (`SistemaTransporte.Infrastructure`)**:
   * `Microsoft.EntityFrameworkCore` (v8.0.x)
@@ -116,7 +192,7 @@ Antes de ejecutar el proyecto, configura el archivo `SistemaTransporte.API/appse
 
 ---
 
-### 📦 Paquetes del Frontend (npm)
+###  Paquetes del Frontend (npm)
 
 * **Enrutamiento y Estado**:
   * `vue` (v3.x)
@@ -177,7 +253,7 @@ dotnet test --logger "trx;LogFileName=resultados.trx" --results-directory ./Test
 
 ---
 
-## 📋 Endpoints Principales
+##  Endpoints Principales
 
 | Módulo | Método | Endpoint |
 |---|---|---|
@@ -190,3 +266,4 @@ dotnet test --logger "trx;LogFileName=resultados.trx" --results-directory ./Test
 | Vehículos | GET/POST/PUT/DELETE | `/api/vehiculos` |
 | Viajes | GET/POST/PUT/DELETE | `/api/viajes` |
 | Mantenimiento | GET/POST/PUT/DELETE | `/api/mantenimiento` |
+
