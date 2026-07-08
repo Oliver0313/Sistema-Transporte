@@ -162,13 +162,12 @@
             </strong>
         </div>
 
-        <div class="detail-item">
+          <div class="detail-item">
             <span>Observaciones</span>
             <strong>
-            {{ viajeSeleccionado.observaciones || 'Sin observaciones' }}
+              {{ viajeSeleccionado.observaciones || 'Sin observaciones' }}
             </strong>
-        </div>
-
+          </div>
         </div>
 
         <p v-else class="empty-text">

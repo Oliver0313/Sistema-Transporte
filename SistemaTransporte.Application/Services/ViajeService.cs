@@ -24,8 +24,81 @@ namespace SistemaTransporte.Application.Services
             _conductorRepository = conductorRepository;
         }
 
+        private async Task ActualizarEstadosViajesAsync()
+        {
+            var viajes = await _viajeRepository.GetAllAsync();
+            var ahora = DateTime.Now;
+
+
+            Console.WriteLine($"AHORA: {ahora}");
+
+            foreach (var v in viajes)
+            {
+                Console.WriteLine($"----------------------");
+                Console.WriteLine($"Viaje: {v.Id}");
+                Console.WriteLine($"Salida : {v.FechaHoraSalida}");
+                Console.WriteLine($"Llegada: {v.FechaHoraLlegada}");
+                Console.WriteLine($"Estado : {v.Estado}");
+            }
+
+            foreach (var viaje in viajes)
+            {
+                if (viaje.Estado == EstadoViaje.Finalizado)
+                    continue;
+
+                if (viaje.FechaHoraLlegada != null &&
+                    viaje.FechaHoraLlegada.Value <= ahora)
+                {
+                    viaje.Estado = EstadoViaje.Finalizado;
+
+                    if (string.IsNullOrWhiteSpace(viaje.Observaciones))
+                        viaje.Observaciones = "Viaje finalizado automáticamente por hora de llegada.";
+
+                    var asignacion = await _asignacionRepository.GetByIdAsync(viaje.AsignacionId);
+
+                    if (asignacion != null)
+                    {
+                        asignacion.Estado = EstadoAsignacion.Finalizada;
+
+                        var vehiculo = await _vehiculoRepository.GetByIdAsync(asignacion.VehiculoId);
+                        var conductor = await _conductorRepository.GetByIdAsync(asignacion.ConductorId);
+
+                        if (vehiculo != null)
+                        {
+                            vehiculo.Estado = EstadoVehiculo.Disponible;
+                            _vehiculoRepository.Update(vehiculo);
+                        }
+
+                        if (conductor != null)
+                        {
+                            conductor.Estado = EstadoConductor.Disponible;
+                            _conductorRepository.Update(conductor);
+                        }
+
+                        _asignacionRepository.Update(asignacion);
+                    }
+
+                    _viajeRepository.Update(viaje);
+                    continue;
+                }
+
+                if (viaje.FechaHoraLlegada != null &&
+                    viaje.FechaHoraSalida <= ahora &&
+                    viaje.FechaHoraLlegada.Value > ahora &&
+                    viaje.Estado == EstadoViaje.Programado)
+                {
+                    viaje.Estado = EstadoViaje.EnCurso;
+                    _viajeRepository.Update(viaje);
+                }
+            }
+
+            await _viajeRepository.SaveChangesAsync();
+        }
+
         public async Task<IEnumerable<ViajeDto>> GetAllAsync()
         {
+            await ActualizarEstadosViajesAsync();
+
             var viajes = await _viajeRepository.GetAllAsync();
 
             return viajes.Select(v => new ViajeDto
