@@ -237,14 +237,14 @@ Las tablas principales son:
 
 ---
 
-# 👨‍💻 Autor
+# 👨‍💻 Autores
 
-**Oliver Taveras**
-
-Desarrollador Backend .NET | ASP.NET Core | SQL Server | Vue.js
+**Oliver Taveras Méndez**
+---
+**Karen Margarita Antigua Fabian**
 
 ---
 
 <p align="center">
-Proyecto desarrollado con fines académicos y de portafolio.
+Proyecto desarrollado con fines de pasantía y de portafolio.
 </p>
