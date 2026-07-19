@@ -1,7 +1,7 @@
 # Trayecto
 
 <p align="center">
-  <img src="./src/assets/icons/favicon.png" alt="Trayecto Logo" width="300"/>
+  <img src="./docs/icono.png"" alt="Trayecto Logo" width="300"/>
 </p>
 
 <p align="center">
@@ -237,14 +237,13 @@ Las tablas principales son:
 
 ---
 
-# 👨‍💻 Autor
+# 👨‍💻👩‍💻 Autores
 
-**Oliver Taveras**
-
-Desarrollador Backend .NET | ASP.NET Core | SQL Server | Vue.js
+**Oliver Taveras Méndez**<br>
+**Karen Antigua Fabian**
 
 ---
 
 <p align="center">
-Proyecto desarrollado con fines académicos y de portafolio.
+Proyecto desarrollado con fines de pasantía y de portafolio.
 </p>
