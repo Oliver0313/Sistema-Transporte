@@ -1,7 +1,7 @@
 # Trayecto
 
 <p align="center">
-  <img src="./src/assets/icons/favicon.png" alt="Trayecto Logo" width="300"/>
+  <img src="./docs/icono.png"" alt="Trayecto Logo" width="300"/>
 </p>
 
 <p align="center">
@@ -237,11 +237,18 @@ Las tablas principales son:
 
 ---
 
+<<<<<<< HEAD
+# 👨‍💻👩‍💻 Autores
+
+**Oliver Taveras Méndez**<br>
+**Karen Antigua Fabian**
+=======
 # 👨‍💻 Autores
 
 **Oliver Taveras Méndez**
 ---
 **Karen Margarita Antigua Fabian**
+>>>>>>> a4cb0a23b48832ce755a141083da7f0840461145
 
 ---
 
