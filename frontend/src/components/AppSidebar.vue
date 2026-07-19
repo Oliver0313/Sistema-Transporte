@@ -1,8 +1,7 @@
 <template>
   <aside class="app-sidebar">
     <div class="logo-container">
-      <h2>Transporte</h2>
-      <h3>SmartRoute</h3>
+      <img src="/src/assets/icons/logo2.png" class="sidebar-brand" alt="Trayecto">
     </div>
 
     <nav class="menu">
@@ -132,7 +131,7 @@ const cerrarSesion = () => {
   min-width: 260px;
   height: 100vh;
   box-sizing: border-box;
-  background-color: #111827;
+  background:#0D1823;
   color: #d1d5db;
   padding: 18px 20px 14px;
   display: flex;
@@ -160,9 +159,19 @@ const cerrarSesion = () => {
   color: #6b7280 !important;
 }
 
-.logo-container {
-  text-align: center;
-  margin-bottom: 4px;
+.logo-container{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px 16px 18px;
+}
+
+.sidebar-brand{
+    width:185px;
+    max-width:100%;
+    height:auto;
+    object-fit:contain;
+
 }
 
 .logo-container h2 {

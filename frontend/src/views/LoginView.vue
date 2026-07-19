@@ -299,14 +299,14 @@ if (estado === 2) {
 }
 
 .form-header h2 {
-  font-size: 1.8rem;
+  font-size:1.55rem;
   font-weight: 700;
   color: #1a1a1a;
   margin-bottom: 8px;
 }
 
 .form-header p {
-  font-size: 0.9rem;
+  font-size:0.82rem;
   color: var(--text-muted, #9ca3af);
 }
 
@@ -323,7 +323,7 @@ if (estado === 2) {
 }
 
 .input-group label {
-  font-size: 0.85rem;
+  font-size:0.80rem;
   font-weight: 600;
   color: var(--text-main, #4b5563);
 }

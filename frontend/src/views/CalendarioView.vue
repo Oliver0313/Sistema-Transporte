@@ -78,7 +78,6 @@
     </div>
 
     <div class="calendar-layout-grid">
-      
       <div class="main-calendar-card card-panel-mockup">
         <div class="main-calendar-navigator">
           <div class="nav-month-controls">
@@ -87,8 +86,6 @@
             <button class="btn-nav-arrow" @click="cambiarMes(1)">▶</button>
           </div>
           <span class="total-indicators-text">{{ solicitudesFiltradas.length }} viajes programados</span>
-          
-       
         </div>
 
         <div class="grid-calendar-table">
@@ -519,6 +516,8 @@ onMounted(async () => {
   border-radius: 16px;
   border: 1px solid #e5e7eb;
   align-items: center; 
+  margin-top: 20px;
+  margin-bottom: 28px;
 }
 
 .mockup-select-modern, 
@@ -574,6 +573,7 @@ onMounted(async () => {
   grid-template-columns: 1fr 320px;
   gap: 20px;
   align-items: start;
+  marign-top: 28px
 }
 
 .card-panel-mockup {
