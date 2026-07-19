@@ -237,10 +237,18 @@ Las tablas principales son:
 
 ---
 
+<<<<<<< HEAD
 # 👨‍💻👩‍💻 Autores
 
 **Oliver Taveras Méndez**<br>
 **Karen Antigua Fabian**
+=======
+# 👨‍💻 Autores
+
+**Oliver Taveras Méndez**
+---
+**Karen Margarita Antigua Fabian**
+>>>>>>> a4cb0a23b48832ce755a141083da7f0840461145
 
 ---
 
