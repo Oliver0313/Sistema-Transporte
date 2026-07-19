@@ -69,13 +69,11 @@ namespace SistemaTransporte.Application.Services
             var viaje = new Viaje
             {
                 AsignacionId = asignacion.Id,
-
                 FechaHoraSalida = solicitud.FechaHoraSalida,
                 FechaHoraLlegada = solicitud.FechaHoraRegreso,
-
                 Estado = EstadoViaje.Programado,
 
-                Origen = "Santo Domingo",
+                Origen = solicitud.AreaSolicitante,
                 Destino = solicitud.Destino,
                 CantidadPasajeros = solicitud.CantidadColaboradores,
                 DistanciaRecorrida = solicitud.Destino switch

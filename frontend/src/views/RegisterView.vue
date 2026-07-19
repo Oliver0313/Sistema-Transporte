@@ -3,12 +3,8 @@
     
     <div class="login-hero-side" :style="{ backgroundImage: `url(${imagenesCarrusel[indiceActivo]})` }">
       <div class="hero-overlay">
-        <div class="hero-content">
-          <p class="hero-tagline">SISTEMA INTELIGENTE DE GESTIÓN CON MONITOREO DE TRANSPORTE</p>
-          
+        <div class="hero-content">          
           <div class="hero-footer-info">
-            <span class="project-name">Transporte Frontend</span>
-            <span class="project-email">transportefrontend@gmail.com</span>
           </div>
         </div>
         

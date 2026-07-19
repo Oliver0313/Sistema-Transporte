@@ -39,7 +39,24 @@ const obtenerCoordenadas = (ciudad) => {
   return coordenadasCiudades[ciudad] || [-69.9312, 18.4861]
 }
 
-const actualizarMapa = () => {
+async function obtenerRuta(origen, destino) {
+
+  const url =
+    `https://api.mapbox.com/directions/v5/mapbox/driving/` +
+    `${origen[0]},${origen[1]};${destino[0]},${destino[1]}` +
+    `?geometries=geojson&overview=full&access_token=${mapboxgl.accessToken}`
+
+  const response = await fetch(url)
+
+  const data = await response.json()
+
+  if (!data.routes.length) return null
+
+  return data.routes[0]
+
+}
+
+const actualizarMapa = async () => {
   if (!map || !props.viaje?.origen || !props.viaje?.destino) return
 
   const origen = obtenerCoordenadas(props.viaje.origen)
@@ -48,23 +65,25 @@ const actualizarMapa = () => {
   if (origenMarker) origenMarker.remove()
   if (destinoMarker) destinoMarker.remove()
 
-  origenMarker = new mapboxgl.Marker({ color: '#111827' })
+  origenMarker = new mapboxgl.Marker({ color: '#22C55E' })
     .setLngLat(origen)
     .setPopup(new mapboxgl.Popup().setText(`Origen: ${props.viaje.origen}`))
     .addTo(map)
 
-  destinoMarker = new mapboxgl.Marker({ color: '#2563eb' })
+  destinoMarker = new mapboxgl.Marker({ color: '#EF4444' })
     .setLngLat(destino)
     .setPopup(new mapboxgl.Popup().setText(`Destino: ${props.viaje.destino}`))
     .addTo(map)
+      
 
-  const ruta = {
-    type: 'Feature',
-    geometry: {
-      type: 'LineString',
-      coordinates: [origen, destino]
-    }
-  }
+const datosRuta = await obtenerRuta(origen, destino)
+
+if (!datosRuta) return
+
+const ruta = {
+  type: 'Feature',
+  geometry: datosRuta.geometry
+}
 
   if (map.getSource('ruta')) {
     map.getSource('ruta').setData(ruta)
@@ -79,16 +98,23 @@ const actualizarMapa = () => {
       type: 'line',
       source: 'ruta',
       paint: {
-        'line-color': '#111827',
-        'line-width': 5
+          'line-color': '#2563EB',
+          'line-width': 7,
+          'line-opacity': 0.9
       }
     })
   }
 
-  map.fitBounds([origen, destino], {
-    padding: 80,
-    maxZoom: 9
-  })
+const bounds = new mapboxgl.LngLatBounds()
+
+ruta.geometry.coordinates.forEach(coord => {
+    bounds.extend(coord)
+})
+
+map.fitBounds(bounds,{
+    padding:70
+})
+
 }
 
 const resizeMap = () => {
@@ -104,7 +130,7 @@ onMounted(async () => {
     container: mapContainer.value,
     style: 'mapbox://styles/mapbox/streets-v12',
     center: [-70.25, 18.9],
-    zoom: 7
+    zoom: 12
   })
 
   map.addControl(new mapboxgl.NavigationControl(), 'top-right')
