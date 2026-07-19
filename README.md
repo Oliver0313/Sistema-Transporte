@@ -1,10 +1,6 @@
 # Trayecto
 
 <p align="center">
-  <img src="./docs/icono.PNG"" alt="Trayecto Logo" width="300"/>
-</p>
-
-<p align="center">
   <b>Sistema Inteligente de Gestión de Transporte Empresarial</b><br>
   Plataforma desarrollada para administrar solicitudes de transporte, asignaciones, vehículos, conductores, viajes, mantenimiento y consumo de combustible en una sola aplicación.
 </p>
